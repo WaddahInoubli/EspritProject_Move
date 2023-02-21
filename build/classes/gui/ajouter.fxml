@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="AnchorPane" prefHeight="449.0" prefWidth="767.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.AjoutereController">
+   <children>
+      <Label layoutX="288.0" layoutY="25.0" prefHeight="18.0" prefWidth="192.0" text="Créer un compte">
+         <font>
+            <Font name="System Bold" size="20.0" />
+         </font>
+      </Label>
+      <Label layoutX="39.0" layoutY="109.0" text="Nom" />
+      <Label layoutX="39.0" layoutY="142.0" text="Prenom" />
+      <Label layoutX="39.0" layoutY="175.0" text="Age" />
+      <Label layoutX="39.0" layoutY="209.0" text="Adresse" />
+      <Label layoutX="394.0" layoutY="113.0" text="Numéro de télephone" />
+      <Label layoutX="430.0" layoutY="56.0" />
+      <Label layoutX="394.0" layoutY="172.0" text="Mail" />
+      <Label layoutX="428.0" layoutY="81.0" />
+      <Label layoutX="428.0" layoutY="81.0" />
+      <Label layoutX="36.0" layoutY="298.0" text="Mot de passe " />
+      <Label layoutX="33.0" layoutY="333.0" text="Confirmer mot de passe " />
+      <TextField fx:id="nom" layoutX="130.0" layoutY="105.0" />
+      <TextField fx:id="prenom" layoutX="130.0" layoutY="138.0" />
+      <TextField fx:id="age" layoutX="132.0" layoutY="171.0" />
+      <TextArea fx:id="adresse" layoutX="133.0" layoutY="207.0" prefHeight="62.0" prefWidth="200.0" />
+      <TextField fx:id="numT" layoutX="543.0" layoutY="110.0" />
+      <TextField fx:id="mail" layoutX="545.0" layoutY="167.0" />
+      <PasswordField fx:id="password1" layoutX="192.0" layoutY="295.0" />
+      <PasswordField fx:id="password2" layoutX="192.0" layoutY="328.0" />
+      <Button layoutX="467.0" layoutY="325.0" mnemonicParsing="false" onAction="#ajouter" prefHeight="26.0" prefWidth="150.0" text="Créer un compte" />
+      <Label fx:id="passwordError" layoutX="36.0" layoutY="368.0" text="Les deux mot de passe ne sont pas identiques" textFill="#df0c0c" />
+      <Label fx:id="numTelError" layoutX="396.0" layoutY="143.0" text="Le numéro de télephone doit etre 8 chiffres" textFill="#df0c0c" />
+      <Label fx:id="mailError" layoutX="397.0" layoutY="198.0" text="L'adresse mail n&quot;est pas dans la forme" textFill="#df0c0c" />
+      <Label layoutX="392.0" layoutY="238.0" text="Role" />
+      <ComboBox fx:id="cbRole" layoutX="545.0" layoutY="234.0" prefWidth="150.0" />
+      <Button layoutX="467.0" layoutY="377.0" mnemonicParsing="false" onAction="#back" prefHeight="26.0" prefWidth="150.0" text="Retour à la liste" />
+      <Button layoutX="661.0" layoutY="27.0" mnemonicParsing="false" onAction="#logout" text="Déconnexion" />
+   </children>
+</AnchorPane>

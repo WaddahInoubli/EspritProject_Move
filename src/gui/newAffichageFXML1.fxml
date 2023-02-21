@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="529.0" prefWidth="940.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.NewAffichageFXML1Controller">
+   <children>
+      <TableView fx:id="tableUser" layoutX="45.0" layoutY="105.0" onMouseClicked="#selectItem" prefHeight="222.0" prefWidth="882.0">
+        <columns>
+          <TableColumn fx:id="cNom" prefWidth="107.20000457763672" text="Nom" />
+          <TableColumn fx:id="cPrenom" prefWidth="100.00003051757812" text="Prenom" />
+            <TableColumn fx:id="cAge" prefWidth="66.39997863769531" text="Age" />
+            <TableColumn fx:id="cNumT" prefWidth="129.60003662109375" text="Numéro de télephone" />
+            <TableColumn fx:id="cMail" prefWidth="184.00009155273438" text="e-mail" />
+            <TableColumn fx:id="cRole" prefWidth="130.40008544921875" text="Role" />
+            <TableColumn fx:id="cActive" prefWidth="102.39990234375" text="Active" />
+        </columns>
+      </TableView>
+      <AnchorPane fx:id="detailsAnchorePane" layoutX="101.0" layoutY="379.0" prefHeight="128.0" prefWidth="770.0">
+         <children>
+            <Label layoutX="46.0" layoutY="21.0" text="Adresse" />
+            <Label fx:id="adresseLabel" layoutX="121.0" layoutY="8.0" prefHeight="42.0" prefWidth="594.0" text="Label" />
+            <Button layoutX="285.0" layoutY="78.0" mnemonicParsing="false" onAction="#modifier" style="-fx-background-color: orange;" text="Modifier" textFill="WHITE" />
+            <Button fx:id="activerButton" layoutX="175.0" layoutY="78.0" mnemonicParsing="false" onAction="#activerDesactiver" prefHeight="26.0" prefWidth="92.0" style="-fx-background-color: blue;" text="Activer" textFill="WHITE" />
+            <Button layoutX="30.0" layoutY="78.0" mnemonicParsing="false" onAction="#showProfile" style="-fx-background-color: green;" text="Consulter le profile" textFill="WHITE" />
+            <Button layoutX="652.0" layoutY="78.0" mnemonicParsing="false" onAction="#Delete" style="-fx-background-color: red;" text="Supprimer" textFill="WHITE" />
+         </children>
+      </AnchorPane>
+      <Label layoutX="45.0" layoutY="14.0" text="Liste des utilisateurs">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <TextField fx:id="rNom" layoutX="45.0" layoutY="68.0" prefHeight="26.0" prefWidth="105.0" />
+      <TextField fx:id="rPrenom" layoutX="151.0" layoutY="68.0" prefHeight="26.0" prefWidth="99.0" />
+      <TextField fx:id="rAge" layoutX="250.0" layoutY="68.0" prefHeight="26.0" prefWidth="71.0" />
+      <TextField fx:id="rNumT" layoutX="321.0" layoutY="68.0" prefHeight="26.0" prefWidth="128.0" />
+      <TextField fx:id="rMail" layoutX="449.0" layoutY="68.0" prefHeight="26.0" prefWidth="188.0" />
+      <ComboBox fx:id="rActive" layoutX="776.0" layoutY="68.0" prefWidth="150.0" />
+      <ComboBox fx:id="rRole" layoutX="637.0" layoutY="67.0" prefHeight="26.0" prefWidth="134.0" />
+      <Button layoutX="784.0" layoutY="343.0" mnemonicParsing="false" onAction="#Search" prefHeight="26.0" prefWidth="134.0" text="Rechercher" />
+      <Button layoutX="840.0" layoutY="19.0" mnemonicParsing="false" onAction="#logout" text="Déconnexion" />
+      <Button layoutX="45.0" layoutY="344.0" mnemonicParsing="false" onAction="#ajouter" prefHeight="26.0" prefWidth="161.0" text="Ajouter un utilisateur" />
+   </children>
+</AnchorPane>
