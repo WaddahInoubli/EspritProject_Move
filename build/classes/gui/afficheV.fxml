@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <TableView fx:id="table" layoutX="26.0" layoutY="56.0" prefHeight="289.0" prefWidth="548.0">
+            <columns>
+                <TableColumn fx:id="matricule" prefWidth="75.0" text="Matricule" />
+                <TableColumn fx:id="etat" prefWidth="75.0" text="Etat" />
+                <TableColumn fx:id="annees" prefWidth="75.0" text="Annees" />
+                <TableColumn fx:id="prix_h" prefWidth="75.0" text="Prix_h" />
+                <TableColumn fx:id="id_m" prefWidth="75.0" text="Id_m" />
+                <TableColumn fx:id="marque" prefWidth="75.0" text="Marque" />
+                <TableColumn fx:id="modele" prefWidth="75.0" text="Modele" />
+                <TableColumn fx:id="couleur" prefWidth="75.0" text="Couleur" />
+            </columns>
+        </TableView>
+        <Button layoutX="19.0" layoutY="13.0" mnemonicParsing="false" onAction="#ajouterVoiture" text="Ajouter" />
+        <TextField fx:id="matriculeTextField" layoutX="26.0" layoutY="362.0" promptText="Matricule" />
+        <TextField fx:id="etatTextField" layoutX="102.0" layoutY="362.0" promptText="Etat" />
+        <TextField fx:id="anneesTextField" layoutX="187.0" layoutY="362.0" promptText="Annees" />
+        <TextField fx:id="prix_hTextField" layoutX="264.0" layoutY="362.0" promptText="Prix_h" />
+        <TextField fx:id="id_mTextField" layoutX="343.0" layoutY="362.0" promptText="Id_m" />
+        <TextField fx:id="marqueTextField" layoutX="408.0" layoutY="362.0" promptText="Marque" />
+        <TextField fx:id="modeleTextField" layoutX="483.0" layoutY="362.0" promptText="Modele" />
+        <TextField fx:id="couleurTextField" layoutX="556.0" layoutY="362.0" promptText="Couleur" />
+      <Button layoutX="112.0" layoutY="13.0" mnemonicParsing="false" onAction="#modifierVoiture" text="modifier" />
+      <Button layoutX="213.0" layoutY="13.0" mnemonicParsing="false" onAction="#supprimerVoiture" text="supprimer" />
+    </children>
+</AnchorPane>
