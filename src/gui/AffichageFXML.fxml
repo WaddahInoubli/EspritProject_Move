@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.ColorAdjust?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" style="-fx-background-image: https://www.google.com/search?q=carrent+image&amp;source=lnms&amp;tbm=isch&amp;sa=X&amp;ved=2ahUKEwiesq_zzp_9AhV9YPEDHQWzC6wQ_AUoAXoECAEQAw&amp;biw=1536&amp;bih=735&amp;dpr=1.25#imgrc=Qo49sxaU9SKdiM&amp;imgdii=nZ3Hrt-ba0nv4M;" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.AffichageFXMLController">
+   <children>
+      <AnchorPane prefHeight="400.0" prefWidth="683.0" style="-fx-background-image: C:\Users\user\Desktop/ww.jpg;">
+         <children>
+            <TextField fx:id="tfnom" disable="true" layoutX="74.0" layoutY="122.0" prefHeight="39.0" prefWidth="254.0" promptText="Nom" />
+            <TextField fx:id="tfprenom" disable="true" layoutX="349.0" layoutY="122.0" prefHeight="39.0" prefWidth="278.0" promptText="Prenom" />
+            <Button fx:id="confirm" layoutX="180.0" layoutY="328.0" mnemonicParsing="false" onAction="#addPersonne" prefHeight="27.0" prefWidth="170.0" text="Confirmer" textFill="#26bc0c">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Button>
+            <TextField fx:id="tfmail" disable="true" layoutX="73.0" layoutY="176.0" prefHeight="39.0" prefWidth="254.0" promptText="e-mail : Move@esprit.tn" />
+            <DatePicker fx:id="tfdate1" layoutX="350.0" layoutY="229.0" prefHeight="39.0" prefWidth="136.0" promptText="Date Debut" />
+            <DatePicker fx:id="tfdate2" layoutX="491.0" layoutY="229.0" prefHeight="39.0" prefWidth="136.0" promptText="Date Fin" />
+            <TextField fx:id="tfaddress" disable="true" layoutX="349.0" layoutY="176.0" prefHeight="39.0" prefWidth="278.0" promptText="Addresse" />
+            <TextField fx:id="tfphone" disable="true" layoutX="73.0" layoutY="227.0" prefHeight="39.0" prefWidth="254.0" promptText="Telephone" />
+            <Button fx:id="cancel" layoutX="361.0" layoutY="327.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="65.0" text="Annuler" textFill="#d91717" />
+            <TextField fx:id="tfprenom1" disable="true" layoutX="214.0" layoutY="53.0" prefHeight="39.0" prefWidth="254.0" promptText="voiture" />
+            <CheckBox fx:id="Driver" layoutX="213.0" layoutY="92.0" mnemonicParsing="false" text="Avec Chauffeur" />
+            <TextField fx:id="tfprix" disable="true" layoutX="478.0" layoutY="53.0" prefHeight="39.0" prefWidth="146.0" promptText="Prix" />
+         </children>
+         <effect>
+            <ColorAdjust brightness="-0.11" contrast="0.17" hue="-0.11" saturation="-0.06" />
+         </effect>
+      </AnchorPane>
+   </children>
+</AnchorPane>
