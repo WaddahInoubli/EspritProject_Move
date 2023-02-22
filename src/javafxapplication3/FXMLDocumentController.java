@@ -8,6 +8,7 @@ package javafxapplication3;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import entities.Comments;
 import entities.offre;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -32,6 +33,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -47,6 +49,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -61,25 +64,10 @@ import utils.MoveDB;
 public class FXMLDocumentController implements Initializable {
     
     
-  @FXML
-    private Button btn_upd;
 
-    @FXML
-    private Button btnadd;
-
-    @FXML
-    private Button btndelcom;
-    
-    @FXML
-     private Button btn_delete;
-
-     @FXML
-    private Button btn_afficher;
      
       @FXML
     private Button getAddView;
-      @FXML
-    private ScrollPane scroll;
  
     @FXML
     private TableColumn<offre, String> colcomment;
@@ -107,8 +95,6 @@ public class FXMLDocumentController implements Initializable {
     @FXML
     private Label id;
 
-    @FXML
-    private Label label;
 
     @FXML
     private Label nom;
@@ -116,45 +102,29 @@ public class FXMLDocumentController implements Initializable {
     @FXML
     private Label postee;
     
-     @FXML
-    private Label namee;
-    
-      @FXML
-    private Label contenentt;
-      
-       @FXML
-    private Label datee;
 
     @FXML
     private TableView<offre> TableView;
-
  
 
-   @FXML
-    private TextArea txtposte;
 
-    @FXML
     private TextField txtName;
 
-    @FXML
-    private TextField txtcomment;
     
     ResultSet resultSet = null ;
     PreparedStatement preparedStatement = null ;
     String query = null;
     offre ofre=null;
+    Comments comments=null;
     Connection connection;
     Statement ste;
    
     ObservableList<offre>  OffreList = FXCollections.observableArrayList();
+    @FXML
+    private Button btn_act;
    
    
-     @FXML
-    void Delete(ActionEvent event) {
-        int Id_Offre =Integer.parseInt(txtName.getText());
-       ServiceOffre s= new ServiceOffre();
-       s.supprimer(Id_Offre);
-    }
+    
     @FXML
    void getAddView(ActionEvent event) {
         try {
@@ -162,6 +132,7 @@ public class FXMLDocumentController implements Initializable {
             Scene scene = new Scene(parent);
             Stage stage = new Stage();
             stage.setScene(scene);
+            scene.getStylesheets().add("/javafxapplication3/move.css");
             stage.initStyle(StageStyle.UTILITY);
             stage.show();
         } catch (IOException ex) {
@@ -197,7 +168,6 @@ public class FXMLDocumentController implements Initializable {
     }
 
 
-     @FXML
   private  void afficher() {
  
         connection = MoveDB.getInstance().getCon();
@@ -235,9 +205,11 @@ Callback<TableColumn<offre, String>, TableCell<offre, String>> cellFoctory = (Ta
                                 + "-glyph-size:28px;"
                                 + "-fx-fill:#ff5744;"
                         );
+                         
                         deleteIcon.setOnMouseClicked((javafx.scene.input.MouseEvent event) -> {
                             
                             try {
+                                
                                 ofre = TableView.getSelectionModel().getSelectedItem();
                                 query = "DELETE FROM `move`.`offre` WHERE Id_Offre  ="+ofre.getId_Offre();
                                 connection = MoveDB.getInstance().getCon();
@@ -269,7 +241,7 @@ Callback<TableColumn<offre, String>, TableCell<offre, String>> cellFoctory = (Ta
                             AddOffreController addOffreController = loader.getController();
                             addOffreController.setUpdate(true);
                             addOffreController.setTextField(ofre.getId_Offre(), ofre.getName_User(), 
-                                    ofre.getPoste(),ofre.getComment());
+                                                            ofre.getPoste(),ofre.getComment());
                             Parent parent = loader.getRoot();
                             Stage stage = new Stage();
                             stage.setScene(new Scene(parent));
@@ -302,24 +274,40 @@ Callback<TableColumn<offre, String>, TableCell<offre, String>> cellFoctory = (Ta
         String poste = rs.getString(3);
         String comment = rs.getString(4);
 //    Label idValueLabel = new Label("ID: \n" + Id);
-    Label nomValueLabel = new Label("nom: \n" + name);
-    Label posteeValueLabel = new Label("poste: \n"+ poste);
-     Label commenttValueLabel = new Label("commentaire: \n "+"                "+ comment);
+    Label nomValueLabel = new Label( name);
+    Label posteeValueLabel = new Label(poste);
+    Label commenttValueLabel = new Label("                "+ comment);
+    nomValueLabel.setStyle("-fx-font-size: 12pt; -fx-font-weight: bold; -fx-text-fill: red;");
+ nomValueLabel.setPadding(new Insets(5, 10, -10, 1));
+ posteeValueLabel.setStyle("-fx-font-size: 12pt; -fx-font-weight: Arial; -fx-text-fill: black;");
+ commenttValueLabel.setStyle("-fx-font-size: 12pt; -fx-font-weight: Arial; -fx-text-fill: black;");
+    Button btn = new Button("Ajouter commentaire");  
+    HBox hbox = new HBox(btn);
+   
+     btn.setStyle(" -fx-background-color:\n" +
+"        linear-gradient(#f0ff35, #a9ff00),\n" +
+"        radial-gradient(center 50% -40%, radius 200%, #b8ee36 45%, #80c800 50%);-fx-background-radius: 30;-fx-background-insets: 0;-fx-text-fill: white;");
+
     vbox.getChildren().add(nomValueLabel);
     vbox.getChildren().add(posteeValueLabel);
     vbox.getChildren().add(commenttValueLabel);
-    
-    
-//        id.setText(Id);
-//        nom.setText(name);
-//        commentt.setText(comment);
-//        postee.setText(poste);
-//         vbox.getChildren().add(id);
-//         vbox.getChildren().add(nom);
-//         vbox.getChildren().add(commentt);
-//         vbox.getChildren().add(postee);
+    vbox.getChildren().add(hbox);
          affichercom();
-        
+           btn.setOnAction(e -> {
+            try {
+            Parent parent = FXMLLoader.load(getClass().getResource("/javafxapplication3/Addcomentaire.fxml"));
+            Scene scene = new Scene(parent);
+            Stage stage = new Stage();
+            stage.setScene(scene);
+            stage.initStyle(StageStyle.UTILITY);
+            stage.show();
+        } catch (IOException ex) {
+            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+           
+           
+           });
+
     }
 } catch (SQLException e) {
     e.printStackTrace();
@@ -351,32 +339,15 @@ Callback<TableColumn<offre, String>, TableCell<offre, String>> cellFoctory = (Ta
     }
   
   
-    @FXML
-    void addcom(ActionEvent event) {
- try {
-            Parent parent = FXMLLoader.load(getClass().getResource("/javafxapplication3/Addcomentaire.fxml"));
-            Scene scene = new Scene(parent);
-            Stage stage = new Stage();
-            stage.setScene(scene);
-            stage.initStyle(StageStyle.UTILITY);
-            stage.show();
-        } catch (IOException ex) {
-            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+   
 
-    @FXML
-    void deletecom(ActionEvent event) {
-
-    }
+    
   
     
-     @FXML
-    void updatecom(ActionEvent event) {
-
-    }
+    
+    
   void affichercom(){
-                              FontAwesomeIconView deleteIcon = new FontAwesomeIconView(FontAwesomeIcon.TRASH);
+                              
 
    try {
                              
@@ -388,43 +359,76 @@ Callback<TableColumn<offre, String>, TableCell<offre, String>> cellFoctory = (Ta
           
     
     
-//        String Id = rs.getString(1);
+        int Id = rs.getInt(1);
+        int Idpub=rs.getInt(2);
         String nameee = rs.getString(4);
-        String contenent = rs.getString(3);
+        String contenente = rs.getString(3);
         String date = rs.getString(5);
-//    Label idValueLabel = new Label("ID: \n" + Id);
-    Label nameValueLabel = new Label("nom: \n" + nameee);
-    Label contenentValueLabel = new Label("contenent: \n"+ contenent);
-     Label dateValueLabel = new Label("date: \n "+"                "+ date);
+    Label idValueLabel = new Label("ID: \n" + Id);
+    Label nameValueLabel = new Label(nameee);
+    Label contenentValueLabel = new Label(contenente);
+     Label dateValueLabel = new Label("                                                "+ date);
      Button button = new Button("Modifier");
       Button btton = new Button("supprimer");
       HBox hbox = new HBox(button, btton);
       hbox.setSpacing(10);
+ nameValueLabel.setStyle("-fx-font-size: 12pt; -fx-font-weight: bold; -fx-text-fill: red;");
+ nameValueLabel.setPadding(new Insets(5, 10, -10, 1));
+ contenentValueLabel.setStyle("-fx-font-size: 12pt; -fx-font-weight: Arial; -fx-text-fill: black;");
+ dateValueLabel.setStyle("-fx-font-size: 7pt; -fx-font-weight: bold;");
+ btton.setStyle(" -fx-background-color: linear-gradient(#ff5400, #be1d00);-fx-background-radius: 30;-fx-background-insets: 0;-fx-text-fill: white;");
+ button.setStyle(" -fx-background-color: linear-gradient(#ffd65b, #e68400),linear-gradient(#ffef84, #f2ba44), linear-gradient(#ffea6a, #efaa22),linear-gradient(#ffe657 0%, #f8c202 50%, #eea10b 100%),linear-gradient(from 0% 0% to 15% 50%, rgba(255,255,255,0.9), rgba(255,255,255,0));-fx-background-radius: 30;-fx-background-insets: 0;-fx-text-fill: white;");
+
     vbox1.getChildren().addAll(nameValueLabel);
     vbox1.getChildren().addAll(contenentValueLabel);
     vbox1.getChildren().addAll(dateValueLabel);
     vbox1.getChildren().addAll(hbox);
-                
-//        id.setText(Id);
-//        namee.setText(nameee);
-//        contenentt.setText(contenent);
-//        datee.setText(date);
-//         vbox.getChildren().add(id);
-//         vbox.getChildren().add(nom);
-//         vbox.getChildren().add(commentt);
-//         vbox.getChildren().add(postee);
-         
-        
-    }
-                            ScrollPane scrollPane = new ScrollPane();
-                scrollPane.setContent(vbox1);
-               
+         button.setOnAction(e -> { 
+             
+             FXMLLoader loader = new FXMLLoader ();
+                            loader.setLocation(getClass().getResource("/javafxapplication3/Addcomentaire.fxml"));
+                            try {
+                                loader.load();
+                            } catch (IOException ex) {
+                                Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                            
+                            AddcomentaireController addcomentaireController = loader.getController();
+                            addcomentaireController.setUpdate(true);
+                            addcomentaireController.setTextField(Id, Idpub ,
+                                    contenente,nameee);
+                            Parent parent = loader.getRoot();
+                            Stage stage = new Stage();
+                            stage.setScene(new Scene(parent));
+                            stage.initStyle(StageStyle.UTILITY);
+                            stage.show();
+                            
 
-                // Create a new Stage and display the ScrollPane in a Scene
-                Stage stage = new Stage();
-                stage.setScene(new Scene(scrollPane, 400, 400));
-                stage.show();
-                          
+             
+         });
+         btton.setOnAction(e -> {
+             try {
+                
+             query = "DELETE FROM `move`.`comments` WHERE Id_Comment = ?";
+            PreparedStatement preparedstatement = connection.prepareStatement(query);
+            preparedstatement.setInt(1, Id);
+            int rowsAffected = preparedstatement.executeUpdate();        
+                                
+                            } catch (SQLException ex) {
+                                Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+             
+         });
+    }
+//                            ScrollPane scrollPane = new ScrollPane();
+//                scrollPane.setContent(vbox1);
+//               
+//
+//                // Create a new Stage and display the ScrollPane in a Scene
+//                Stage stage = new Stage();
+//                stage.setScene(new Scene(scrollPane, 400, 400));
+//                stage.show();
+//                          
 } catch (SQLException e) {
     e.printStackTrace();
 }
@@ -437,5 +441,10 @@ Callback<TableColumn<offre, String>, TableCell<offre, String>> cellFoctory = (Ta
         
       afficher();
     }    
+
+    @FXML
+    private void actualiser(ActionEvent event) {
+        refreshTable();
+    }
     
 }

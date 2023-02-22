@@ -71,20 +71,11 @@ connection = MoveDB.getInstance().getCon();
             alert.showAndWait();
 
         } 
+    
      else {
          getQuery();
             insert();
             clean();
-//    try {
-//        PreparedStatement statement = connection.prepareStatement("INSERT INTO `move`.`offre` (Poste, Name_User, Comment) VALUES (?, ?, ?)");
-//        statement.setString(1, name);
-//        statement.setString(2, comment);
-//        statement.setString(3, poste);
-//        statement.executeUpdate();
-//    } catch (SQLException e) {
-//       System.out.println("Exception: "+e.getMessage());
-//    }
-
    
 
     }

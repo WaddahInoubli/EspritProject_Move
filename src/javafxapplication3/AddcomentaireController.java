@@ -80,6 +80,7 @@ connection = MoveDB.getInstance().getCon();
 
         }else{
             query = "UPDATE `move`.`comments` SET "
+                    + "`Id_publication`=?,"
                     + "`contenent`=?,"
                     + "`Nam_User`=?,"
                     + "`date_com`= ? WHERE Id_Comment = '"+IdComment+"'";
@@ -114,12 +115,12 @@ connection = MoveDB.getInstance().getCon();
     }
   
 
-    void setTextField(int Id_Comment, int Id_publication, String contenent, String Name_User, LocalDate date_com) {
+    void setTextField(int Id_Comment, int Id_publication, String contenent, String Name_User) {
         IdComment = Id_Comment;
-        
+        Idpublication = Id_publication;
         txtcom.setText(contenent);
         txtname.setText(Name_User);
-        dateFid.setValue(date_com);
+        
         
 
     

@@ -5,6 +5,7 @@
  */
 package entities;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 /**
@@ -16,16 +17,16 @@ public class Comments {
     private int Id_publication ;  
     private String contenent;
     private String Name_User;
-    private Date date_com;
+    private LocalDate date_com;
 
-    public Comments(int Id_publication, String contenent, String Name_User, Date date_com) {
+    public Comments(int Id_publication, String contenent, String Name_User, LocalDate date_com) {
         this.Id_publication = Id_publication;
         this.contenent = contenent;
         this.Name_User = Name_User;
         this.date_com = date_com;
     }
 
-    public Comments(int Id_Comment, int Id_publication, String contenent, String Name_User, Date date_com) {
+    public Comments(int Id_Comment, int Id_publication, String contenent, String Name_User, LocalDate date_com) {
         this.Id_Comment = Id_Comment;
         this.Id_publication = Id_publication;
         this.contenent = contenent;
@@ -49,7 +50,7 @@ public class Comments {
         this.Id_publication = Id_publication;
     }
 
-    public String getContenent() {
+    public String getcontenent() {
         return contenent;
     }
 
@@ -65,11 +66,11 @@ public class Comments {
         this.Name_User = Name_User;
     }
 
-    public Date getDate_com() {
+    public LocalDate getDate_com() {
         return date_com;
     }
 
-    public void setDate_com(Date date_com) {
+    public void setDate_com(LocalDate date_com) {
         this.date_com = date_com;
     }
 }
