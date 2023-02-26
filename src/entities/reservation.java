@@ -1,24 +1,36 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package entities;
 
-import java.util.Date;
+import java.time.LocalDate;
 
-public class reservation {
+/**
+ *
+ * @author Andrew
+ */
+public class Reservation {
+private  int id ;
+private  int id_client_FK ;
+private  int id_voiture_FK ;
+private  int id_chaufeur_FK ;
+ private LocalDate datedebut;
+ private LocalDate datefin;
+ private  Boolean ifdriver;
 
-private int id_Reservation ;
-private int id_client_FK;
-private int id_voiture_FK;
-private int id_driver_FK;
-private Date DateDebutReservation;
-private Date DateFinReservation;
-private boolean ifDriver;
-private int prix;
-
-    public int getId_Reservation() {
-        return id_Reservation;
-    }
-
-    public void setId_Reservation(int id_Reservation) {
-        this.id_Reservation = id_Reservation;
+    @Override
+    public String toString() {
+        return "Reservation{" +
+                "id=" + id +
+                ", id_client_FK=" + id_client_FK +
+                ", id_voiture_FK=" + id_voiture_FK +
+                ", id_chaufeur_FK=" + id_chaufeur_FK +
+                ", datedebut=" + datedebut +
+                ", datefin=" + datefin +
+                ", ifdriver=" + ifdriver +
+                '}';
     }
 
     public int getId_client_FK() {
@@ -37,54 +49,56 @@ private int prix;
         this.id_voiture_FK = id_voiture_FK;
     }
 
-    public int getId_driver_FK() {
-        return id_driver_FK;
+    public int getId_chaufeur_FK() {
+        return id_chaufeur_FK;
     }
 
-    public void setId_driver_FK(int id_driver_FK) {
-        this.id_driver_FK = id_driver_FK;
+    public void setId_chaufeur_FK(int id_chaufeur_FK) {
+        this.id_chaufeur_FK = id_chaufeur_FK;
     }
 
-    public Date getDateDebutReservation() {
-        return DateDebutReservation;
+    public LocalDate getDatedebut() {
+        return datedebut;
     }
 
-    public void setDateDebutReservation(Date dateDebutReservation) {
-        DateDebutReservation = dateDebutReservation;
+    public void setDatedebut(LocalDate datedebut) {
+        this.datedebut = datedebut;
     }
 
-    public Date getDateFinReservation() {
-        return DateFinReservation;
+    public LocalDate getDatefin() {
+        return datefin;
     }
 
-    public void setDateFinReservation(Date dateFinReservation) {
-        DateFinReservation = dateFinReservation;
+    public void setDatefin(LocalDate datefin) {
+        this.datefin = datefin;
     }
 
-    public boolean isIfDriver() {
-        return ifDriver;
+    public Boolean getIfdriver() {
+        return ifdriver;
     }
 
-    public void setIfDriver(boolean ifDriver) {
-        this.ifDriver = ifDriver;
+    public void setIfdriver(Boolean ifdriver) {
+        this.ifdriver = ifdriver;
     }
 
-    public int getPrix() {
-        return prix;
-    }
-
-    public void setPrix(int prix) {
-        this.prix = prix;
-    }
-
-    public reservation(int id_Reservation, int id_client_FK, int id_voiture_FK, int id_driver_FK, Date dateDebutReservation, Date dateFinReservation, boolean ifDriver, int prix) {
-        this.id_Reservation = id_Reservation;
+    public Reservation(int id, int id_client_FK, int id_voiture_FK, int id_chaufeur_FK, LocalDate datedebut, LocalDate datefin, Boolean ifdriver) {
+        this.id = id;
         this.id_client_FK = id_client_FK;
         this.id_voiture_FK = id_voiture_FK;
-        this.id_driver_FK = id_driver_FK;
-        this.DateDebutReservation = dateDebutReservation;
-        this.DateFinReservation = dateFinReservation;
-        this.ifDriver = ifDriver;
-        this.prix = prix;
+        this.id_chaufeur_FK = id_chaufeur_FK;
+        this.datedebut = datedebut;
+        this.datefin = datefin;
+        this.ifdriver = ifdriver;
+    }
+
+    public Reservation(LocalDate datedebut, LocalDate datefin) {
+        this.datedebut = datedebut;
+        this.datefin = datefin;
+    }
+    public Reservation(LocalDate datedebut) {
+        this.datedebut = datedebut;
+
     }
 }
+
+
