@@ -212,4 +212,11 @@ public class NewAffichageFXML1Controller implements Initializable {
         PidevGui.pStage.show();
     }
 
+    @FXML
+    private void extract(ActionEvent event) {
+        serviceUser.extractUsers();
+        JOptionPane.showMessageDialog(null, "extraction réussi !");
+
+    }
+
 }

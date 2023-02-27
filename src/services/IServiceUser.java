@@ -20,5 +20,6 @@ public interface IServiceUser extends IService<User>{
     public List<User> find(String nom,String prenom,String numTel,String role,String email,Boolean desactive);
     public void acrivateDesactivateUSer(int userId,Boolean activate);
     public void modifiersansMotdePasse(User u);
+    public void extractUsers();
     
 }

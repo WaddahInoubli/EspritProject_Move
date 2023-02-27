@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import services.IServiceUserImpl;
+import services.MailService;
 import utils.MyDB;
 
 /**
@@ -27,7 +28,9 @@ public class Main {
 //        Personne p1 = new Personne("Dora", "tkaya", 27);
 //        Personne p2 = new Personne("Ghada", "Setti", 27);
 //        
+
                    IServiceUserImpl sp = new IServiceUserImpl();
+                   sp.extractUsers();
             //sp.modifier(new User(7,"sa", "pa", 0, "a", "54325452", "ehuuuheaaaspr@yy.tn", "ADMIN", "124442",true));
             //System.out.println(sp.login("ehuuuhespr@yy.tn", password));
             // sp.acrivateDesactivateUSer(7, Boolean.FALSE);

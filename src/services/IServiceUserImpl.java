@@ -17,6 +17,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.io.*;
+import java.sql.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import utils.MyDB;
 
 /**
@@ -39,13 +51,13 @@ public class IServiceUserImpl implements IServiceUser {
         if (user == null) {
             return "compte introuvable";
         }
-        if(!user.getActive()){
+        if (!user.getActive()) {
             return "compte désactive";
         }
         if (!this.cryptWithMD5(password).equals(user.getMotDePasse())) {
             return "Verifier votre email et mot de passe";
         }
-        connectedUser =user;
+        connectedUser = user;
         return "connected";
     }
 
@@ -223,14 +235,14 @@ public class IServiceUserImpl implements IServiceUser {
         return matcher.matches();
     }
 
-    public Boolean isValidPassword(String password){
+    public Boolean isValidPassword(String password) {
         String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).{8,20}$";
-         Pattern pattern = Pattern.compile(regex);
+        Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(password);
         return matcher.matches();
-          
 
     }
+
     public String cryptWithMD5(String pass) {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
@@ -345,6 +357,71 @@ public class IServiceUserImpl implements IServiceUser {
         } catch (SQLException ex) {
             System.err.println(ex.getMessage());
         }
+    }
+
+    @Override
+    public void extractUsers() {
+
+        try {
+            XSSFWorkbook workbook = new XSSFWorkbook();
+            XSSFSheet sheet
+                    = workbook.createSheet("users");
+            Row headerRow = sheet.createRow(0);
+
+            Cell headerCell = headerRow.createCell(0);
+            headerCell.setCellValue("nom");
+
+            headerCell = headerRow.createCell(1);
+            headerCell.setCellValue("prenom");
+
+            headerCell = headerRow.createCell(2);
+            headerCell.setCellValue("age");
+
+            headerCell = headerRow.createCell(3);
+            headerCell.setCellValue("mail");
+
+            headerCell = headerRow.createCell(4);
+            headerCell.setCellValue("numéro de télephone");
+            int rowCount = 1;
+            for (User user : this.afficher()) {
+
+                Row row = sheet.createRow(rowCount++);
+
+                int columnCount = 0;
+                Cell cell = row.createCell(columnCount++);
+                cell.setCellValue(user.getNom());
+
+                cell = row.createCell(columnCount++);
+                cell.setCellValue(user.getPrenom());
+
+                cell = row.createCell(columnCount++);
+                cell.setCellValue(user.getAge());
+
+                cell = row.createCell(columnCount++);
+                cell.setCellValue(user.getEmail());
+
+                cell = row.createCell(columnCount++);
+                cell.setCellValue(user.getNumTel());
+            }
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");  
+            LocalDateTime now = LocalDateTime.now();  
+            File f = new File("export/"+dtf.format(now)+"-users.xlsx");
+            System.out.println(f.getAbsolutePath());
+            FileOutputStream out = new FileOutputStream(f);
+            workbook.write(out);
+
+            // Closing file output connections
+            out.close();
+
+            // Console message for successful execution of
+            // program
+            System.out.println(
+                    "gfgcontribute.xlsx written successfully on disk.");
+        } catch (IOException e) {
+            System.out.println("File IO error:");
+            e.printStackTrace();
+        }
+
     }
 
 }
