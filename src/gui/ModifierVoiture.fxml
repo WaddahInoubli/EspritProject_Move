@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.ModifierVoitureController">
+   <children>
+      <AnchorPane id="AnchorPane" prefHeight="516.0" prefWidth="718.0" style="-fx-background-color: #DFF3FB;">
+         <children>
+            <Label fx:id="welcome" layoutX="197.0" layoutY="10.0" text="Ajouter Voiture" textFill="#111bd0">
+               <font>
+                  <Font name="System Bold" size="32.0" />
+               </font>
+            </Label>
+            <Button fx:id="A" layoutX="283.0" layoutY="417.0" mnemonicParsing="false" onAction="#insert" prefHeight="47.0" prefWidth="120.0" style="-fx-background-color: #1E7FCB; -fx-border-radius: 50; -fx-background-radius: 50;" text="Modifier" textFill="WHITE">
+               <font>
+                  <Font name="System Bold" size="20.0" />
+               </font>
+            </Button>
+            <TextField fx:id="annes" layoutX="155.0" layoutY="225.0" prefHeight="55.0" prefWidth="392.0" promptText="annes" />
+            <TextField fx:id="etat" layoutX="153.0" layoutY="138.0" prefHeight="55.0" prefWidth="401.0" promptText="etat" />
+            <Hyperlink fx:id="prec" layoutX="17.0" layoutY="14.0" onAction="#prec" text="Retour">
+               <font>
+                  <Font name="System Bold" size="21.0" />
+               </font>
+            </Hyperlink>
+            <Label layoutX="35.0" layoutY="74.0" text="modele">
+               <font>
+                  <Font name="System Bold" size="15.0" />
+               </font>
+            </Label>
+            <Label layoutX="41.0" layoutY="155.0" text="etat">
+               <font>
+                  <Font name="System Bold" size="15.0" />
+               </font>
+            </Label>
+            <Label layoutX="34.0" layoutY="242.0" text="annes">
+               <font>
+                  <Font name="System Bold" size="15.0" />
+               </font>
+            </Label>
+            <ComboBox fx:id="modele" layoutX="153.0" layoutY="62.0" prefHeight="47.0" prefWidth="402.0" promptText="modele" />
+            <Label fx:id="imgpathttt" layoutX="669.0" layoutY="53.0" text="Label" visible="false" />
+            <TextField fx:id="prix" layoutX="155.0" layoutY="321.0" prefHeight="55.0" prefWidth="401.0" promptText="prix" />
+            <Label fx:id="labelid" layoutX="599.0" layoutY="109.0" text="Label" visible="false" />
+            <Label layoutX="34.0" layoutY="338.0" text="prix">
+               <font>
+                  <Font name="System Bold" size="15.0" />
+               </font>
+            </Label>
+         </children>
+      </AnchorPane>
+   </children>
+</AnchorPane>

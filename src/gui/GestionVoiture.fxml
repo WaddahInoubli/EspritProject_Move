@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/18" fx:controller="gui.GestionVoitureController">
+   <children>
+      <AnchorPane id="AnchorPane" layoutX="10.0" layoutY="10.0" prefHeight="616.0" prefWidth="940.0" style="-fx-background-color: #DFF3FB;" styleClass="mainFxmlClass">
+         <children>
+            <Label layoutX="260.0" text="Gestion des Voitures" textFill="#9c3832">
+               <font>
+                  <Font name="Arial Unicode MS" size="31.0" />
+               </font>
+            </Label>
+            <Button fx:id="supp" layoutX="452.0" layoutY="513.0" mnemonicParsing="false" onAction="#supp" prefHeight="40.0" prefWidth="119.0" style="-fx-background-color: #ff4500;" text="Supprimer" textFill="WHITE">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+            </Button>
+            <Button fx:id="modif" layoutX="158.0" layoutY="515.0" mnemonicParsing="false" onAction="#Modif" prefHeight="26.0" prefWidth="101.0" style="-fx-background-color: #cc5500;" text="Modifier" textFill="WHITE">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+            </Button>
+            <Button fx:id="Ajouter" layoutX="293.0" layoutY="511.0" mnemonicParsing="false" onAction="#Ajouter" prefHeight="43.0" prefWidth="119.0" style="-fx-background-color: ff8c00;" text="Ajouter" textFill="WHITE">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+            </Button>
+            <Label fx:id="imgpathttt" layoutX="533.0" layoutY="515.0" text="Label" visible="false" />
+            <Label fx:id="labelid" layoutX="761.0" layoutY="37.0" text="Label" visible="false" />
+            <TextField fx:id="inputRech" layoutX="323.0" layoutY="71.0" prefHeight="39.0" prefWidth="211.0" />
+            <Hyperlink fx:id="Retour" layoutX="29.0" layoutY="34.0" onAction="#Retour" text="Retour">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Hyperlink>
+            <Button fx:id="pdf2" layoutX="604.0" layoutY="70.0" mnemonicParsing="false" onAction="#pdf2" prefHeight="26.0" prefWidth="74.0" style="-fx-background-color: #FF0000;" styleClass="button_Submit" text="PDF" textFill="WHITE">
+               <font>
+                  <Font name="Lato Black" size="14.0" />
+               </font>
+            </Button>
+            <Button fx:id="afficherparprix" layoutX="699.0" layoutY="69.0" mnemonicParsing="false" onAction="#afficherparprix" prefHeight="30.0" prefWidth="138.0" style="-fx-background-color: #296d98;" styleClass="button_Submit" text="Afficher par prix" textFill="WHITE">
+               <font>
+                  <Font name="Lato Bold" size="14.0" />
+               </font>
+            </Button>
+            <TableView fx:id="tableview" layoutX="133.0" layoutY="145.0" prefHeight="308.0" prefWidth="674.0">
+              <columns>
+                <TableColumn fx:id="etat" prefWidth="205.6000213623047" text="etat" />
+                <TableColumn fx:id="annes" prefWidth="132.0" text="annes" />
+                  <TableColumn fx:id="prix_h" prefWidth="163.199951171875" text="prix_h" />
+                  <TableColumn fx:id="id_m" prefWidth="164.0" text="id_m" />
+              </columns>
+            </TableView>
+         </children>
+      </AnchorPane>
+   </children>
+</AnchorPane>

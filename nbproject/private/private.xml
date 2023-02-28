@@ -3,16 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/tekay/Desktop/move/move/src/gui/Main.java</file>
-            <file>file:/C:/Users/tekay/Desktop/move/move/src/move/Move.java</file>
-            <file>file:/C:/Users/tekay/Desktop/move/move/src/utils/MyDB.java</file>
-            <file>file:/C:/Users/tekay/Desktop/move/move/src/gui/AffichageController.java</file>
-            <file>file:/C:/Users/tekay/Desktop/move/move/src/entities/modele.java</file>
-            <file>file:/C:/Users/tekay/Desktop/move/move/src/service/iservice.java</file>
-            <file>file:/C:/Users/tekay/Desktop/move/move/src/entities/voiture.java</file>
-            <file>file:/C:/Users/tekay/Desktop/move/move/nbproject/jfx-impl.xml</file>
-            <file>file:/C:/Users/tekay/Desktop/move/move/src/service/serviceVoiture.java</file>
-            <file>file:/C:/Users/tekay/Desktop/move/move/src/gui/afficheV.fxml</file>
+            <file>file:/C:/Users/tekay/Desktop/PiDev/src/gui/GestionVoitureController.java</file>
+            <file>file:/C:/Users/tekay/Desktop/PiDev/src/gui/wwww.jpg</file>
+            <file>file:/C:/Users/tekay/Desktop/PiDev/src/service/VoitureService.java</file>
+            <file>file:/C:/Users/tekay/Desktop/PiDev/src/gui/ModifierVoitureController.java</file>
+            <file>file:/C:/Users/tekay/Desktop/PiDev/src/gui/AjouterVoitureController.java</file>
+            <file>file:/C:/Users/tekay/Desktop/PiDev/src/gui/Main.java</file>
         </group>
     </open-files>
 </project-private>
