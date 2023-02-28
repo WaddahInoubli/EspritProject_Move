@@ -9,7 +9,7 @@
 
 <AnchorPane id="AnchorPane" prefHeight="449.0" prefWidth="767.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.afficherProfileController">
    <children>
-      <Label layoutX="288.0" layoutY="25.0" prefHeight="18.0" prefWidth="192.0" text="Profile">
+      <Label fx:id="titleLabel" layoutX="288.0" layoutY="25.0" prefHeight="18.0" prefWidth="192.0" text="Profile">
          <font>
             <Font name="System Bold" size="20.0" />
          </font>
@@ -45,8 +45,8 @@
          <font>
             <Font name="System Bold" size="12.0" />
          </font></Label>
-      <Button layoutX="467.0" layoutY="377.0" mnemonicParsing="false" onAction="#back" prefHeight="26.0" prefWidth="150.0" text="Retour à la liste" />
-      <Button layoutX="661.0" layoutY="27.0" mnemonicParsing="false" onAction="#logout" text="Déconnexion" />
+      <Button fx:id="btnRetourList" layoutX="467.0" layoutY="377.0" mnemonicParsing="false" onAction="#back" prefHeight="26.0" prefWidth="150.0" text="Retour à la liste" />
+      <Button layoutX="661.0" layoutY="27.0" mnemonicParsing="false" onAction="#logout" style="-fx-background-color: #F16767;" text="Déconnexion" textFill="WHITE" />
       <CheckBox fx:id="cbActive" layoutX="400.0" layoutY="277.0" mnemonicParsing="false" prefHeight="18.0" prefWidth="86.0" text="Active" />
       <Label fx:id="nom" layoutX="130.0" layoutY="109.0" prefHeight="18.0" prefWidth="150.0" text="Label" />
       <Label fx:id="prenom" layoutX="130.0" layoutY="141.0" prefHeight="18.0" prefWidth="150.0" text="Label" />
@@ -55,5 +55,6 @@
       <Label fx:id="mail" layoutX="546.0" layoutY="171.0" prefHeight="18.0" prefWidth="150.0" text="Label" />
       <Label fx:id="role" layoutX="547.0" layoutY="237.0" prefHeight="18.0" prefWidth="150.0" text="Label" />
       <Text fx:id="adresse" layoutX="130.0" layoutY="222.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" />
+      <Button fx:id="modifierButton" layoutX="467.0" layoutY="329.0" mnemonicParsing="false" onAction="#RedirectToModifer" prefHeight="26.0" prefWidth="150.0" text="Modifier" />
    </children>
 </AnchorPane>

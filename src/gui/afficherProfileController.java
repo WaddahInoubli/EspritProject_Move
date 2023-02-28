@@ -15,6 +15,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.text.Text;
@@ -46,12 +47,22 @@ public class afficherProfileController implements Initializable {
     private Label role;
      private static User user;
     private IServiceUserImpl serviceUser = new IServiceUserImpl();
+    @FXML
+    private Button btnRetourList;
+    @FXML
+    private Button modifierButton;
+    @FXML
+    private Label titleLabel;
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        if(!serviceUser.getConnectedUser().getRole().equals("ADMIN")){
+            btnRetourList.setVisible(false);
+            titleLabel.setText("Mon Profile");
+        }
         nom.setText(user.getNom());
         prenom.setText(user.getPrenom());
         age.setText(user.getAge() + "");
@@ -85,6 +96,15 @@ public class afficherProfileController implements Initializable {
 
     public static void setUser(User user) {
         afficherProfileController.user = user;
+    }
+
+    @FXML
+    private void RedirectToModifer(ActionEvent event) throws IOException {
+        ModifierController.setUser(user);
+        Parent root = FXMLLoader.load(getClass().getResource("../gui/modifier.fxml"));
+        Scene scene = new Scene(root);
+        PidevGui.pStage.setScene(scene);
+        PidevGui.pStage.show();
     }
 
 }

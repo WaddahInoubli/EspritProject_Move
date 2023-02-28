@@ -45,7 +45,7 @@
       <ComboBox fx:id="rActive" layoutX="776.0" layoutY="68.0" prefWidth="150.0" />
       <ComboBox fx:id="rRole" layoutX="637.0" layoutY="67.0" prefHeight="26.0" prefWidth="134.0" />
       <Button layoutX="784.0" layoutY="343.0" mnemonicParsing="false" onAction="#Search" prefHeight="26.0" prefWidth="134.0" text="Rechercher" />
-      <Button layoutX="840.0" layoutY="19.0" mnemonicParsing="false" onAction="#logout" text="Déconnexion" />
+      <Button layoutX="840.0" layoutY="19.0" mnemonicParsing="false" onAction="#logout" style="-fx-background-color: #F16767;" text="Déconnexion" textFill="WHITE" />
       <Button layoutX="45.0" layoutY="344.0" mnemonicParsing="false" onAction="#ajouter" prefHeight="26.0" prefWidth="161.0" text="Ajouter un utilisateur" />
       <Button layoutX="661.0" layoutY="345.0" mnemonicParsing="false" onAction="#extract" text="Extraire" />
    </children>

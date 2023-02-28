@@ -18,8 +18,8 @@
       </Label>
       <Label layoutX="353.0" layoutY="179.0" text="Mot de passe" />
       <TextField fx:id="tmail" layoutX="466.0" layoutY="116.0" />
-      <Button layoutX="489.0" layoutY="244.0" mnemonicParsing="false" onAction="#login" prefHeight="26.0" prefWidth="142.0" text="se connecter" />
-      <Button layoutX="489.0" layoutY="284.0" mnemonicParsing="false" onAction="#subscribe" prefHeight="26.0" prefWidth="142.0" text="Créer un compte" />
+      <Button layoutX="489.0" layoutY="244.0" mnemonicParsing="false" onAction="#login" prefHeight="26.0" prefWidth="142.0" style="-fx-background-color: #4B56D2;" text="se connecter" textFill="WHITE" />
+      <Button layoutX="489.0" layoutY="284.0" mnemonicParsing="false" onAction="#subscribe" prefHeight="26.0" prefWidth="142.0" style="-fx-background-color: #E6E2C3;" text="Créer un compte" textFill="#300606" />
       <ImageView fitHeight="176.0" fitWidth="314.0" layoutX="14.0" layoutY="137.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@../../../../../Desktop/location-voiture-tunise.jpg" />

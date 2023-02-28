@@ -48,7 +48,12 @@ public class LoginController implements Initializable {
     private void login(ActionEvent event) throws IOException {
         String loginReturn = serviceUser.login(tmail.getText(), tpassword.getText());
         if (loginReturn.equals("connected")) {
-            Parent root = FXMLLoader.load(getClass().getResource("../gui/newAffichageFXML1.fxml"));
+            String redirectUri="../gui/newAffichageFXML1.fxml";
+            if(!serviceUser.getConnectedUser().getRole().equals("ADMIN")){
+                 afficherProfileController.setUser(serviceUser.getConnectedUser());
+                 redirectUri="../gui/afficherProfile.fxml";
+            }
+            Parent root = FXMLLoader.load(getClass().getResource(redirectUri));
             Scene scene = new Scene(root);
             PidevGui.pStage.setScene(scene);
             PidevGui.pStage.show();
