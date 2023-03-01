@@ -33,7 +33,7 @@ public class confirmadmincontroller implements Initializable {
         System.out.println(prenom);
         if (prenom.equals("waddhah")) {
 
-            Parent Home = FXMLLoader.load(getClass().getResource("listereservation.fxml"));
+            Parent Home = FXMLLoader.load(getClass().getResource("Listereservations.fxml"));
             Scene home = new Scene(Home);
             Stage app_stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             app_stage.setScene(home);

@@ -22,6 +22,11 @@ public class Voiture {
         this.prix= prix;
 
     }
+    public Voiture(Double prix) {
+
+        this.prix= prix;
+
+    }
 
 public  Voiture(int id ){
         this.id=id;

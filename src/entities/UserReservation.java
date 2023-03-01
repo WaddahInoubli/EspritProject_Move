@@ -50,9 +50,28 @@ private LocalDate datedebut;
     private String prenom;
     private String address;
     private int phone;
+    private  Double prix;
+
+    public Double getPrix() {
+        return prix;
+    }
+
+    public void setPrix(Double prix) {
+        this.prix = prix;
+    }
+
     private int idreservation;
     private String email ;
-    public UserReservation(User user, Reservation reservation ,Voiture voiture) {
+
+    public int getIdvoiture() {
+        return idvoiture;
+    }
+
+    public void setIdvoiture(int idvoiture) {
+        this.idvoiture = idvoiture;
+    }
+
+    public UserReservation(User user, Reservation reservation , Voiture voiture) {
 
 this.voiture=voiture;
         this.user = user;
@@ -69,6 +88,7 @@ this.voiture=voiture;
             this.modele=voiture.getModele();
             this.idvoiture=voiture.getId();
             this.ifdriver=reservation.getIfdriver();
+            this.prix=voiture.getPrix();
     }
     public UserReservation(User user, Reservation reservation) {
 
@@ -83,7 +103,7 @@ this.voiture=voiture;
         this.address=user.getAddress();
         this.phone=user.getPhone();
         this.idreservation=reservation.getId();
-        this.ifdriver=reservation.getIfdriver();
+
 
 
     }

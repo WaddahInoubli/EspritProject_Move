@@ -87,7 +87,57 @@ public class serviceReservation implements IserviceReservation<UserReservation> 
         }
 
 
+    @Override
+    public void modifier(UserReservation userReservation) {
+        try {
+            connection.setAutoCommit(false);
+            try {
+                String updatevoiture="Update voiture SET marque=?, modele=?,Prix_jour=? where  id=?";
+                PreparedStatement voiture = connection.prepareStatement(updatevoiture);
+                voiture.setString(1, userReservation.getVoiture().getMarque());
 
+                voiture.setString(2, userReservation.getVoiture().getModele());
+                voiture.setDouble(3, userReservation.getVoiture().getPrix());
+                voiture.setInt(4, userReservation.getVoiture().getId());
+                voiture.executeUpdate();
+
+                // Update the client record
+                String updateClientSql = "UPDATE client SET nom=?, prenom=?, adresse=?, telephone=?, email=? WHERE id=?";
+                PreparedStatement clientStatement = connection.prepareStatement(updateClientSql);
+                clientStatement.setString(1, userReservation.getUser().getNom());
+                System.out.println( userReservation.getUser().getNom());
+                clientStatement.setString(2, userReservation.getUser().getPrenom());
+                clientStatement.setString(3, userReservation.getUser().getAddress());
+                clientStatement.setInt(4, userReservation.getUser().getPhone());
+                clientStatement.setString(5, userReservation.getUser().getEmail());
+                clientStatement.setInt(6, userReservation.getUser().getId());
+                clientStatement.executeUpdate();
+
+                // Update the reservation record
+                String updateReservationSql = "UPDATE reservation SET id_voiture_FK=?, date_debut=?, date_fin=?, ifdriver=? WHERE id_client_FK=?";
+                PreparedStatement reservationStatement = connection.prepareStatement(updateReservationSql);
+                reservationStatement.setInt(1, userReservation.getVoiture().getId());
+                reservationStatement.setDate(2, Date.valueOf(userReservation.getReservation().getDatedebut()));
+                reservationStatement.setDate(3, Date.valueOf(userReservation.getReservation().getDatefin()));
+                reservationStatement.setBoolean(4, userReservation.getReservation().getIfdriver());
+                System.out.println(userReservation.getReservation().getIfdriver());
+                reservationStatement.setInt(5, userReservation.getUser().getId());
+                reservationStatement.executeUpdate();
+
+                // Commit the transaction
+                connection.commit();
+
+                System.out.println("Data updated successfully");
+                connection.close();
+            } catch (SQLException ex) {
+
+                connection.rollback();
+                System.err.println("Error updating data: " + ex.getMessage());
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Override
    /* public void supprimer(Reservation t) {
@@ -118,6 +168,7 @@ public class serviceReservation implements IserviceReservation<UserReservation> 
         ArrayList<UserReservation> listrec = new ArrayList<>();
         Reservation reservation=null;
         User user =null;
+        Voiture voiture=null;
         try{
         ste= connection.createStatement();
         String req_select="SELECT * FROM reservation";
@@ -130,8 +181,17 @@ public class serviceReservation implements IserviceReservation<UserReservation> 
            LocalDate date_debut= res.getDate("date_debut").toLocalDate();
            LocalDate date_fin= res.getDate("date_fin").toLocalDate();
            int id_chauffeur_FK=res.getInt("id_chauffeur_FK");
-           int ifDriver=res.getInt("ifDriver");
+           Boolean ifDriver=res.getBoolean("ifdriver");
+            System.out.println(ifDriver);
            int id_voiture_FK=res.getInt("id_voiture_FK");
+            String sql1= "select * from voiture where id=? " ;
+            PreparedStatement selectuser1 = connection.prepareStatement(sql1);
+            selectuser1.setInt(1, id_voiture_FK);
+            ResultSet resultat1=   selectuser1.executeQuery();
+            if(resultat1.next()){
+                Double prix=resultat1.getDouble("Prix_jour");
+                voiture =new Voiture(prix);
+            }
             String sql= "select * from client where id=? " ;
             PreparedStatement selectuser = connection.prepareStatement(sql);
             selectuser.setInt(1, id_client);
@@ -147,8 +207,8 @@ public class serviceReservation implements IserviceReservation<UserReservation> 
 
             }
 
-   reservation =new Reservation();
-   UserReservation user1=new UserReservation(user,reservation);
+   reservation =new Reservation(id,date_debut,date_fin,ifDriver);
+   UserReservation user1=new UserReservation(user,reservation,voiture);
    listrec.add(user1);
 
 
@@ -163,6 +223,7 @@ public class serviceReservation implements IserviceReservation<UserReservation> 
     @Override
     public ArrayList<UserReservation> afficheronereservation( int id1) {
         ArrayList<UserReservation> listrec = new ArrayList<>();
+       Voiture voiture=null;
         Reservation reservation=null;
         User user =null;
         try{
@@ -179,11 +240,31 @@ public class serviceReservation implements IserviceReservation<UserReservation> 
 
 
                 LocalDate date_debut= res.getDate("date_debut").toLocalDate();
-                System.out.println( "date_debut"+date_debut);
+                System.out.println( "date_debut"+ date_debut);
                 LocalDate date_fin= res.getDate("date_fin").toLocalDate();
                 int id_chauffeur_FK=res.getInt("id_chauffeur_FK");
-                int ifDriver=res.getInt("ifDriver");
+                Boolean ifDriver=res.getBoolean("ifDriver");
                 int id_voiture_FK=res.getInt("id_voiture_FK");
+
+                String sqlVoiture="select * from voiture where id=?";
+                PreparedStatement selecteur=connection.prepareStatement(sqlVoiture);
+                selecteur.setInt(1,id_voiture_FK);
+                ResultSet resultatVoiture=   selecteur.executeQuery();
+                if(resultatVoiture.next()){
+                     int idvoiture=resultatVoiture.getInt("id");
+                    String modele=resultatVoiture.getString("modele");
+                    String marque=resultatVoiture.getString("marque");
+                    Double prix_jour=resultatVoiture.getDouble("prix_jour");
+                    voiture =new Voiture(id,modele,marque,prix_jour);
+
+
+                }
+
+
+
+
+
+
                 String sql= "select * from client where id=? " ;
                 PreparedStatement selectuser = connection.prepareStatement(sql);
                 selectuser.setInt(1, id_client);
@@ -199,8 +280,8 @@ public class serviceReservation implements IserviceReservation<UserReservation> 
 
                 }
 
-                reservation =new Reservation();
-                UserReservation user1=new UserReservation(user,reservation);
+                reservation =new Reservation(id, date_debut, date_fin,ifDriver);
+                UserReservation user1=new UserReservation(user,reservation,voiture);
                 listrec.add(user1);
 
 
@@ -213,10 +294,7 @@ public class serviceReservation implements IserviceReservation<UserReservation> 
     }
 
 
-    @Override
-    public void modifier(UserReservation t) {
 
-}
 }
 
  

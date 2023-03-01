@@ -25,6 +25,9 @@ private  int id_chaufeur_FK ;
     public void setId(int id) {
         this.id = id;
     }
+public Reservation(int id, LocalDate date_debut, LocalDate date_fin){
+
+}
 public Reservation(){
 
 }

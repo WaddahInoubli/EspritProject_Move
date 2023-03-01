@@ -3,27 +3,34 @@ package GUI;
 import entities.Reservation;
 import entities.User;
 import entities.UserReservation;
+import entities.Voiture;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import services.serviceReservation;
 
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.ResourceBundle;
 
 public class ModifierReservationControllers  implements Initializable {
+
+
+    @FXML
+    private TextField Periode;
+    @FXML
+    private TextField finalPrice;
+    @FXML
+    private CheckBox ifDriver;
 
     @FXML
     private Label adressrequire;
@@ -41,7 +48,7 @@ public class ModifierReservationControllers  implements Initializable {
     private Label emailrequire;
 
     @FXML
-    private ChoiceBox<?> fxidlist;
+    private ChoiceBox<String> fxidlist;
 
     @FXML
     private TextField idadress;
@@ -98,9 +105,78 @@ public class ModifierReservationControllers  implements Initializable {
     void Reset(ActionEvent event) {
 
     }
-
+    private  boolean cheked=false;
+    Reservation reservation=Reservation.getInstance();
+    String modele="";
+    String marque="";
+    Double prix;
+    int id;
     @FXML
-    void addreseRvation(ActionEvent event) {
+    void UpdateReservatioon(ActionEvent event) {
+        User user = null;
+        Reservation reservation = null;
+        serviceReservation service = new serviceReservation();
+        try {
+
+            SimpleDateFormat dateFormat = new
+                    SimpleDateFormat ("yyyy-MM-dd");
+            Date date1 = dateFormat.parse(String.valueOf(iddatedebut.getValue()));
+            Date date2 = dateFormat.parse(String.valueOf(idfatefin.getValue()));
+
+
+
+            if (idprix.getText().isEmpty()) {
+                prixrequire.setText("champ prix obligatoir svp");
+            } else if (idprenom.getText().isEmpty()) {
+                prenomrequire.setText("champ prenom obligatoir svp");
+            } else if (idnom.getText().isEmpty()) {
+                nomrequire.setText("champ nom obligatoir svp");
+            } else if (idadress.getText().isEmpty()) {
+                adressrequire.setText("champ address obligatoir svp");
+            } else if (idemail.getText().isEmpty()) {
+                emailrequire.setText("champ email obligatoir svp");
+            } else if (idphone.getText().isEmpty()) {
+                phonerequire.setText("champ phone obligatoir svp");
+            } else if (iddatedebut.equals(null)) {
+                datedebut.setText("champ date debut obligatoir svp");
+
+            } else if (idfatefin.equals(null)) {
+                datefinrequire.setText("champ datefin obligatoir svp");
+            } else   if(date2.before(date1)){
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Invalid date");
+                alert.setHeaderText(null);
+                alert.setContentText(" invalid date ");
+                alert.showAndWait();
+
+            } else {
+
+
+
+
+                String nom = idnom.getText();
+
+                String prenom = idprenom.getText();
+                String address = idadress.getText();
+                LocalDate datedebut = iddatedebut.getValue();
+                LocalDate datefin = idfatefin.getValue();
+                String email = idemail.getText();
+                String phone = idphone.getText();
+
+                int phone1 = Integer.parseInt(phone);
+                user = new User(nom, prenom, address, phone1, email);
+                reservation = new Reservation(datedebut, datefin,cheked);
+
+
+            }
+
+
+        } catch (Exception e) {
+            System.out.println( "erroror:"+e.getMessage());
+        }
+        Voiture voiture =new Voiture(id,modele,marque,prix);
+        UserReservation user1 = new UserReservation(user, reservation,voiture);
+        service.modifier(user1);
 
     }
 
@@ -112,7 +188,7 @@ public class ModifierReservationControllers  implements Initializable {
     public void setData(String data) {
         this.data = data;
     }
-    Reservation reservation=Reservation.getInstance();
+
 
     public void affichedata(){
         System.out.println( reservation.getId());
@@ -121,26 +197,44 @@ public class ModifierReservationControllers  implements Initializable {
         ArrayList<UserReservation> reservations = new ArrayList<>();
 
         for (int i = 0; i <reservations1.afficheronereservation(reservation.getId()).size() ; i++) {
-            reservations.add(new UserReservation(new User(reservations1.afficheronereservation(reservation.getId()).get(i).getUser().getNom(),reservations1.afficheronereservation(reservation.getId()).get(i).getUser().getPrenom(),reservations1.afficheronereservation(reservation.getId()).get(i).getUser().getAddress(),reservations1.afficheronereservation(reservation.getId()).get(i).getUser().getPhone(),reservations1.afficheronereservation(reservation.getId()).get(i).getUser().getEmail()), new Reservation(reservations1.afficheronereservation(reservation.getId()).get(i).getReservation().getId(),reservations1.afficheronereservation(reservation.getId()).get(i).getReservation().getDatedebut(),reservations1.afficheronereservation(reservation.getId()).get(i).getReservation().getDatefin(),reservations1.afficheronereservation(reservation.getId()).get(i).getReservation().getIfdriver())));
-            System.out.println(reservations.get(i).getReservation().getDatefin());
+            reservations.add(new UserReservation(new User(reservations1.afficheronereservation(reservation.getId()).get(i).getUser().getNom(),reservations1.afficheronereservation(reservation.getId()).get(i).getUser().getPrenom(),reservations1.afficheronereservation(reservation.getId()).get(i).getUser().getAddress(),reservations1.afficheronereservation(reservation.getId()).get(i).getUser().getPhone(),reservations1.afficheronereservation(reservation.getId()).get(i).getUser().getEmail()), new Reservation(reservations1.afficheronereservation(reservation.getId()).get(i).getReservation().getId(),reservations1.afficheronereservation(reservation.getId()).get(i).getReservation().getDatedebut(),reservations1.afficheronereservation(reservation.getId()).get(i).getReservation().getDatefin(),reservations1.afficheronereservation(reservation.getId()).get(i).getReservation().getIfdriver()),new Voiture(reservations1.afficheronereservation(reservation.getId()).get(i).getIdvoiture(),reservations1.afficheronereservation(reservation.getId()).get(i).getVoiture().getModele(),reservations1.afficheronereservation(reservation.getId()).get(i).getVoiture().getMarque(),reservations1.afficheronereservation(reservation.getId()).get(i).getVoiture().getPrix() )));
+            System.out.println( "datefin"+reservations.get(i).getReservation().getDatefin());
         }
         idnom.setText(reservations.get(0).getUser().getNom());
-
         idprenom.setText(reservations.get(0).getUser().getPrenom());
         idadress.setText(reservations.get(0).getAddress());
         idemail.setText(reservations.get(0).getEmail());
         idphone.setText(String.valueOf(reservations.get(0).getPhone()));
         iddatedebut.setValue(reservations.get(0).getReservation().getDatedebut());
         idfatefin.setValue(reservations.get(0).getReservation().getDatefin());
+        idprix.setText(String.valueOf(reservations.get(0).getVoiture().getPrix()));
 
+        if(reservations.get(0).getReservation().getIfdriver()){
+            ifDriver.setSelected(true);
+        }
+            marque=reservations.get(0).getVoiture().getModele();
+        modele=reservations.get(0).getVoiture().getMarque();
+        prix=reservations.get(0).getVoiture().getPrix();
+        id=reservations.get(0).getVoiture().getId();
+         fxidlist.getItems().add(String.valueOf(reservations.get(0).getVoiture().getModele() + " " + reservations.get(0).getVoiture().getMarque()));
 
+        fxidlist.getSelectionModel().select(0);
     }
 
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        ifDriver.setOnAction(event -> {
+            boolean isSelected = ifDriver.isSelected();
+            if(isSelected){
+                cheked= true;
+            }else  {
+                cheked=false;
+            }
+            System.out.println(cheked);
+        });
 
- affichedata();
+        affichedata();
 
 
 

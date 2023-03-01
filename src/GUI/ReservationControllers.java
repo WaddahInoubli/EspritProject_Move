@@ -153,7 +153,7 @@ UserReservation userReservation;
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Invalid date");
                 alert.setHeaderText(null);
-              alert.setContentText(" yaatiik 3assba date fin lazem akber men date debut kalmoola lhakrem hadha bhiim yasser ");
+              alert.setContentText("error : choisir une date finale superieur a celle de debut ! ");
                 alert.showAndWait();
 
             } else {
@@ -356,7 +356,7 @@ UserReservation userReservation;
                 System.out.println(date1);
                 if(date1 !=null && date2 !=null) {
 
-                    long datetotale=ChronoUnit.DAYS.between(date2, date1);
+                    long datetotale=ChronoUnit.DAYS.between(date1, date2);
 
                     Double prixtototale=datetotale * voiture.getPrix();
                     finalPrice.setText(String.valueOf(prixtototale));
