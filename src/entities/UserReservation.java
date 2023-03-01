@@ -4,6 +4,45 @@ import java.time.LocalDate;
 
 public class UserReservation {
     private User user;
+    private Voiture voiture;
+private String modele;
+private String marque;
+private int idvoiture;
+
+private boolean ifdriver;
+
+    public boolean isIfdriver() {
+        return ifdriver;
+    }
+
+    public void setIfdriver(boolean ifdriver) {
+        this.ifdriver = ifdriver;
+    }
+
+    public String getModele() {
+        return modele;
+    }
+
+    public void setModele(String modele) {
+        this.modele = modele;
+    }
+
+    public String getMarque() {
+        return marque;
+    }
+
+    public void setMarque(String marque) {
+        this.marque = marque;
+    }
+
+    public Voiture getVoiture() {
+        return voiture;
+    }
+
+    public void setVoiture(Voiture voiture) {
+        this.voiture = voiture;
+    }
+
     private Reservation reservation;
 private LocalDate datedebut;
     private LocalDate datefin;
@@ -11,8 +50,11 @@ private LocalDate datedebut;
     private String prenom;
     private String address;
     private int phone;
+    private int idreservation;
     private String email ;
-    public UserReservation(User user, Reservation reservation) {
+    public UserReservation(User user, Reservation reservation ,Voiture voiture) {
+
+this.voiture=voiture;
         this.user = user;
         this.reservation = reservation;
         this.datedebut=reservation.getDatedebut();
@@ -22,6 +64,27 @@ private LocalDate datedebut;
         this.email=user.getEmail();
         this.address=user.getAddress();
         this.phone=user.getPhone();
+            this.idreservation=reservation.getId();
+         this.marque=voiture.getMarque();
+            this.modele=voiture.getModele();
+            this.idvoiture=voiture.getId();
+            this.ifdriver=reservation.getIfdriver();
+    }
+    public UserReservation(User user, Reservation reservation) {
+
+
+        this.user = user;
+        this.reservation = reservation;
+        this.datedebut=reservation.getDatedebut();
+        this.datefin=reservation.getDatefin();
+        this.nom=user.getNom();
+        this.prenom=user.getPrenom();
+        this.email=user.getEmail();
+        this.address=user.getAddress();
+        this.phone=user.getPhone();
+        this.idreservation=reservation.getId();
+        this.ifdriver=reservation.getIfdriver();
+
 
     }
     public UserReservation( Reservation reservation) {
@@ -29,6 +92,12 @@ private LocalDate datedebut;
         this.reservation = reservation;
         this.datedebut=reservation.getDatedebut();
         this.datefin=reservation.getDatefin();
+        this.idreservation=reservation.getId();
+    }
+    public UserReservation( ) {
+
+
+        this.idreservation=reservation.getId();
     }
 
     public void setUser(User user) {

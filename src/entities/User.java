@@ -1,6 +1,21 @@
 package entities;
 
 public class User{
+    int id=2;
+
+    public User() {
+    }
+private static final    User user=new User();
+    public int getId() {
+        return id;
+    }
+public static  User getInstance(){
+        return user;
+}
+    public void setId(int id) {
+        this.id = id;
+    }
+
     private String nom;
     private String prenom;
     private String address;
@@ -57,7 +72,7 @@ public class User{
     public void setEmail(String email) {
         this.email = email;
     }
-    public User(String nom) {
+    public User(String nom, String s, String prenom, String address, int phone, String email) {
         this.nom = nom;
     }
     public User(String nom, String prenom, String address, int phone, String email) {

@@ -5,15 +5,27 @@ public class Voiture {
     private String marque;
     private int telephone;
     private String email;
+    private  Double prix;
 
-    public Voiture(int id, String modele, String marque) {
+    public Double getPrix() {
+        return prix;
+    }
+
+    public void setPrix(Double prix) {
+        this.prix = prix;
+    }
+
+    public Voiture(int id, String modele, String marque , Double prix) {
         this.id = id;
         this.modele = modele;
         this.marque = marque;
+        this.prix= prix;
 
     }
 
-
+public  Voiture(int id ){
+        this.id=id;
+}
     public int getId() {
         return id;
     }

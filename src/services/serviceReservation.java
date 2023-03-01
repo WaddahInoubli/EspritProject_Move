@@ -22,39 +22,20 @@ public class serviceReservation implements IserviceReservation<UserReservation> 
     Statement ste;
 
     public serviceReservation() {
-        
+
         connection = MyDB.getInstance().getCon();
     }
-    
-    
-    
+
+
+
 
    @Override
     public void ajouter(UserReservation userReservation ) {
         try {
 
-            // Connect to the MySQL database
-
-
-// Create a new transaction
             connection.setAutoCommit(false);
 
             try {
-                // Insert data into the voiture table
-                String insertVoitureSql = "INSERT INTO voiture (marque, modele, annee,Prix_jour) VALUES (?, ?, ?,?)";
-                PreparedStatement voitureStatement = connection.prepareStatement(insertVoitureSql, Statement.RETURN_GENERATED_KEYS);
-                voitureStatement.setString(1, "Toyota");
-                voitureStatement.setString(2, "Corolla");
-                voitureStatement.setInt(3, 2021);
-                voitureStatement.setInt(4, 170);
-                voitureStatement.executeUpdate();
-
-                // Get the ID of the inserted voiture record
-                ResultSet voitureResultSet = voitureStatement.getGeneratedKeys();
-                int voitureId = -1;
-                if (voitureResultSet.next()) {
-                    voitureId = voitureResultSet.getInt(1);
-                }
 
                 // Insert data into the client table
                 String insertClientSql = "INSERT INTO client (nom, prenom, adresse,telephone,email) VALUES (? ,? ,? ,? ,?)";
@@ -75,12 +56,13 @@ public class serviceReservation implements IserviceReservation<UserReservation> 
                 }
 
                 // Insert data into the reservation table
-                String insertReservationSql = "INSERT INTO reservation (id_voiture_FK, id_client_FK, date_debut, date_fin) VALUES (?, ?, ?, ?)";
+                String insertReservationSql = "INSERT INTO reservation (id_voiture_FK, id_client_FK, date_debut, date_fin,ifdriver) VALUES (?, ?, ?, ?,?)";
                 PreparedStatement reservationStatement = connection.prepareStatement(insertReservationSql);
-                reservationStatement.setInt(1, voitureId);
+                reservationStatement.setInt(1, userReservation.getVoiture().getId());
                 reservationStatement.setInt(2, clientId);
                 reservationStatement.setDate(3, Date.valueOf(userReservation.getReservation().getDatedebut()));
                 reservationStatement.setDate(4, Date.valueOf(userReservation.getReservation().getDatefin()));
+                reservationStatement.setBoolean(5, userReservation.getReservation().getIfdriver());
                 reservationStatement.executeUpdate();
 
                 // Commit the transaction
@@ -92,13 +74,13 @@ public class serviceReservation implements IserviceReservation<UserReservation> 
                 connection.rollback();
                 System.err.println("Error inserting data: " + ex.getMessage());
             }
-            
-            
-            
 
-        
-        
-       
+
+
+
+
+
+
     } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -111,21 +93,23 @@ public class serviceReservation implements IserviceReservation<UserReservation> 
    /* public void supprimer(Reservation t) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }*/
- public void supprimer(UserReservation t) {
+ public void supprimer(UserReservation userReservation) {
           try {
-            String requete = "DELETE FROM reclamation WHERE id=?";
+              System.out.println(userReservation.getReservation().getId());
+            String requete = "DELETE FROM reservation WHERE id=?";
             PreparedStatement pst = connection.prepareStatement(requete);
+            pst.setInt(1,userReservation.getReservation().getId());
 
             pst.executeUpdate();
-            System.out.println("Reclamation supprimée !");
+            System.out.println("reservation supprimée !");
 
         } catch (SQLException ex) {
             System.err.println(ex.getMessage());
-        }      
+        }
     }
- 
-   
-    
+
+
+
 
 
 
@@ -143,8 +127,8 @@ public class serviceReservation implements IserviceReservation<UserReservation> 
             int id=res.getInt("id");
             int id_client=res.getInt("id_client_FK");
 
-           Date date_debut=res.getDate("date_debut");
-           Date date_fin=res.getDate("date_fin");
+           LocalDate date_debut= res.getDate("date_debut").toLocalDate();
+           LocalDate date_fin= res.getDate("date_fin").toLocalDate();
            int id_chauffeur_FK=res.getInt("id_chauffeur_FK");
            int ifDriver=res.getInt("ifDriver");
            int id_voiture_FK=res.getInt("id_voiture_FK");
@@ -163,7 +147,7 @@ public class serviceReservation implements IserviceReservation<UserReservation> 
 
             }
 
-   reservation =new Reservation(date_debut.toLocalDate(), date_fin.toLocalDate());
+   reservation =new Reservation();
    UserReservation user1=new UserReservation(user,reservation);
    listrec.add(user1);
 
@@ -176,7 +160,58 @@ public class serviceReservation implements IserviceReservation<UserReservation> 
         return listrec;
     }
 
- 
+    @Override
+    public ArrayList<UserReservation> afficheronereservation( int id1) {
+        ArrayList<UserReservation> listrec = new ArrayList<>();
+        Reservation reservation=null;
+        User user =null;
+        try{
+            System.out.println( "mon id"+id1);
+            ste= connection.createStatement();
+            String sqlrequete= "select * from reservation where id=? " ;
+            PreparedStatement selectoneuser = connection.prepareStatement(sqlrequete);
+            selectoneuser.setInt(1, id1);
+            ResultSet res=   selectoneuser.executeQuery();
+            while(res.next()){
+
+                int id=res.getInt("id");
+                int id_client=res.getInt("id_client_FK");
+
+
+                LocalDate date_debut= res.getDate("date_debut").toLocalDate();
+                System.out.println( "date_debut"+date_debut);
+                LocalDate date_fin= res.getDate("date_fin").toLocalDate();
+                int id_chauffeur_FK=res.getInt("id_chauffeur_FK");
+                int ifDriver=res.getInt("ifDriver");
+                int id_voiture_FK=res.getInt("id_voiture_FK");
+                String sql= "select * from client where id=? " ;
+                PreparedStatement selectuser = connection.prepareStatement(sql);
+                selectuser.setInt(1, id_client);
+                ResultSet resultat=   selectuser.executeQuery();
+                if(resultat.next()){
+                    String nom=resultat.getString("nom");
+                    String prenom=resultat.getString("prenom");
+                    String adress=resultat.getString("adresse");
+                    String email=resultat.getString("email");
+                    int telephone=resultat.getInt("telephone");
+                    System.out.println(nom+" "+prenom );
+                    user =new User( nom, prenom,  adress,  telephone, email);
+
+                }
+
+                reservation =new Reservation();
+                UserReservation user1=new UserReservation(user,reservation);
+                listrec.add(user1);
+
+
+            }
+        }catch(SQLException ex){
+            System.out.println("SQLException "+ex.getMessage());
+        }
+
+        return listrec;
+    }
+
 
     @Override
     public void modifier(UserReservation t) {

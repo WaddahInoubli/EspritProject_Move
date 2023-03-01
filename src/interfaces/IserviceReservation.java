@@ -5,6 +5,8 @@
  */
 package interfaces;
 
+import entities.UserReservation;
+
 import java.util.ArrayList;
 
 /**
@@ -18,6 +20,8 @@ public interface IserviceReservation<T> {
     public void supprimer(T t); 
     public void modifier(T t);
     public ArrayList<T> afficher();
-    
-    
+
+    public ArrayList<T> afficheronereservation(int t);
+
+
 }

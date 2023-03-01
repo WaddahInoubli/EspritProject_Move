@@ -28,8 +28,9 @@ public class Servicevoiture  implements IserviceVoiture<Voiture> {
                 int id=res.getInt("id");
                 String modele = res.getString("modele");
                 String marque = res.getString("marque");
+                Double prix= res.getDouble("Prix_jour");
 
-Voiture voiture=new Voiture(id,modele,marque);
+Voiture voiture=new Voiture(id,modele,marque,prix);
 listeVoiture.add(voiture);
             }
         }catch(SQLException ex){

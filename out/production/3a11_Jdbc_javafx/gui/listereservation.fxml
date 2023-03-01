@@ -31,8 +31,8 @@
                   <TableColumn fx:id="prix" prefWidth="133.5999755859375" text="prix" />
               </columns>
             </TableView>
-            <Button layoutX="700.0" layoutY="612.0" mnemonicParsing="false" text="modifier" />
-            <Button fx:id="suprimer" layoutX="791.0" layoutY="612.0" mnemonicParsing="false" onAction="#Delete" text="Supprimer">
+            <Button layoutX="700.0" layoutY="612.0" mnemonicParsing="false" onAction="#Modiferreservation" fx:id="modifier" text="modifier" />
+            <Button fx:id="suprimer" layoutX="791.0" layoutY="612.0" mnemonicParsing="false" onAction="#handleDeleteButtonAction" text="Supprimer">
                <effect>
                   <Lighting diffuseConstant="1.76" specularConstant="1.42" surfaceScale="3.98">
                      <bumpInput>

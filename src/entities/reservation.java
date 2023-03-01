@@ -17,7 +17,23 @@ private  int id_client_FK ;
 private  int id_voiture_FK ;
 private  int id_chaufeur_FK ;
  private LocalDate datedebut;
- private LocalDate datefin;
+    private LocalDate datefin;
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+public Reservation(){
+
+}
+    private static final    Reservation reservation=new Reservation();
+
+    public static  Reservation getInstance(){
+        return reservation;
+    }
+
  private  Boolean ifdriver;
 
     @Override
@@ -81,7 +97,7 @@ private  int id_chaufeur_FK ;
         this.ifdriver = ifdriver;
     }
 
-    public Reservation(int id, int id_client_FK, int id_voiture_FK, int id_chaufeur_FK, LocalDate datedebut, LocalDate datefin, Boolean ifdriver) {
+    public Reservation(int id) {
         this.id = id;
         this.id_client_FK = id_client_FK;
         this.id_voiture_FK = id_voiture_FK;
@@ -90,15 +106,25 @@ private  int id_chaufeur_FK ;
         this.datefin = datefin;
         this.ifdriver = ifdriver;
     }
-
-    public Reservation(LocalDate datedebut, LocalDate datefin) {
+    public Reservation(int id ,LocalDate datedebut, LocalDate datefin,boolean ifdriver){
+       this.id = id;
+        this.id_client_FK = id_client_FK;
+        this.id_voiture_FK = id_voiture_FK;
+        this.id_chaufeur_FK = id_chaufeur_FK;
         this.datedebut = datedebut;
         this.datefin = datefin;
+        this.ifdriver = ifdriver;
+}
+    public Reservation(LocalDate datedebut, LocalDate datefin,boolean ifdriver) {
+        this.datedebut = datedebut;
+        this.datefin = datefin;
+        this.ifdriver = ifdriver;
     }
     public Reservation(LocalDate datedebut) {
         this.datedebut = datedebut;
 
     }
+
 }
 
 
