@@ -11,7 +11,7 @@ public class ReservaMain extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(ReservaMain.class.getResource("Reservation.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 1250, 650);
+        Scene scene = new Scene(fxmlLoader.load(), 780, 620);
         stage.setTitle("Hello!");
         stage.setScene(scene);
         stage.show();

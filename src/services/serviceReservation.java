@@ -114,21 +114,22 @@ public class serviceReservation implements IserviceReservation<UserReservation> 
                 clientStatement.executeUpdate();
 
                 // Update the reservation record
-                String updateReservationSql = "UPDATE reservation SET id_voiture_FK=?, date_debut=?, date_fin=?, ifdriver=? WHERE id_client_FK=?";
+                String updateReservationSql = "UPDATE reservation SET date_debut=?, date_fin=?, id_voiture_FK=?, id_client_FK=?  ,ifdriver=? WHERE id=? ";
                 PreparedStatement reservationStatement = connection.prepareStatement(updateReservationSql);
-                reservationStatement.setInt(1, userReservation.getVoiture().getId());
-                reservationStatement.setDate(2, Date.valueOf(userReservation.getReservation().getDatedebut()));
-                reservationStatement.setDate(3, Date.valueOf(userReservation.getReservation().getDatefin()));
-                reservationStatement.setBoolean(4, userReservation.getReservation().getIfdriver());
+                reservationStatement.setDate(1, Date.valueOf( userReservation.getReservation().getDatedebut()));
+                reservationStatement.setDate(2, Date.valueOf(userReservation.getReservation().getDatefin()));
+                reservationStatement.setInt(3, userReservation.getVoiture().getId());
+                reservationStatement.setInt(4, userReservation.getUser().getId());
                 System.out.println(userReservation.getReservation().getIfdriver());
-                reservationStatement.setInt(5, userReservation.getUser().getId());
+                reservationStatement.setBoolean(5, userReservation.getReservation().getIfdriver());
+                reservationStatement.setInt(6, userReservation.getReservation().getId());
                 reservationStatement.executeUpdate();
 
                 // Commit the transaction
-                connection.commit();
+
 
                 System.out.println("Data updated successfully");
-                connection.close();
+
             } catch (SQLException ex) {
 
                 connection.rollback();
@@ -143,12 +144,12 @@ public class serviceReservation implements IserviceReservation<UserReservation> 
    /* public void supprimer(Reservation t) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }*/
- public void supprimer(UserReservation userReservation) {
+ public void supprimer(int id) {
           try {
-              System.out.println(userReservation.getReservation().getId());
+              System.out.println(id);
             String requete = "DELETE FROM reservation WHERE id=?";
             PreparedStatement pst = connection.prepareStatement(requete);
-            pst.setInt(1,userReservation.getReservation().getId());
+            pst.setInt(1,id);
 
             pst.executeUpdate();
             System.out.println("reservation supprimée !");

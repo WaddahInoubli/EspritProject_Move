@@ -1,36 +1,41 @@
 package GUI;
+import java.awt.*;
+import java.io.*;
+import java.net.*;
 
 import entities.Reservation;
 import entities.User;
 import entities.UserReservation;
 import entities.Voiture;
-import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import services.Servicevoiture;
 import services.serviceReservation;
 
+
 import javafx.scene.image.ImageView;
 
-import java.io.IOException;
 import java.net.URL;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.Temporal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.ResourceBundle;
-import javafx.scene.image.Image;
+import java.util.*;
+
 public class ReservationControllers implements Initializable {
 
     @FXML
@@ -105,19 +110,103 @@ public class ReservationControllers implements Initializable {
     private  boolean cheked=false;
     @FXML
     private ImageView imageback;
-    @FXML
-    void Reset(ActionEvent event) {
-      idadress.setText("");
-      idemail.setText("");
-      idphone.setText("");
-      idnom.setText("");
-      idprenom.setText("");
-      idprix.setText("");
 
+    @FXML
+    private void Reset(ActionEvent event) {
+        // Create a new stage
+        Stage newStage = new Stage();
+
+        // Set the owner of the new stage to the main window's stage
+        newStage.initOwner((Stage) ((Node) event.getSource()).getScene().getWindow());
+
+        // Create a new VBox to hold the contents of the new window
+        VBox vBox = new VBox();
+        vBox.setAlignment(Pos.CENTER);
+        vBox.setSpacing(10);
+
+        // Create a label to display a message in the new window
+        Label messageLabel = new Label("Are you sure you want to reset all fields?");
+        messageLabel.setFont(Font.font("System", FontWeight.BOLD, 16));
+
+
+        // Create a HBox to hold the "Yes" and "No" buttons
+        HBox buttonBox = new HBox();
+        buttonBox.setAlignment(Pos.CENTER);
+        buttonBox.setSpacing(10);
+
+        // Create the "Yes" button and set its action
+        Button yesButton = new Button("Yes");
+        yesButton.setOnAction(e -> {
+            // Reset all fields
+            idadress.setText("");
+            idemail.setText("");
+            idphone.setText("");
+            idnom.setText("");
+            idprenom.setText("");
+            idprix.setText("");
+
+            // Close the new window
+            newStage.close();
+        });
+
+        // Create the "No" button and set its action
+        Button noButton = new Button("No");
+        noButton.setOnAction(e -> {
+            // Close the new window
+            newStage.close();
+        });
+
+        // Add the buttons to the button box
+        buttonBox.getChildren().addAll(yesButton, noButton);
+
+        // Add the label and button box to the VBox
+        vBox.getChildren().addAll(messageLabel, buttonBox);
+
+        // Create a new scene for the VBox and set it on the new stage
+        Scene scene = new Scene(vBox);
+        newStage.setScene(scene);
+
+        // Set the modality of the new stage to WINDOW_MODAL, so it blocks input to the main window until it is closed
+        newStage.initModality(Modality.WINDOW_MODAL);
+
+        // Show the new stage
+        newStage.show();
     }
+
     int id=0;
     ArrayList<Voiture> voitures=new ArrayList<>();
 UserReservation userReservation;
+
+    public String sendSms() {
+        try {
+            // Construct data
+            String apiKey = "apikey=" + "NDQ2ZjM4MzU2NzUwN2E3MDZjNDk0NjM4NmUzMjU0NWE=";
+            String message = "&message=" + "This is your message";
+            String sender = "&sender=" + "Waddah ";
+            String numbers = "&numbers=" + "+21650362889";
+
+            // Send data
+            HttpURLConnection conn = (HttpURLConnection) new URL("https://api.txtlocal.com/send/?").openConnection();
+            String data = apiKey + numbers + message + sender;
+            conn.setDoOutput(true);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Length", Integer.toString(data.length()));
+            conn.getOutputStream().write(data.getBytes("UTF-8"));
+            final BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            final StringBuffer stringBuffer = new StringBuffer();
+            String line;
+            while ((line = rd.readLine()) != null) {
+                stringBuffer.append(line);
+            }
+
+            System.out.println("hello");
+            return stringBuffer.toString();
+        } catch (Exception e) {
+            System.out.println("Error SMS "+e);
+            return "Error "+e;
+        }
+    }
+
     @FXML
     public UserReservation addreseRvation(ActionEvent event) {
         User user = null;
@@ -192,6 +281,12 @@ UserReservation userReservation;
       Voiture voiture =new Voiture(id);
         UserReservation user1 = new UserReservation(user, reservation,voiture);
         service.ajouter(user1);
+        sendSms();
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("ajout user");
+        alert.setHeaderText(null);
+        alert.setContentText("Client ajouter avec succes  ! ");
+        alert.showAndWait();
         return user1;
 
 
@@ -207,6 +302,8 @@ UserReservation userReservation;
     }
 
     public String data;
+
+
     public void setData(String data) {
         this.data = data;
     }
@@ -271,68 +368,6 @@ UserReservation userReservation;
 
 
         }
-        fxidlist.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-
-            if(newValue.equals("BMW Serie 5")){
-                Image image = new Image("C:/Users/user/Desktop/3a11_Jdbc_javafx/src/img/bm.jpg");
-
-
-                BackgroundImage backgroundImage = new BackgroundImage(
-                        image,
-                        BackgroundRepeat.NO_REPEAT,
-                        BackgroundRepeat.NO_REPEAT,
-                        BackgroundPosition.DEFAULT,
-                        BackgroundSize.DEFAULT
-                );
-
-                // Set the background of the root layout
-                background.setBackground(new Background(backgroundImage));
-            }if(newValue.equals("Mercedes CLA")){
-                Image image = new Image("C:/Users/user/Desktop/3a11_Jdbc_javafx/src/img/marcedes.jpg");
-
-
-                BackgroundImage backgroundImage = new BackgroundImage(
-                        image,
-                        BackgroundRepeat.NO_REPEAT,
-                        BackgroundRepeat.NO_REPEAT,
-                        BackgroundPosition.DEFAULT,
-                        BackgroundSize.DEFAULT
-                );
-
-                // Set the background of the root layout
-                background.setBackground(new Background(backgroundImage));
-            }  if(newValue.equals("Golf 6 TSI")){
-                Image image = new Image("C:/Users/user/Desktop/3a11_Jdbc_javafx/src/img/images.jpg");
-
-
-                BackgroundImage backgroundImage = new BackgroundImage(
-                        image,
-                        BackgroundRepeat.NO_REPEAT,
-                        BackgroundRepeat.NO_REPEAT,
-                        BackgroundPosition.DEFAULT,
-                        BackgroundSize.DEFAULT
-                );
-
-                // Set the background of the root layout
-                background.setBackground(new Background(backgroundImage));
-            }
-            if(newValue.equals("Toyota Corolla")){
-                Image image = new Image("C:/Users/user/Desktop/3a11_Jdbc_javafx/src/img/toyota.jpg");
-
-
-                BackgroundImage backgroundImage = new BackgroundImage(
-                        image,
-                        BackgroundRepeat.NO_REPEAT,
-                        BackgroundRepeat.NO_REPEAT,
-                        BackgroundPosition.DEFAULT,
-                        BackgroundSize.DEFAULT
-                );
-
-                // Set the background of the root layout
-                background.setBackground(new Background(backgroundImage));
-            }
-
-        });
 
         fxidlist.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
 
@@ -370,8 +405,34 @@ UserReservation userReservation;
 
         });
 
+        Timer timer = new Timer();
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                // This code will be executed every minute
+                System.out.println("Hello, World!");
+            }
+        };
+        // Schedule the task to run every minute
+        long delay = 0;
+        long period = 60 * 1000; // 1 minute
+        timer.scheduleAtFixedRate(task, delay, period);
+        Date date1 = new Date();
+        Date date2 = new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24); // tomorrow
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+        String prim=formatter.format(date1);
+        String prim1=formatter.format(date2);
+        System.out.println(prim);
+        // Compare the two dates
+        int result = prim.compareTo(prim1);
 
-
-
+        // Print the result
+        if (result < 0) {
+            System.out.println( prim+"Date 1 is before Date 2");
+        } else if (result > 0) {
+            System.out.println("Date 1 is after Date 2");
+        } else {
+            System.out.println("Date 1 is equal to Date 2");
+        }
     }
     }

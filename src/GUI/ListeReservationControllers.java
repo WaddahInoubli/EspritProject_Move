@@ -1,6 +1,10 @@
 package GUI;
 
-
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import entities.Reservation;
 import entities.User;
 import entities.UserReservation;
@@ -70,30 +74,29 @@ int iduser= 0;
 
     @FXML
     private void handleDeleteButtonAction(ActionEvent event) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to delete?", ButtonType.YES, ButtonType.NO);
-        alert.setTitle("Delete Confirmation");
-        alert.setHeaderText("Confirm Deletion");
-        alert.showAndWait();
-
-        if (alert.getResult() == ButtonType.YES) {
-            Delete();
-        }
-    }
-    UserReservation Delete() {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Item deleted successfully.", ButtonType.OK);
-        alert.setTitle("Deletion Status");
-        alert.setHeaderText("Deletion Successful");
-        alert.showAndWait();
-        serviceReservation delete=new serviceReservation();
         UserReservation row = ReservationManager.getSelectionModel().getSelectedItem();
-        Reservation reservation =null;
-        System.out.println(row.getReservation().getId());
-        int id=row.getReservation().getId();
-        iduser=id;
-        reservation=new Reservation(id);
-        UserReservation user1= new UserReservation(reservation);
-        delete.supprimer(user1);
-        ReservationManager.getItems().remove(row);
+    }
+    UserReservation  Delete() {
+        UserReservation user1=null;
+        try {
+
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Item deleted successfully.", ButtonType.OK);
+            alert.setTitle("Deletion Status");
+            alert.setHeaderText("Deletion Successful");
+            alert.showAndWait();
+            serviceReservation delete = new serviceReservation();
+            UserReservation row = ReservationManager.getSelectionModel().getSelectedItem();
+            Reservation reservation = null;
+            System.out.println(row.getReservation().getId());
+            int id = row.getReservation().getId();
+            iduser = id;
+            reservation = new Reservation(id);
+             user1 = new UserReservation(reservation);
+            delete.supprimer(id);
+            ReservationManager.getItems().remove(row);
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
         return user1;
     }
     //
@@ -148,9 +151,9 @@ int iduser= 0;
                 }
 
                 String lowerCaseFilter = newValue.toLowerCase();
-                if (personne.getNom().toLowerCase().contains(lowerCaseFilter)) {
+                if (Boolean.getBoolean(personne.getNom().toLowerCase().contains(lowerCaseFilter)+" "+personne.getPrenom().toLowerCase().contains(lowerCaseFilter))) {
                     return true;
-                } else if (personne.getPrenom().toLowerCase().contains(lowerCaseFilter)) {
+                } else if (personne.getPrenom().toLowerCase().contains(lowerCaseFilter) ) {
                     return true;
                 }
                 else if (String.valueOf(personne.getPhone()).contains(newValue)) {
@@ -164,6 +167,7 @@ int iduser= 0;
         ReservationManager.setItems(filteredList);
 
     }
+
     Reservation reservation=Reservation.getInstance();
     public void Modiferreservation(ActionEvent event) throws IOException {
 

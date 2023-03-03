@@ -8,13 +8,19 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 import services.serviceReservation;
 
+import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -111,13 +117,18 @@ public class ModifierReservationControllers  implements Initializable {
     String marque="";
     Double prix;
     int id;
-    @FXML
-    void UpdateReservatioon(ActionEvent event) {
+
+    private void update(){
+
         User user = null;
         Reservation reservation = null;
         serviceReservation service = new serviceReservation();
         try {
 
+            Alert alert1 = new Alert(Alert.AlertType.CONFIRMATION, "reservation modifier", ButtonType.OK);
+            alert1.setTitle("modification Status");
+            alert1.setHeaderText("modification Successful");
+            alert1.showAndWait();
             SimpleDateFormat dateFormat = new
                     SimpleDateFormat ("yyyy-MM-dd");
             Date date1 = dateFormat.parse(String.valueOf(iddatedebut.getValue()));
@@ -177,12 +188,32 @@ public class ModifierReservationControllers  implements Initializable {
         Voiture voiture =new Voiture(id,modele,marque,prix);
         UserReservation user1 = new UserReservation(user, reservation,voiture);
         service.modifier(user1);
+    }
+    @FXML
+    void UpdateReservatioon(ActionEvent event) {
+
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "voulez vraiment modifier?", ButtonType.YES, ButtonType.NO);
+        alert.setTitle("update Confirmation");
+        alert.setHeaderText("Confirm update");
+        alert.showAndWait();
+
+        if (alert.getResult() == ButtonType.YES) {
+            update();
+        }
+
+
+
 
     }
 
     @FXML
-    void conssulterliste(ActionEvent event) {
-
+    void conssulterliste(ActionEvent event) throws IOException {
+        Parent Home = FXMLLoader.load(getClass().getResource("confirm.fxml"));
+        Scene home = new Scene(Home);
+        Stage app_stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        app_stage.setScene(home);
+        app_stage.show();
     }
     public String data;
     public void setData(String data) {
