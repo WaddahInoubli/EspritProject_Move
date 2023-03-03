@@ -29,10 +29,10 @@ public class javafxapplication3 extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            Parent parent = FXMLLoader.load(getClass().getResource("/javafxapplication3/FXMLDocument.fxml"));
+            Parent parent = FXMLLoader.load(getClass().getResource("/Gui/FXMLDocument.fxml"));
             Scene scene =new Scene(parent);
              
-             scene.getStylesheets().add("/javafxapplication3/move.css");
+            scene.getStylesheets().add("/javafxapplication3/move.css");
             primaryStage.setTitle("Move");
             primaryStage.setScene(scene);
             primaryStage.show();

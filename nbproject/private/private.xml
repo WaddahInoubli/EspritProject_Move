@@ -4,10 +4,15 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/C:/Users/chedli/Documents/NetBeansProjects/JavaFXApplication3/src/entities/Comments.java</file>
+            <file>file:/C:/Users/chedli/Documents/NetBeansProjects/JavaFXApplication3/src/Gui/FXMLDocument.fxml</file>
+            <file>file:/C:/Users/chedli/Documents/NetBeansProjects/JavaFXApplication3/src/services/Iserviceoffre.java</file>
             <file>file:/C:/Users/chedli/Documents/NetBeansProjects/JavaFXApplication3/src/javafxapplication3/FXMLDocumentController.java</file>
-            <file>file:/C:/Users/chedli/Documents/NetBeansProjects/JavaFXApplication3/src/javafxapplication3/move.css</file>
+            <file>file:/C:/Users/chedli/Documents/NetBeansProjects/JavaFXApplication3/src/services/ServiceComments.java</file>
             <file>file:/C:/Users/chedli/Documents/NetBeansProjects/JavaFXApplication3/src/javafxapplication3/AddcomentaireController.java</file>
+            <file>file:/C:/Users/chedli/Documents/NetBeansProjects/JavaFXApplication3/src/Gui/AddOffre.fxml</file>
+            <file>file:/C:/Users/chedli/Documents/NetBeansProjects/JavaFXApplication3/src/services/ServiceOffre.java</file>
             <file>file:/C:/Users/chedli/Documents/NetBeansProjects/JavaFXApplication3/src/entities/offre.java</file>
+            <file>file:/C:/Users/chedli/Documents/NetBeansProjects/JavaFXApplication3/src/Gui/Addcomentaire.fxml</file>
             <file>file:/C:/Users/chedli/Documents/NetBeansProjects/JavaFXApplication3/src/javafxapplication3/javafxapplication3.java</file>
             <file>file:/C:/Users/chedli/Documents/NetBeansProjects/JavaFXApplication3/src/javafxapplication3/AddOffreController.java</file>
         </group>

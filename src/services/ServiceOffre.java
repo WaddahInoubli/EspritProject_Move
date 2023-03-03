@@ -55,7 +55,7 @@ public class ServiceOffre implements Iserviceoffre<offre> {
     public void supprimer(int Id_Offre) {
         
         try {
-        PreparedStatement statement = connection.prepareStatement("DELETE FROM `move`.`offre` WHERE Id_Offre = ?");
+        PreparedStatement statement = connection.prepareStatement("DELETE FROM `esprit3a11`.`offre` WHERE Id_Offre = ?");
         statement.setInt(1, Id_Offre);
         statement.executeUpdate();
     } catch (SQLException e) {
@@ -70,25 +70,27 @@ public class ServiceOffre implements Iserviceoffre<offre> {
 
     @Override
     public ArrayList<offre> afficher() {
-ArrayList<offre> listoffre = new ArrayList<>();
-        try{
-        ste= connection.createStatement();
-        String req_select="SELECT * FROM `move`.`offre`";
-        ResultSet res = ste.executeQuery(req_select);
-        while(res.next()){
-            int Id_Offre = res.getInt(1);
-            String Poste = res.getString(2);
-            String Name_User = res.getString(3);
-             String Comment = res.getString(4);
-            
-            offre off = new offre(Id_Offre,Poste,Name_User,Comment);
-            listoffre.add(off);
-        }
-        }catch(SQLException ex){
-            System.out.println("SQLException "+ex.getMessage());
-        }
-        
-        return listoffre;    }
+        return null;
+//ArrayList<offre> listoffre = new ArrayList<>();
+//        try{
+//        ste= connection.createStatement();
+//        String req_select="SELECT * FROM `esprit3a11`.`offre`";
+//        ResultSet res = ste.executeQuery(req_select);
+//        while(res.next()){
+//            int Id_Offre = res.getInt(1);
+//            String Name_User = res.getString(2);
+//            String content = res.getString(3);
+//             String Comment = res.getString(4);
+//            String date = res.getString(4);
+//            offre off = new offre(Id_Offre,Name_User,content,Comment,date);
+//            listoffre.add(off);
+//        }
+//        }catch(SQLException ex){
+//            System.out.println("SQLException "+ex.getMessage());
+//        }
+//        
+//        return listoffre;  
+    }
 
     public void supprimer(offre t) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

@@ -8,6 +8,7 @@ package javafxapplication3;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ResourceBundle;
@@ -18,6 +19,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -64,7 +66,7 @@ connection = MoveDB.getInstance().getCon();
     String name = txtName.getText();
     String comment = txtcomment.getText();
     String poste = txtposte.getText();
-     if (name.isEmpty() || comment.isEmpty() || poste.isEmpty() ) {
+     if (name.isEmpty() ||  poste.isEmpty() ) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setHeaderText(null);
             alert.setContentText("Please Fill All DATA");
@@ -76,21 +78,21 @@ connection = MoveDB.getInstance().getCon();
          getQuery();
             insert();
             clean();
-   
-
+    Alert a = new Alert(Alert.AlertType.INFORMATION, "Succéss", ButtonType.OK);
+    a.showAndWait();  
     }
    }
     private void getQuery() {
 
         if (update == false) {
             
-            query = "INSERT INTO `move`.`offre`(Poste, Name_User, Comment) VALUES (?,?,?)";
+            query = "INSERT INTO `esprit3a11`.`offre`(Name_User,content,Comment,date) VALUES (?,?,0,NOW())";
 
         }else{
-            query = "UPDATE `move`.`offre` SET "
-                    + "`Poste`=?,"
+            query = "UPDATE `esprit3a11`.`offre` SET "
                     + "`Name_User`=?,"
-                    + "`Comment`= ? WHERE Id_Offre = '"+offreId+"'";
+                    + "`content`=?,"
+                    + "`date`=NOW() WHERE Id_Offre = '"+offreId+"'";
         }
 
     }
@@ -100,6 +102,7 @@ connection = MoveDB.getInstance().getCon();
          txtcomment.clear();
          txtposte.clear();
     }
+     
       private void insert() {
 
         try {
@@ -107,7 +110,6 @@ connection = MoveDB.getInstance().getCon();
             preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, txtName.getText());
             preparedStatement.setString(2, txtposte.getText());
-            preparedStatement.setString(3, txtcomment.getText());
             preparedStatement.execute();
 
         } catch (SQLException ex) {
@@ -124,10 +126,10 @@ connection = MoveDB.getInstance().getCon();
          
     }    
 
-    void setTextField(int Id_Offre, String Name_User, String Poste, String Comment) {
+    void setTextField(int Id_Offre, String Name_User, String content, String Comment) {
         offreId = Id_Offre;
         txtName.setText(Name_User);
-        txtposte.setText(Poste);
+        txtposte.setText(content);
         txtcomment.setText(Comment);
         
 

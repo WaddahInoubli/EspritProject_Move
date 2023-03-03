@@ -5,6 +5,7 @@
  */
 package entities;
 
+import java.time.LocalDate;
 import java.util.Date;
 import javafx.scene.control.DatePicker;
 
@@ -14,25 +15,17 @@ import javafx.scene.control.DatePicker;
  */
 public class offre {
     private int Id_Offre;
-    private String Poste;
     private String Name_User;
+    private String content;
     private String Comment;
-    
-    
-     public offre(String Poste, String Name_User, String Comment) {
-       
-        this.Poste = Poste;
-        this.Name_User = Name_User;
-        this.Comment = Comment;
-       
-    }
+    private LocalDate date;
 
-    public offre(int Id_Offre, String Poste, String Name_User, String Comment) {
+    public offre(int Id_Offre, String content, String Name_User, String Comment, LocalDate date) {
         this.Id_Offre = Id_Offre;
-        this.Poste = Poste;
+        this.content = content;
         this.Name_User = Name_User;
         this.Comment = Comment;
-        
+        this.date = date;
     }
 
     public int getId_Offre() {
@@ -43,12 +36,12 @@ public class offre {
         this.Id_Offre = Id_Offre;
     }
 
-    public String getPoste() {
-        return Poste;
+    public String getContent() {
+        return content;
     }
 
-    public void setPoste(String Poste) {
-        this.Poste = Poste;
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public String getName_User() {
@@ -67,11 +60,20 @@ public class offre {
         this.Comment = Comment;
     }
 
-  
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
 
     @Override
     public String toString() {
-        return "offre{" + "Id_Offre=" + Id_Offre + ", Poste=" + Poste + ", Name_User=" + Name_User + ", Comment=" + Comment +  '}';
+        return "offre{" + "Id_Offre=" + Id_Offre + ", content=" + content + ", Name_User=" + Name_User + ", Comment=" + Comment + ", date=" + date + '}';
     }
     
+    
 }
+
+    

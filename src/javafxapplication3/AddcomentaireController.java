@@ -19,6 +19,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -33,8 +34,6 @@ public class AddcomentaireController implements Initializable {
  @FXML
     private Button btn_add;
 
-    @FXML
-    private DatePicker dateFid;
 
     @FXML
     private TextArea txtcom;
@@ -55,9 +54,9 @@ public class AddcomentaireController implements Initializable {
 connection = MoveDB.getInstance().getCon();
     
     String name = txtname.getText();
-    String date = String.valueOf(dateFid.getValue());
+    
     String content = txtcom.getText();
-     if (name.isEmpty() || date.isEmpty() || content.isEmpty() ) {
+     if (name.isEmpty()  || content.isEmpty() ) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setHeaderText(null);
             alert.setContentText("Please Fill All DATA");
@@ -68,6 +67,8 @@ connection = MoveDB.getInstance().getCon();
          getQuery();
             insert();
             clean();
+             Alert a = new Alert(Alert.AlertType.INFORMATION, "Succéss", ButtonType.OK);
+    a.showAndWait();  
 
 
     }
@@ -76,21 +77,21 @@ connection = MoveDB.getInstance().getCon();
 
         if (update == false) {
             
-            query = "INSERT INTO `move`.`comments`(Id_publication,contenent, Nam_User, date_com) VALUES (?,?,?,?)";
+            query = "INSERT INTO `esprit3a11`.`comments`(Id_publication,contenent, Nam_User, date_com) VALUES (?,?,?,NOW())";
 
         }else{
-            query = "UPDATE `move`.`comments` SET "
+            query = "UPDATE `esprit3a11`.`comments` SET "
                     + "`Id_publication`=?,"
                     + "`contenent`=?,"
                     + "`Nam_User`=?,"
-                    + "`date_com`= ? WHERE Id_Comment = '"+IdComment+"'";
+                    + "`date_com`= NOW() WHERE Id_Comment = '"+IdComment+"'";
         }
 
     }
 
       private void clean() {
          txtname.clear();
-         dateFid.setValue(null);
+         
          txtcom.clear();
     }
       private void insert() {
@@ -98,9 +99,9 @@ connection = MoveDB.getInstance().getCon();
         try {
 
             preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setString(1, "13");
+            preparedStatement.setInt(1, Idpublication);
             preparedStatement.setString(2, txtcom.getText());
-            preparedStatement.setString(4, String.valueOf(dateFid.getValue()));
+//            preparedStatement.setString(4, String.valueOf(dateFid.getValue()));
             preparedStatement.setString(3, txtname.getText());
             preparedStatement.execute();
 
@@ -132,5 +133,9 @@ connection = MoveDB.getInstance().getCon();
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
     }    
+
+    void settTextField(int Idpub) {
+        Idpublication = Idpub;
+    }
     
 }
