@@ -12,26 +12,19 @@ public class User {
     private int id;
     private String nom;
     private String prenom;
-    private String password;
 
-    public User(String nom, String prenom, String password) {
+    public User(String nom, String prenom) {
         this.nom = nom;
         this.prenom = prenom;
-        this.password = password;
     }
 
-    public User(int id, String nom, String prenom, String password) {
-        this.id = id;
-        this.nom = nom;
-        this.prenom = prenom;
-        this.password = password;
-    }
-    
     public User(int id, String nom, String prenom) {
         this.id = id;
         this.nom = nom;
         this.prenom = prenom;
     }
+    
+
 
     public User() {
     }
@@ -61,25 +54,12 @@ public class User {
     public void setPrenom(String prenom) {
         this.prenom = prenom;
     }
-    
-    //toString
+
     @Override
     public String toString() {
-        return "Personne{" + "id=" + id + ", nom=" + nom + ", prenom=" + prenom + ", password=" + password + '}';
+        return "User{" + "id=" + id + ", nom=" + nom + ", prenom=" + prenom + '}';
     }
-
-    /**
-     * @return the type
-     */
-    public String getPswd() {
-        return password;
-    }
-
-    /**
-     * @param pswd the type to set
-     */
-    public void setPswd(String pswd) {
-        this.password = pswd;
-    }
+    
+  
     
 }

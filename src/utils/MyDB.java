@@ -1,45 +1,51 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
  */
 package utils;
 
-import com.mysql.jdbc.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Connection;
 
 /**
  *
- * @author Imen Frigui
+ * @author Andrew
  */
 public class MyDB {
-    final String url="jdbc:mysql://localhost:3306/job4u";
+    final String url="jdbc:mysql://localhost:3306/move";
     final String user="root";
     final String pwd="";
     Connection con;
     
+    //creer un 
     public static MyDB db;
     
   
    //rendre le constructeur prive
-    private MyDB() {   
+    private MyDB() {
+        
         try {
-            System.out.println("Connexion en cours ....");
+            System.out.println("Connexion en cours");
             con= (Connection) DriverManager.getConnection(url, user, pwd);
-            System.out.println("Connected");
-        } catch (SQLException ex) {
-            System.out.println("Probleme de connexion : "+ex.getMessage());
+            System.out.println("Connexion etablie");
+        } catch (SQLException exa) {
+            System.out.println("Probleme de connexion : "+exa.getMessage());
+            
         }
     }
     
+    //une methode static
     public static MyDB getInstance(){
         if(db==null)
             db=new MyDB();
-        return db;   
+        return db;
+        
     }
 
     public Connection getCon() {
         return con;
     }
-}
     
+}

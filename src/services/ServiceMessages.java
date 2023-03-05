@@ -32,7 +32,7 @@ public class ServiceMessages implements IServiceMessages<Message> {
     @Override
     public void Add(Message m) throws SQLException {
         try {
-            PreparedStatement pre = connection.prepareStatement("INSERT INTO `job4u`.`message` (`id_disc`,`id_sender`,`message`) VALUES (?,?,?)");
+            PreparedStatement pre = connection.prepareStatement("INSERT INTO `move`.`message` (`id_disc`,`id_sender`,`message`) VALUES (?,?,?)");
             pre.setInt(1, m.getId_disc());
             pre.setInt(2, m.getId_sender());
             

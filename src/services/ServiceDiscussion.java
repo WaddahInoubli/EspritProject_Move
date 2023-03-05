@@ -34,7 +34,7 @@ public class ServiceDiscussion implements IServiceDiscussion<Discussion> {
 
     @Override
     public void Add(Discussion d) throws SQLException {
-        PreparedStatement pre = connection.prepareStatement("INSERT INTO `job4u`.`discussion` (`id_sender`,`id_reciver`) VALUES (?,?)");
+        PreparedStatement pre = connection.prepareStatement("INSERT INTO `move`.`discussion` (`id_sender`,`id_reciver`) VALUES (?,?)");
         pre.setInt(1, d.getId_sender());
         pre.setInt(2, d.getId_reciver());
 
@@ -44,7 +44,7 @@ public class ServiceDiscussion implements IServiceDiscussion<Discussion> {
     @Override
     public void Delete(Discussion d) {
         try {
-            String requete = "DELETE FROM `job4u`.`discussion` WHERE `id_disc`=?";
+            String requete = "DELETE FROM `move`.`discussion` WHERE `id_disc`=?";
 //            String requete = "INSERT INTO evenement VALUES (null,?,?,?,CONVERT(?, DATE),CONVERT(?, DATE),CONVERT(?, TIME),CONVERT(?, TIME),?,?)";
             PreparedStatement ps = connection.prepareStatement(requete);
             ps.setInt(1, d.getId_disc());
@@ -60,7 +60,7 @@ public class ServiceDiscussion implements IServiceDiscussion<Discussion> {
         List<Discussion> listDisc = new ArrayList<>();
         try {
             ste = connection.createStatement();
-            String req_select = "SELECT * FROM `job4u`.`discussion`";
+            String req_select = "SELECT * FROM `move`.`discussion`";
             ResultSet res = ste.executeQuery(req_select);
             while (res.next()) {
                 int id_disc = res.getInt(1);

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="AnchorPane" prefHeight="420.0" prefWidth="623.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.HomeController">
+   <children>
+      <Button fx:id="fxsave" layoutX="19.0" layoutY="380.0" mnemonicParsing="false" onAction="#savetoexcel" prefHeight="25.0" prefWidth="84.0" text="Save" />
+      <TableView fx:id="table" layoutX="14.0" layoutY="28.0" prefHeight="344.0" prefWidth="569.0">
+         <columns>
+            <TableColumn fx:id="fxid_mesg" prefWidth="75.0" text="id_mesg" />
+            <TableColumn fx:id="fxid_disc" prefWidth="75.0" text="id_disc" />
+            <TableColumn fx:id="fxid_sender" prefWidth="75.0" text="id_sender" />
+            <TableColumn fx:id="fxmessage" prefWidth="75.0" text="message" />
+         </columns>
+      </TableView>
+      <Label layoutX="133.0" layoutY="383.0" text="Search Section">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+      </Label>
+      <TextField fx:id="filterField" alignment="CENTER" layoutX="249.0" layoutY="375.0" prefHeight="35.0" prefWidth="336.0" promptText="Type Here!" />
+   </children>
+</AnchorPane>

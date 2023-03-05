@@ -31,7 +31,7 @@ public class ServiceUsers implements IServiceUsers<User>{
     public void ajouter(User u) {
         try {
             ste = connection.createStatement();
-            String req = "INSERT INTO `job4u`.`Users` (`nom`,`prenom`,`pswd`) VALUES ('" + u.getNom() + "','" + u.getPrenom() + "'," + u.getPswd() + ");";
+            String req = "INSERT INTO `move`.`user` (`nom`,`prenom`) VALUES ('" + u.getNom() + "','" + u.getPrenom() + "');";
             ste.executeUpdate(req);
         } catch (SQLException ex) {
             System.out.println("Exception: " + ex.getMessage());
@@ -50,11 +50,9 @@ public class ServiceUsers implements IServiceUsers<User>{
 
     @Override
     public void ajouter2(User u) throws SQLException {
-        PreparedStatement pre = connection.prepareStatement("INSERT INTO `esprit3a11`.`Personne` (`nom`,`prenom`,`password`) VALUES (?,?,?)");
+        PreparedStatement pre = connection.prepareStatement("INSERT INTO `move`.`user` (`nom`,`prenom`) VALUES (?,?)");
         pre.setString(1, u.getNom());
         pre.setString(2, u.getPrenom());
-        pre.setString(3, u.getPswd());
-
         pre.executeUpdate();
 
     }
@@ -64,14 +62,13 @@ public class ServiceUsers implements IServiceUsers<User>{
         ArrayList<User> listusrs = new ArrayList<>();
         try {
             ste = connection.createStatement();
-            String req_select = "SELECT * FROM `job4u`.`Users`";
+            String req_select = "SELECT * FROM `move`.`user`";
             ResultSet res = ste.executeQuery(req_select);
             while (res.next()) {
                 int id = res.getInt(1);
                 String nom = res.getString("nom");
-                String prenom = res.getString(3);
-                String pswd = res.getString("password");
-                User us = new User(id, nom, prenom, pswd);
+                String prenom = res.getString("prenom");
+                User us = new User(id, nom, prenom);
                 listusrs.add(us);
             }
         } catch (SQLException ex) {
@@ -84,12 +81,12 @@ public class ServiceUsers implements IServiceUsers<User>{
     public User getUserById(int id) throws SQLException {
 
         ste = connection.createStatement();
-        ResultSet rs = ste.executeQuery("select * from users where Id=" + id + ";");
+        ResultSet rs = ste.executeQuery("select * from user where id= " +id+ ";");
         String nom = null;
         String prenom = null;
         if (rs.next()) {
-            nom = rs.getString("Nom");
-            prenom = rs.getString("Prenom");
+            nom = rs.getString("nom");
+            prenom = rs.getString("prenom");
         }
         User u = new User(id, nom, prenom);
         System.out.println(u);

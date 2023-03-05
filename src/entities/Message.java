@@ -6,99 +6,72 @@ package entities;
 
 /**
  *
- * @author Imen Frigui
+ * @author Z4RGA
  */
 public class Message {
-    private int id_mesg;
-    private int id_disc;
-    private int id_sender;
-    private String message;
-
-
-    public Message(int id_mesg, int id_disc, int id_sender, String message) {
-        this.id_mesg =id_mesg;
-        this.id_disc=id_disc;
-        this.id_sender=id_sender;
-        this.message=message;
-
-    }
-
-    public Message(int id_disc, int id_sender, String message) {
-        this.id_disc=id_disc;
-        this.id_sender=id_sender;
-        this.message=message;
-    }
-   
-    public Message(int id_sender, String message) {
-        this.id_sender=id_sender;
-        this.message=message;
-    }
-    
+     private int id_mesg ;
+     private int id_disc	 ;
+     private int id_sender ;
+     private String message;
 
     public Message() {
     }
 
-    @Override
-    public String toString() {
-        return  "Message{" + "contenu_msg=" + getMessage()+", id_disc="+getId_disc()+", id_sender"+getId_sender();
+    public Message(int id_mesg, int id_disc, int id_sender, String message) {
+        this.id_mesg = id_mesg;
+        this.id_disc = id_disc;
+        this.id_sender = id_sender;
+        this.message = message;
     }
 
-    /**
-     * @return the id_mesg
-     */
+    public Message(int id_disc, int id_sender, String message) {
+        this.id_disc = id_disc;
+        this.id_sender = id_sender;
+        this.message = message;
+    }
+
+    public Message(int id_sender, String message) {
+        this.id_sender = id_sender;
+        this.message = message;
+    }
+
     public int getId_mesg() {
         return id_mesg;
     }
 
-    /**
-     * @param id_mesg the id_mesg to set
-     */
-    public void setId_mesg(int id_mesg) {
-        this.id_mesg = id_mesg;
-    }
-
-    /**
-     * @return the id_disc
-     */
     public int getId_disc() {
         return id_disc;
     }
 
-    /**
-     * @param id_disc the id_disc to set
-     */
-    public void setId_disc(int id_disc) {
-        this.id_disc = id_disc;
-    }
-
-    /**
-     * @return the id_sender
-     */
     public int getId_sender() {
         return id_sender;
     }
 
-    /**
-     * @param id_sender the id_sender to set
-     */
-    public void setId_sender(int id_sender) {
-        this.id_sender = id_sender;
-    }
-
-    /**
-     * @return the message
-     */
     public String getMessage() {
         return message;
     }
 
-    /**
-     * @param message the message to set
-     */
+    public void setId_mesg(int id_mesg) {
+        this.id_mesg = id_mesg;
+    }
+
+    public void setId_disc(int id_disc) {
+        this.id_disc = id_disc;
+    }
+
+    public void setId_sender(int id_sender) {
+        this.id_sender = id_sender;
+    }
+
     public void setMessage(String message) {
         this.message = message;
     }
-    
-    
+
+    @Override
+    public String toString() {
+        return "Message{" + "id_mesg=" + id_mesg + ", id_disc=" + id_disc + ", id_sender=" + id_sender + ", message=" + message + '}';
+    }
+      
+     
     
 }
