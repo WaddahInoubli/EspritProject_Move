@@ -43,7 +43,7 @@ public class serviceReclamation implements IserviceReclamation<Reclamation>{
         try {
             
             ste = connection.createStatement();
-            String req ="INSERT INTO `esprit3a11`.`reclamation` (objectif`,`text`,`iduser`) VALUES ('"+t.getobjectif()+"',"+t.gettext()+","+t.getiduser()+");";
+            String req ="INSERT INTO `esprit3a11`.`reclamation` (objectif`,`text`,`iduser`) VALUES ('"+t.getObjectif()+"',"+t.getText()+","+t.getIduser()+");";
             ste.executeUpdate(req);
             
             
@@ -81,9 +81,9 @@ public class serviceReclamation implements IserviceReclamation<Reclamation>{
     public void ajouter2(Reclamation t) throws SQLException {
         PreparedStatement pre = connection.prepareStatement("INSERT INTO `esprit3a11`.`reclamation` (`objectif`,`text`,`iduser`) VALUES (?,?,?)");
      
-        pre.setString(1, t.getobjectif());
-         pre.setString(2, t.gettext());
-          pre.setInt(3, t.getiduser());
+        pre.setString(1, t.getObjectif());
+         pre.setString(2, t.getText());
+          pre.setInt(3, t.getIduser());
         
         pre.executeUpdate();
         
@@ -103,7 +103,7 @@ public class serviceReclamation implements IserviceReclamation<Reclamation>{
             String text = res.getString("text");
              int  iduser = res.getInt("iduser");
 
-            Reclamation rec = new Reclamation(id,objectif,text,iduser);
+            Reclamation rec = new Reclamation(id,objectif,text,iduser,res.getInt(5));
             listrec.add(rec);
         }
         }catch(SQLException ex){
@@ -134,6 +134,26 @@ public class serviceReclamation implements IserviceReclamation<Reclamation>{
         }
         return reclamations;
     }
+    
+    public ObservableList<Reclamation> getallAdmin() {
+        ObservableList<Reclamation> reclamations = FXCollections.observableArrayList();
+        try {
+            String req = "select * from reclamation WHERE reclamation.etat=0";
+            Statement st = connection.createStatement();
+            ResultSet rs = st.executeQuery(req);
+
+            while (rs.next()) {
+                Reclamation p = new Reclamation(rs.getInt(1),rs.getString(2),rs.getString(3),rs.getInt(4),rs.getInt(5));
+               
+              
+               reclamations.add(p);
+            }
+
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+        return reclamations;
+    }
 
  
 
@@ -144,10 +164,10 @@ public class serviceReclamation implements IserviceReclamation<Reclamation>{
             PreparedStatement pst = connection.prepareStatement(requete);
             pst.setInt(3, t.getId());
         
-            pst.setString(1, t.getobjectif());
+            pst.setString(1, t.getObjectif());
             
-            pst.setString(2, t.gettext());
-            pst.setInt(3, t.getiduser());
+            pst.setString(2, t.getText());
+           
             pst.executeUpdate();
             System.out.println(" Reclamation Modifiée! ");
         } catch (SQLException ex) {
@@ -176,6 +196,53 @@ public class serviceReclamation implements IserviceReclamation<Reclamation>{
         }
         return u ;
     }
-}
+     
+     public List<Reclamation> getMyRtrans(int id) {
+        List<Reclamation> list = new ArrayList<>();
+        try {
+            String req = "Select * from reclamation WHERE reclamation.iduser='"+id+"' ";
+            Statement st = connection.createStatement();
+            ResultSet rs = st.executeQuery(req);
+            while (rs.next()) {
+                
+                
+                
+                Reclamation c = new Reclamation(rs.getInt(1), rs.getString("objectif"), rs.getString(3),id,rs.getInt(5));
+                list.add(c);
+            }
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return list;
+    }
+      public List<Reclamation> getMyRtrans(int id,String rech) {
+        List<Reclamation> list = new ArrayList<>();
+        try {
+            PreparedStatement p = connection.prepareStatement("SELECT * from reclamation WHERE reclamation.iduser=? AND reclamation.objectif LIKE ?");
+            p.setInt(1, id);
+            p.setString(2,"%"+rech+"%");
+            ResultSet rs = p.executeQuery();
+            while (rs.next()) {
+                
+                
+                
+                Reclamation c = new Reclamation(rs.getInt(1), rs.getString("objectif"), rs.getString(3),id,rs.getInt(5));
+                list.add(c);
+            }
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return list;
+    }
+      public void traiterRec(Reclamation t) throws SQLException {
+          
+          String requete = "UPDATE reclamation SET etat=1 WHERE reclamation.iduser='"+t.getId()+"'";
+          Statement st = connection.createStatement();
+            ResultSet rs = st.executeQuery(requete);
+      }
+      }
+
 
  

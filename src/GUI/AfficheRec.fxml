@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+
+<AnchorPane id="AnchorPane" prefHeight="600.0" prefWidth="800.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/19" fx:controller="GUI.AfficheRecController">
+   <children>
+      <ImageView fitHeight="100.0" fitWidth="202.0" layoutX="14.0" layoutY="10.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../Image/332149518_5955305277918961_9152433779256862738_n.png" />
+         </image>
+      </ImageView>
+      <HBox layoutX="175.0" layoutY="11.0" prefHeight="100.0" prefWidth="641.0" style="-fx-background-color: #757bd7;">
+         <children>
+            <Text fx:id="reclamation" fill="#f2d443" layoutX="5.0" layoutY="10.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Accueil" textAlignment="CENTER" wrappingWidth="254.7391538619995" x="5.0" y="10.0">
+               <font>
+                  <Font name="System Bold" size="24.0" />
+               </font>
+            </Text>
+            <Text fx:id="reclamation1" fill="#f2d443" onMousePressed="#ajjout" strokeType="OUTSIDE" strokeWidth="0.0" text="Ajouter Reclamation" textAlignment="CENTER" wrappingWidth="225.9391050338745" x="5.0" y="10.0">
+               <font>
+                  <Font name="System Bold" size="24.0" />
+               </font>
+            </Text>
+            <Text fx:id="reclamation11" fill="#f2d443" onMousePressed="#afff" strokeType="OUTSIDE" strokeWidth="0.0" text="Afficher Reclamation" textAlignment="CENTER" wrappingWidth="225.93904393911362" x="5.0" y="10.0">
+               <font>
+                  <Font name="System Bold" size="24.0" />
+               </font>
+            </Text>
+         </children>
+      </HBox>
+      <ScrollPane fx:id="scrollpane" layoutX="135.0" layoutY="192.0" prefHeight="393.0" prefWidth="686.0" />
+      <Text fill="#154076" layoutX="305.0" layoutY="167.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Mes Reclamation" wrappingWidth="377.9392271041871">
+         <font>
+            <Font size="46.0" />
+         </font>
+      </Text>
+      <TextField fx:id="tfrech" layoutX="51.0" layoutY="117.0" />
+      <Button layoutX="83.0" layoutY="153.0" mnemonicParsing="false" onAction="#rech" text="Chercher" />
+   </children>
+</AnchorPane>

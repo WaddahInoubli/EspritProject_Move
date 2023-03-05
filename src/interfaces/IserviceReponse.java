@@ -13,7 +13,7 @@ import java.util.List;
  *
  * @author Andrew
  */
-public interface IserviceCategorie<T> {
+public interface IserviceReponse<T> {
     
     public void ajouter(T  t) throws SQLException;
     public void ajouter2(T  t) throws SQLException;

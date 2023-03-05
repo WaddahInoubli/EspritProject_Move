@@ -3,18 +3,23 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/GUI/NewFXMain.java</file>
-            <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/services/serviceReclamation.java</file>
-            <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/espritproject_move/EspritProject_Move.java</file>
-            <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/entities/categorie.java</file>
-            <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/GUI/afficher_reclamation_fxml.fxml</file>
-            <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/services/serviceCategorie.java</file>
+            <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/GUI/ReponsefXMLController.java</file>
+            <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/services/serviceReponse.java</file>
+            <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/entities/reponse.java</file>
             <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/entities/Reclamation.java</file>
             <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/interfaces/IserviceReclamation.java</file>
-            <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/GUI/Afficher_reclamation_fxmlController.java</file>
             <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/GUI/ReclamationfxmlController.java</file>
-            <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/GUI/reclamationfxml.fxml</file>
             <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/utils/MyDB.java</file>
+            <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/GUI/NewFXMain.java</file>
+            <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/GUI/AfficheRec.fxml</file>
+            <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/GUI/AdminUI.fxml</file>
+            <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/services/serviceReclamation.java</file>
+            <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/GUI/ModifierRecController.java</file>
+            <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/GUI/AfficheRecController.java</file>
+            <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/interfaces/IserviceCategorie.java</file>
+            <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/GUI/ModifierRec.fxml</file>
+            <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/interfaces/IserviceReponse.java</file>
+            <file>file:/C:/Users/HP/Desktop/%20EspritProject_Move/%20EspritProject_Move/src/GUI/AdminUIController.java</file>
         </group>
     </open-files>
 </project-private>

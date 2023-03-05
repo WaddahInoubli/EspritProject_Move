@@ -5,6 +5,8 @@
  */
 package entities;
 
+import java.util.logging.Logger;
+
 /**
  *
  * @author Andrew
@@ -14,19 +16,22 @@ public class Reclamation{
     private String objectif ;
     private String text ; 
     private int iduser;
+    private int etat;
 
-    public Reclamation( String objectif ,String text,int iduser) {
+    public Reclamation( String objectif ,String text,int iduser,int etat) {
   
         this.objectif= objectif;
         this.text= text;
         this.iduser=iduser;
+        this.etat=etat;
     }
 
-    public Reclamation(int id, String objectif ,String text ,int iduser) {
+    public Reclamation(int id, String objectif ,String text ,int iduser,int etat) {
         this.id = id;
         this.objectif= objectif;
         this.text= text; 
         this.iduser=iduser;
+        this.etat=etat;
        
     }
 
@@ -52,7 +57,7 @@ public class Reclamation{
 
   
 
-    public String  getobjectif() {
+    public String  getObjectif() {
         return objectif;
     }
 
@@ -60,7 +65,7 @@ public class Reclamation{
         this.objectif= objectif ;
     }
     
-      public String  gettext() {
+      public String  getText() {
         return text ;
     }
 
@@ -68,7 +73,7 @@ public class Reclamation{
         this.text= text ;
     }
     
-    public  int getiduser() {
+    public  int getIduser() {
         return iduser;
     }
 
@@ -81,6 +86,18 @@ public class Reclamation{
     public String toString() {
         return "Reclamation{" + "id=" + id + ",  obejectif=" + objectif +  ", text=" + text +  '}';
     }
+    
+
+    public int getEtat() {
+        return etat;
+    }
+
+    public void setEtat(int etat) {
+        this.etat = etat;
+    }
+    
+    
+    
     
 }
 
