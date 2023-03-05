@@ -6,13 +6,23 @@
 package javafxapplication3;
 
 
-import com.jfoenix.controls.JFXScrollPane;
+
+import com.restfb.DefaultFacebookClient;
+import com.restfb.FacebookClient;
+import com.restfb.Parameter;
+import com.restfb.Version;
+import com.restfb.types.FacebookType;
+import java.io.*;
+import java.net.*;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import entities.Comments;
 import entities.offre;
-import java.awt.event.MouseEvent;
-import java.io.ByteArrayOutputStream;
+
+
+
+
+
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
@@ -20,51 +30,48 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Date;
+
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.embed.swing.SwingFXUtils;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
+
 import javafx.fxml.Initializable;
-import javafx.scene.control.Label;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Group;
+
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.SnapshotParameters;
-import javafx.scene.control.Alert;
+
 import javafx.scene.control.Button;
-import javafx.scene.control.DatePicker;
+
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
+
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.image.WritableImage;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
+
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
+
 import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Callback;
-import javax.imageio.ImageIO;
-import services.ServiceOffre;
+
+
 import utils.MoveDB;
+
 
 /**
  *
@@ -139,7 +146,7 @@ public class FXMLDocumentController implements Initializable {
     private ScrollPane scroll;
     @FXML
     private TableColumn<?, ?> coldate;
-   
+
    
     
     @FXML
@@ -333,8 +340,10 @@ Callback<TableColumn<offre, String>, TableCell<offre, String>> cellFoctory = (Ta
  nomValueLabel.setPadding(new Insets(5, 10, -10, 1));
  posteeValueLabel.setStyle("-fx-font-size: 12pt; -fx-font-weight: Arial; -fx-text-fill: black;");
  commenttValueLabel.setStyle("-fx-font-size: 12pt; -fx-font-weight: Arial; -fx-text-fill: black;");
-    Button btn = new Button("Ajouter commentaire");  
-    HBox hbox = new HBox(btn);
+    Button btn = new Button("Ajouter commentaire"); 
+    Button share = new Button("publier sur facebook");
+    HBox hbox = new HBox(btn,share);
+    
    
      btn.setStyle(" -fx-background-color:\n" +
 "        linear-gradient(#f0ff35, #a9ff00),\n" +
@@ -344,24 +353,22 @@ Callback<TableColumn<offre, String>, TableCell<offre, String>> cellFoctory = (Ta
     vbox.getChildren().add(posteeValueLabel);
     vbox.getChildren().add(commenttValueLabel);
     vbox.getChildren().add(hbox);
-   // create ScrollPane
-//    WritableImage image = vbox.snapshot(new SnapshotParameters(), null);
-//
-//// Convertir la capture d'écran en bytes pour l'envoyer à Facebook
-//ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", baos);
-//byte[] imageBytes = baos.toByteArray();
-//
-//// Créer un objet FacebookClient pour se connecter à l'API Facebook
-//FacebookClient facebookClient = new DefaultFacebookClient(accessToken);
-//
-//// Créer un objet FacebookType pour représenter l'image partagée
-//FacebookType imageType = facebookClient.publish("me/photos", FacebookType.class,
-//        BinaryAttachment.with("image.png", imageBytes),
-//        Parameter.with("message", "Voici le contenu de mon VBox !"));
+
+  
+
 refreshTable();    
  
          affichercom();
+          share.setOnAction(e -> {
+    String accessToken = "EAAIenFpPxHABAPre76UzC5LEJcPmrrTrB8EODT65CljGDl9DRrHipxcAWdvcRKGWgG6GKwL5Sv3qcEt7ENKJLQNSQs1GHBI6bhXEeZCiURhtVnGR0JZAws86MYAxER6kiwdtyCWzZB2Se3ZB4qZAEZA3t1mxYzTGNixFNvAsWgqame2UwAfy4x";
+    FacebookClient fbClient = new DefaultFacebookClient(accessToken, Version.VERSION_12_0);
+
+    FacebookType response = fbClient.publish("me/feed", FacebookType.class,
+        
+        Parameter.with("message", poste));
+
+//    System.out.println("Link posted to timeline with ID: " + response.getId());
+          });
            btn.setOnAction(e -> {
            
                 FXMLLoader loader = new FXMLLoader ();
@@ -526,15 +533,17 @@ refreshTable();
     @FXML
     private void actualiser(ActionEvent event) {
         refreshTable();
-      
+      publier();
     }
 
     
     @FXML
     private void search(ActionEvent event) {
+        
          try {
             OffreList.clear();
             String searchTerm = txtsearch.getText();
+          
             query = "SELECT * FROM `esprit3a11`.`offre`WHERE Name_User LIKE '%" + searchTerm + "%'";
             preparedStatement = connection.prepareStatement(query);
             resultSet = preparedStatement.executeQuery();
@@ -550,13 +559,15 @@ refreshTable();
                 
             }
             
-            
         } catch (SQLException ex) {
             Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        
+   
+           
         
     }
-    
-}
+   void publier(){
+   }
+   }
+  
+ 
