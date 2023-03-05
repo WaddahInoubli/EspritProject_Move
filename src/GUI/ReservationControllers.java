@@ -1,12 +1,17 @@
 package GUI;
-import java.awt.*;
 import java.io.*;
-import java.net.*;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.twilio.Twilio;
+import com.twilio.rest.api.v2010.account.Message;
+
+import com.twilio.type.PhoneNumber;
 import entities.Reservation;
 import entities.User;
 import entities.UserReservation;
 import entities.Voiture;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -99,7 +104,10 @@ public class ReservationControllers implements Initializable {
     private Button idconsulte;
     @FXML
     private Label phonerequire;
-
+private String number1="+21696289993";
+private String number2="+15673716327";
+    public  final String ACCOUNT_SID = "AC040cc7b478a4ccac0a2a3f37bfc62894";
+    public  final String AUTH_TOKEN = "028420b684af4fe03ba293f70c86514b";
     @FXML
     private Label prenomrequire;
 
@@ -111,7 +119,7 @@ public class ReservationControllers implements Initializable {
     @FXML
     private ImageView imageback;
 
-    @FXML
+   /* @FXML
     private void Reset(ActionEvent event) {
         // Create a new stage
         Stage newStage = new Stage();
@@ -171,42 +179,20 @@ public class ReservationControllers implements Initializable {
 
         // Show the new stage
         newStage.show();
-    }
+    }*/
 
     int id=0;
     ArrayList<Voiture> voitures=new ArrayList<>();
 UserReservation userReservation;
 
-    public String sendSms() {
-        try {
-            // Construct data
-            String apiKey = "apikey=" + "NDQ2ZjM4MzU2NzUwN2E3MDZjNDk0NjM4NmUzMjU0NWE=";
-            String message = "&message=" + "This is your message";
-            String sender = "&sender=" + "Waddah ";
-            String numbers = "&numbers=" + "+21650362889";
+    public void sendSms() {
 
-            // Send data
-            HttpURLConnection conn = (HttpURLConnection) new URL("https://api.txtlocal.com/send/?").openConnection();
-            String data = apiKey + numbers + message + sender;
-            conn.setDoOutput(true);
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Length", Integer.toString(data.length()));
-            conn.getOutputStream().write(data.getBytes("UTF-8"));
-            final BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            final StringBuffer stringBuffer = new StringBuffer();
-            String line;
-            while ((line = rd.readLine()) != null) {
-                stringBuffer.append(line);
-            }
 
-            System.out.println("hello");
-            return stringBuffer.toString();
-        } catch (Exception e) {
-            System.out.println("Error SMS "+e);
-            return "Error "+e;
-        }
     }
 
+    private void Reset(ActionEvent event) {
+
+    }
     @FXML
     public UserReservation addreseRvation(ActionEvent event) {
         User user = null;
@@ -245,11 +231,14 @@ UserReservation userReservation;
               alert.setContentText("error : choisir une date finale superieur a celle de debut ! ");
                 alert.showAndWait();
 
+
+
+
             } else {
 
 
                 boolean isSelected = ifDriver.isSelected();
-                if(isSelected) {
+                if (isSelected) {
                     System.out.println("Checkbox selected status: " + isSelected);
                 }
 
@@ -260,22 +249,17 @@ UserReservation userReservation;
                 LocalDate datedebut = iddatedebut.getValue();
                 LocalDate datefin = idfatefin.getValue();
                 String email = idemail.getText();
-                String phone = idphone.getText();
-                int phone1 = Integer.parseInt(phone);
+                String phone2 = idphone.getText();
+                int phone1 = Integer.parseInt(phone2);
                 user = new User(nom, prenom, address, phone1, email);
-                reservation = new Reservation(datedebut, datefin,cheked);
+                reservation = new Reservation(datedebut, datefin, cheked);
+
 
 
             }
 
 
-
-
-
-
-
-
-        } catch (Exception e) {
+            }  catch (Exception e) {
             System.out.println( "erroror:"+e.getMessage());
         }
       Voiture voiture =new Voiture(id);
@@ -410,29 +394,29 @@ UserReservation userReservation;
             @Override
             public void run() {
                 // This code will be executed every minute
-                System.out.println("Hello, World!");
+                serviceReservation reservations1=new serviceReservation();
+                Date date1 = new Date();
+
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                String prim=formatter.format(date1);
+                ObservableList<UserReservation> reservations = FXCollections.observableArrayList();
+
+                for (int i = 0; i <reservations1.afficher1().size() ; i++) {
+
+                    int result = prim.compareTo(String.valueOf(reservations1.afficher1().get(i).getReservation().getDatefin()));
+                  if(reservations1.afficher1().get(i).getReservation().isArchive()==false && (result>0)){
+                     reservations1.updateoneReservation(reservations1.afficher1().get(i).getReservation().getId());
+                      System.out.println(reservations1.afficher1().get(i).getReservation().getDatefin());
+
+                  }
+
+}
             }
         };
         // Schedule the task to run every minute
         long delay = 0;
         long period = 60 * 1000; // 1 minute
         timer.scheduleAtFixedRate(task, delay, period);
-        Date date1 = new Date();
-        Date date2 = new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24); // tomorrow
-        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm");
-        String prim=formatter.format(date1);
-        String prim1=formatter.format(date2);
-        System.out.println(prim);
-        // Compare the two dates
-        int result = prim.compareTo(prim1);
 
-        // Print the result
-        if (result < 0) {
-            System.out.println( prim+"Date 1 is before Date 2");
-        } else if (result > 0) {
-            System.out.println("Date 1 is after Date 2");
-        } else {
-            System.out.println("Date 1 is equal to Date 2");
-        }
     }
     }

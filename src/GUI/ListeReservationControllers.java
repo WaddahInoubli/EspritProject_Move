@@ -122,7 +122,7 @@ int iduser= 0;
             Double prix=reservations1.afficher().get(i).getVoiture().getPrix();
             Double prixtotale=daysBetween*prix;
 
-            reservations.add(new UserReservation(new User(reservations1.afficher().get(i).getUser().getNom(),reservations1.afficher().get(i).getUser().getPrenom(),reservations1.afficher().get(i).getUser().getAddress(),reservations1.afficher().get(i).getUser().getPhone(),reservations1.afficher().get(i).getUser().getEmail()), new Reservation(reservations1.afficher().get(i).getReservation().getId(),reservations1.afficher().get(i).getReservation().getDatedebut(),reservations1.afficher().get(i).getReservation().getDatefin(),reservations1.afficher().get(i).getReservation().getIfdriver()),new Voiture(prixtotale)));
+            reservations.add(new UserReservation(new User(reservations1.afficher().get(i).getUser().getNom(),reservations1.afficher().get(i).getUser().getPrenom(),reservations1.afficher().get(i).getUser().getAddress(),reservations1.afficher().get(i).getUser().getPhone(),reservations1.afficher().get(i).getUser().getEmail()), new Reservation(reservations1.afficher().get(i).getReservation().getId(),reservations1.afficher().get(i).getReservation().getDatedebut(),reservations1.afficher().get(i).getReservation().getDatefin(),reservations1.afficher().get(i).getReservation().getIfdriver(),reservations1.afficher().get(i).getReservation().isArchive()),new Voiture(prixtotale)));
 
         }
         System.out.println(reservations.get(0).getReservation().getDatefin());

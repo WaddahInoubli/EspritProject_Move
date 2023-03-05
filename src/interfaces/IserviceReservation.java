@@ -20,8 +20,9 @@ public interface IserviceReservation<T> {
     public void supprimer(int t);
     public void modifier(T t);
     public ArrayList<T> afficher();
-
+    public ArrayList<T> afficher1();
     public ArrayList<T> afficheronereservation(int t);
+     public void updateoneReservation(int id);
 
 
 }

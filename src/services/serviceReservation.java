@@ -178,12 +178,12 @@ public class serviceReservation implements IserviceReservation<UserReservation> 
 
             int id=res.getInt("id");
             int id_client=res.getInt("id_client_FK");
-
+            boolean isarchive=res.getBoolean("Archive");
            LocalDate date_debut= res.getDate("date_debut").toLocalDate();
            LocalDate date_fin= res.getDate("date_fin").toLocalDate();
            int id_chauffeur_FK=res.getInt("id_chauffeur_FK");
            Boolean ifDriver=res.getBoolean("ifdriver");
-            System.out.println(ifDriver);
+
            int id_voiture_FK=res.getInt("id_voiture_FK");
             String sql1= "select * from voiture where id=? " ;
             PreparedStatement selectuser1 = connection.prepareStatement(sql1);
@@ -203,17 +203,54 @@ public class serviceReservation implements IserviceReservation<UserReservation> 
                 String adress=resultat.getString("adresse");
                 String email=resultat.getString("email");
                 int telephone=resultat.getInt("telephone");
-                System.out.println(nom+" "+prenom );
+
                 user =new User( nom, prenom,  adress,  telephone, email);
 
             }
 
-   reservation =new Reservation(id,date_debut,date_fin,ifDriver);
+   reservation =new Reservation(id,date_debut,date_fin,ifDriver,isarchive);
    UserReservation user1=new UserReservation(user,reservation,voiture);
    listrec.add(user1);
 
 
         }
+        }catch(SQLException ex){
+            System.out.println("SQLException "+ex.getMessage());
+        }
+
+        return listrec;
+    }
+
+    @Override
+    public ArrayList<UserReservation> afficher1() {
+        ArrayList<UserReservation> listrec = new ArrayList<>();
+        Reservation reservation=null;
+        User user =null;
+        Voiture voiture=null;
+        try{
+            ste= connection.createStatement();
+            String req_select="SELECT * FROM reservation";
+            ResultSet res = ste.executeQuery(req_select);
+            while(res.next()){
+
+                int id=res.getInt("id");
+                int id_client=res.getInt("id_client_FK");
+                boolean isarchive=res.getBoolean("Archive");
+                LocalDate date_debut= res.getDate("date_debut").toLocalDate();
+                LocalDate date_fin= res.getDate("date_fin").toLocalDate();
+                int id_chauffeur_FK=res.getInt("id_chauffeur_FK");
+                Boolean ifDriver=res.getBoolean("ifdriver");
+
+                int id_voiture_FK=res.getInt("id_voiture_FK");
+
+
+
+                reservation =new Reservation(id,isarchive,date_debut,date_fin,ifDriver);
+                UserReservation user1=new UserReservation(reservation);
+                listrec.add(user1);
+
+
+            }
         }catch(SQLException ex){
             System.out.println("SQLException "+ex.getMessage());
         }
@@ -231,11 +268,12 @@ public class serviceReservation implements IserviceReservation<UserReservation> 
             System.out.println( "mon id"+id1);
             ste= connection.createStatement();
             String sqlrequete= "select * from reservation where id=? " ;
+
             PreparedStatement selectoneuser = connection.prepareStatement(sqlrequete);
             selectoneuser.setInt(1, id1);
             ResultSet res=   selectoneuser.executeQuery();
             while(res.next()){
-
+       boolean isarchive=res.getBoolean("Archive");
                 int id=res.getInt("id");
                 int id_client=res.getInt("id_client_FK");
 
@@ -281,7 +319,7 @@ public class serviceReservation implements IserviceReservation<UserReservation> 
 
                 }
 
-                reservation =new Reservation(id, date_debut, date_fin,ifDriver);
+                reservation =new Reservation(id, date_debut, date_fin,ifDriver,isarchive);
                 UserReservation user1=new UserReservation(user,reservation,voiture);
                 listrec.add(user1);
 
@@ -294,6 +332,23 @@ public class serviceReservation implements IserviceReservation<UserReservation> 
         return listrec;
     }
 
+    @Override
+    public void updateoneReservation(int id ) {
+
+     try{
+         String updatevoiture="Update reservation SET Archive=? where  id=?";
+         PreparedStatement voiture = connection.prepareStatement(updatevoiture);
+         voiture.setBoolean(1, true);
+
+
+         voiture.setInt(2, id);
+         voiture.executeUpdate();
+         System.out.println("update avec success");
+     }catch(Exception e){
+         System.out.println("error"+e.getMessage());
+     }
+
+    }
 
 
 }

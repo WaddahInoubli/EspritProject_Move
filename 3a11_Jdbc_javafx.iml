@@ -10,5 +10,7 @@
     <orderEntry type="library" exported="" name="lib" level="project" />
     <orderEntry type="library" exported="" name="mysql-connector-j-8.0.32" level="project" />
     <orderEntry type="library" exported="" name="jiconfont-font_awesome-4.7.0.1" level="project" />
+    <orderEntry type="library" exported="" name="Maven: com.twilio.sdk:twilio:8.20.0" level="project" />
+    <orderEntry type="library" exported="" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.12.1" level="project" />
   </component>
 </module>

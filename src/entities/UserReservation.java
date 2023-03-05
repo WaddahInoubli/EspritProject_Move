@@ -8,8 +8,25 @@ public class UserReservation {
 private String modele;
 private String marque;
 private int idvoiture;
+private  boolean archive;
 
-private boolean ifdriver;
+    public boolean isArchive() {
+        return archive;
+    }
+
+    public void setArchive(boolean archive) {
+        this.archive = archive;
+    }
+
+    public int getIdreservation() {
+        return idreservation;
+    }
+
+    public void setIdreservation(int idreservation) {
+        this.idreservation = idreservation;
+    }
+
+    private boolean ifdriver;
 
     public boolean isIfdriver() {
         return ifdriver;
@@ -89,6 +106,7 @@ this.voiture=voiture;
             this.idvoiture=voiture.getId();
             this.ifdriver=reservation.getIfdriver();
             this.prix=voiture.getPrix();
+        this.archive=reservation.isArchive();
     }
     public UserReservation(User user, Reservation reservation) {
 
@@ -103,7 +121,7 @@ this.voiture=voiture;
         this.address=user.getAddress();
         this.phone=user.getPhone();
         this.idreservation=reservation.getId();
-
+this.archive=reservation.isArchive();
 
 
     }
@@ -113,6 +131,7 @@ this.voiture=voiture;
         this.datedebut=reservation.getDatedebut();
         this.datefin=reservation.getDatefin();
         this.idreservation=reservation.getId();
+        this.archive=reservation.isArchive();
     }
     public UserReservation( ) {
 

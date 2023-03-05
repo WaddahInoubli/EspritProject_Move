@@ -4,8 +4,6 @@ import entities.Reservation;
 import entities.User;
 import entities.UserReservation;
 import entities.Voiture;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -14,7 +12,6 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
@@ -228,7 +225,7 @@ public class ModifierReservationControllers  implements Initializable {
         ArrayList<UserReservation> reservations = new ArrayList<>();
 
         for (int i = 0; i <reservations1.afficheronereservation(reservation.getId()).size() ; i++) {
-            reservations.add(new UserReservation(new User(reservations1.afficheronereservation(reservation.getId()).get(i).getUser().getNom(),reservations1.afficheronereservation(reservation.getId()).get(i).getUser().getPrenom(),reservations1.afficheronereservation(reservation.getId()).get(i).getUser().getAddress(),reservations1.afficheronereservation(reservation.getId()).get(i).getUser().getPhone(),reservations1.afficheronereservation(reservation.getId()).get(i).getUser().getEmail()), new Reservation(reservations1.afficheronereservation(reservation.getId()).get(i).getReservation().getId(),reservations1.afficheronereservation(reservation.getId()).get(i).getReservation().getDatedebut(),reservations1.afficheronereservation(reservation.getId()).get(i).getReservation().getDatefin(),reservations1.afficheronereservation(reservation.getId()).get(i).getReservation().getIfdriver()),new Voiture(reservations1.afficheronereservation(reservation.getId()).get(i).getIdvoiture(),reservations1.afficheronereservation(reservation.getId()).get(i).getVoiture().getModele(),reservations1.afficheronereservation(reservation.getId()).get(i).getVoiture().getMarque(),reservations1.afficheronereservation(reservation.getId()).get(i).getVoiture().getPrix() )));
+            reservations.add(new UserReservation(new User(reservations1.afficheronereservation(reservation.getId()).get(i).getUser().getNom(),reservations1.afficheronereservation(reservation.getId()).get(i).getUser().getPrenom(),reservations1.afficheronereservation(reservation.getId()).get(i).getUser().getAddress(),reservations1.afficheronereservation(reservation.getId()).get(i).getUser().getPhone(),reservations1.afficheronereservation(reservation.getId()).get(i).getUser().getEmail()), new Reservation(reservations1.afficheronereservation(reservation.getId()).get(i).getReservation().getId(),reservations1.afficheronereservation(reservation.getId()).get(i).getReservation().getDatedebut(),reservations1.afficheronereservation(reservation.getId()).get(i).getReservation().getDatefin(),reservations1.afficheronereservation(reservation.getId()).get(i).getReservation().getIfdriver(),reservations1.afficheronereservation(reservation.getId()).get(i).getReservation().isArchive()),new Voiture(reservations1.afficheronereservation(reservation.getId()).get(i).getIdvoiture(),reservations1.afficheronereservation(reservation.getId()).get(i).getVoiture().getModele(),reservations1.afficheronereservation(reservation.getId()).get(i).getVoiture().getMarque(),reservations1.afficheronereservation(reservation.getId()).get(i).getVoiture().getPrix() )));
             System.out.println( "datefin"+reservations.get(i).getReservation().getDatefin());
         }
         idnom.setText(reservations.get(0).getUser().getNom());

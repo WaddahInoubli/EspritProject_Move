@@ -2,6 +2,7 @@
 
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -49,5 +50,6 @@
                </image>
             </ImageView>
          </children></Pane>
+      <TextField fx:id="searchField" layoutX="254.0" layoutY="7.0" prefHeight="26.0" prefWidth="630.0" promptText="Recherche" />
     </children>
 </AnchorPane>

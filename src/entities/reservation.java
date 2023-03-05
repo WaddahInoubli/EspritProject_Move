@@ -13,7 +13,26 @@ import java.time.LocalDate;
  */
 public class Reservation {
 private  int id ;
-private  int id_client_FK ;
+private  boolean archive;
+
+    public boolean isArchive() {
+        return archive;
+    }
+
+    public void setArchive(boolean archive) {
+        this.archive = archive;
+    }
+
+    public Reservation(int id, boolean archive, LocalDate datedebut, LocalDate datefin, Boolean ifDriver) {
+        this.id = id;
+        this.archive = archive;
+
+        this.datedebut = datedebut;
+        this.datefin = datefin;
+
+    }
+
+    private  int id_client_FK ;
 private  int id_voiture_FK ;
 private  int id_chaufeur_FK ;
  private LocalDate datedebut;
@@ -109,7 +128,7 @@ public Reservation(){
         this.datefin = datefin;
         this.ifdriver = ifdriver;
     }
-    public Reservation(int id ,LocalDate datedebut, LocalDate datefin,boolean ifdriver){
+    public Reservation(int id ,LocalDate datedebut, LocalDate datefin,boolean ifdriver , boolean isarchive){
        this.id = id;
         this.id_client_FK = id_client_FK;
         this.id_voiture_FK = id_voiture_FK;
@@ -117,6 +136,7 @@ public Reservation(){
         this.datedebut = datedebut;
         this.datefin = datefin;
         this.ifdriver = ifdriver;
+        this.archive=isarchive;
 }
     public Reservation(LocalDate datedebut, LocalDate datefin,boolean ifdriver) {
         this.datedebut = datedebut;
