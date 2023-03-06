@@ -18,6 +18,7 @@ public class Comments {
     private String contenent;
     private String Name_User;
     private LocalDate date_com;
+     private LocalDate dater_com;
 
     public Comments(int Id_publication, String contenent, String Name_User, LocalDate date_com) {
         this.Id_publication = Id_publication;
