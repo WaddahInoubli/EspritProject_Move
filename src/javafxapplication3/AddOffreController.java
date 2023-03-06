@@ -31,6 +31,7 @@ import utils.MoveDB;
  * @author chedli
  */
 public class AddOffreController implements Initializable {
+
     @FXML
     private Button btn_add;
 
@@ -45,7 +46,6 @@ public class AddOffreController implements Initializable {
 
     @FXML
     private TextArea txtposte;
-    
 
     PreparedStatement preparedStatement;
     Connection connection;
@@ -53,57 +53,56 @@ public class AddOffreController implements Initializable {
     private boolean update;
     int offreId;
     String query = null;
+
     /**
      * Initializes the controller class.
      */
- @FXML
+    @FXML
     void Add(ActionEvent event) {
-//        offre o= new offre(txtName.getText(),txtposte.getText(),txtcomment.getText());
-//        ServiceOffre s= new ServiceOffre();
-//        s.ajouter(o); 
-connection = MoveDB.getInstance().getCon();
-    
-    String name = txtName.getText();
-    String comment = txtcomment.getText();
-    String poste = txtposte.getText();
-     if (name.isEmpty() ||  poste.isEmpty() ) {
+
+        connection = MoveDB.getInstance().getCon();
+
+        String name = txtName.getText();
+        String comment = txtcomment.getText();
+        String poste = txtposte.getText();
+
+        if (name.isEmpty() || poste.isEmpty()) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setHeaderText(null);
             alert.setContentText("Please Fill All DATA");
             alert.showAndWait();
 
-        } 
-    
-     else {
-         getQuery();
+        } else {
+            getQuery();
             insert();
             clean();
-    Alert a = new Alert(Alert.AlertType.INFORMATION, "Succéss", ButtonType.OK);
-    a.showAndWait();  
+            Alert a = new Alert(Alert.AlertType.INFORMATION, "Succéss", ButtonType.OK);
+            a.showAndWait();
+        }
     }
-   }
+
     private void getQuery() {
 
         if (update == false) {
-            
+
             query = "INSERT INTO `esprit3a11`.`offre`(Name_User,content,Comment,date) VALUES (?,?,0,NOW())";
 
-        }else{
+        } else {
             query = "UPDATE `esprit3a11`.`offre` SET "
                     + "`Name_User`=?,"
                     + "`content`=?,"
-                    + "`date`=NOW() WHERE Id_Offre = '"+offreId+"'";
+                    + "`date`=NOW() WHERE Id_Offre = '" + offreId + "'";
         }
 
     }
 
-      private void clean() {
-         txtName.clear();
-         txtcomment.clear();
-         txtposte.clear();
+    private void clean() {
+        txtName.clear();
+        txtcomment.clear();
+        txtposte.clear();
     }
-     
-      private void insert() {
+
+    private void insert() {
 
         try {
 
@@ -117,22 +116,23 @@ connection = MoveDB.getInstance().getCon();
         }
 
     }
+
     void setUpdate(boolean b) {
         this.update = b;
 
     }
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-         
-    }    
+
+    }
 
     void setTextField(int Id_Offre, String Name_User, String content, String Comment) {
         offreId = Id_Offre;
         txtName.setText(Name_User);
         txtposte.setText(content);
         txtcomment.setText(Comment);
-        
 
     }
-    
+
 }

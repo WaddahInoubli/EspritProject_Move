@@ -51,11 +51,13 @@ public class AddcomentaireController implements Initializable {
 
     @FXML
     void addcome(ActionEvent event) {
-connection = MoveDB.getInstance().getCon();
+        
+    connection = MoveDB.getInstance().getCon();
     
     String name = txtname.getText();
-    
     String content = txtcom.getText();
+    
+    
      if (name.isEmpty()  || content.isEmpty() ) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setHeaderText(null);
@@ -64,15 +66,17 @@ connection = MoveDB.getInstance().getCon();
 
         } 
      else {
-         getQuery();
+            getQuery();
             insert();
             clean();
              Alert a = new Alert(Alert.AlertType.INFORMATION, "Succéss", ButtonType.OK);
-    a.showAndWait();  
+             a.showAndWait();  
 
 
-    }
+          }
    }
+    
+    
     private void getQuery() {
 
         if (update == false) {
