@@ -57,11 +57,7 @@ public class DiscussionController implements Initializable {
     private void addDissAndSendFirstMsg(ActionEvent event) throws SQLException {
         
                       
-        if (firstMsgFld.getText().isEmpty()) {
-                firstMsgFld.setText("Veuillez enter votre Message"); } 
-        
-        
-        
+
         
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         Discussion disc = new Discussion(1, senderCbox.getValue().getId());

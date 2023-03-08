@@ -25,9 +25,9 @@
       <Pane prefHeight="580.0" prefWidth="150.0" style="-fx-background-color: #0c2d48;" styleClass="side-bar">
          <children>
             <Circle fill="WHITE" layoutX="75.0" layoutY="75.0" radius="37.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" />
-            <ImageView fitHeight="47.0" fitWidth="47.0" layoutX="51.0" layoutY="52.0" pickOnBounds="true" preserveRatio="true">
+            <ImageView fitHeight="74.0" fitWidth="74.0" layoutX="38.0" layoutY="38.0" pickOnBounds="true" preserveRatio="true">
                <image>
-                  <Image url="@../images/groom_friend2.jpg" />
+                  <Image url="@../images/groom_friend2.png" />
                </image>
             </ImageView>
             <Label layoutX="39.0" layoutY="127.0" prefHeight="15.0" prefWidth="74.0" text="userName" textAlignment="CENTER" textFill="WHITE">
