@@ -1,0 +1,122 @@
+{% extends 'baseBack.html.twig' %}
+
+{% block content %}
+
+
+    <style>
+        .alert {
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        td {
+            word-break: break-all;
+        }
+    </style>
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+    {% for message in app.flashes('warning') %}
+        <div class="alert alert-warning">
+            {{ message }}
+        </div>
+    {% endfor %}
+    {% for message in app.flashes('danger') %}
+
+        <div class="alert alert-danger alert-dismissible fade show">
+            {{ message }}
+        </div>
+    {% endfor %}
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Liste des utilisateurs</h5>
+            <div>
+                <a class="btn btn-primary" href="{{ path('back_users_form') }}"  style="float: left;">
+                    Ajouter un nouveau utilisateur
+                    <div class="ripple-container"></div>
+                </a>
+            </div>
+
+            <br>
+            <br>
+
+            <div class="material-datatables" >
+                <table class="table datatable" >
+                    <thead>
+                    <tr>
+                        <th scope="col">Nom</th>
+                        <th scope="col">Prenom</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Numéro de téléphone</th>
+                        <th scope="col">Roles</th>
+                        <th scope="col">Actions</th>
+
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>
+                                {{ user.nom }}
+                            </td>
+
+                            <td>
+                                {{ user.prenom }}
+                            </td>
+                            <td>
+                                {{ user.email }}
+                            </td>
+                            <td>
+                                {{ user.numTel }}
+                            </td>
+                            <td>
+                                {{ user.role }}
+                            </td>
+
+                            <td>
+                                <a href="{{ path('back_users_form_edit', {'id': user.id}) }}" class="btn btn-warning btn-sm"  type="button" data-toggle="tooltip" data-placement="top" title="Edit"><i class="bx bxs-edit-alt"></i></a>
+                                <a href="{{ path('back_users_delete', {'id': user.id}) }}" class="btn btn-danger btn-sm rounded-0" type="button"  data-placement="top" title="Edit"><i class="bx bxs-trash"></i></a>
+
+
+                            </td>
+
+                        </tr>
+
+
+
+
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+    $(document).ready(function () {
+        $('#datatables').addClass('newclass').removeClass('dataTable');
+
+
+        $('#datatables').DataTable({
+            "ordering": false,
+            "bPaginate": false,
+            "stripeClasses": [],
+
+
+
+            responsive: true,
+
+            language: {
+                search: "_INPUT_",
+                searchPlaceholder: "Search User",
+            },
+            dom: 'Bfrtip',
+        });
+
+        $('#datatables').addClass('newclass').removeClass('dataTable');
+
+    });
+</script>
+{% endblock %}
