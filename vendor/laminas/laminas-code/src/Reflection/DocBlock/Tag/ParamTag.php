@@ -1,11 +1,5 @@
 <?php
 
-/**
- * @see       https://github.com/laminas/laminas-code for the canonical source repository
- * @copyright https://github.com/laminas/laminas-code/blob/master/COPYRIGHT.md
- * @license   https://github.com/laminas/laminas-code/blob/master/LICENSE.md New BSD License
- */
-
 namespace Laminas\Code\Reflection\DocBlock\Tag;
 
 use function explode;
@@ -15,36 +9,27 @@ use function trim;
 
 class ParamTag implements TagInterface, PhpDocTypedTagInterface
 {
-    /**
-     * @var string[]
-     * @psalm-return list<string>
-     */
+    /** @var list<string> */
     protected $types = [];
 
-    /** @var string */
+    /** @var string|null */
     protected $variableName;
 
-    /** @var string */
+    /** @var string|null */
     protected $description;
 
-    /**
-     * @return string
-     */
+    /** @return 'param' */
     public function getName()
     {
         return 'param';
     }
 
-    /**
-     * Initializer
-     *
-     * @param  string $tagDocBlockLine
-     */
-    public function initialize($tagDocBlockLine)
+    /** @inheritDoc */
+    public function initialize($content)
     {
         $matches = [];
 
-        if (! preg_match('#((?:[\w|\\\]+(?:\[\])*\|?)+)(?:\s+(\$\S+))?(?:\s+(.*))?#s', $tagDocBlockLine, $matches)) {
+        if (! preg_match('#((?:[\w|\\\]+(?:\[\])*\|?)+)(?:\s+(\$\S+))?(?:\s+(.*))?#s', $content, $matches)) {
             return;
         }
 
@@ -75,25 +60,19 @@ class ParamTag implements TagInterface, PhpDocTypedTagInterface
         return $this->types[0];
     }
 
-    /** {@inheritDoc} */
+    /** @inheritDoc */
     public function getTypes()
     {
         return $this->types;
     }
 
-    /**
-     * Get parameter name
-     *
-     * @return string
-     */
+    /** @return string|null */
     public function getVariableName()
     {
         return $this->variableName;
     }
 
-    /**
-     * @return string
-     */
+    /** @return string|null */
     public function getDescription()
     {
         return $this->description;

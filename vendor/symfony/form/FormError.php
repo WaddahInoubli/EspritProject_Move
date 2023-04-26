@@ -47,13 +47,8 @@ class FormError
      *
      * @see \Symfony\Component\Translation\Translator
      */
-    public function __construct(?string $message, string $messageTemplate = null, array $messageParameters = [], int $messagePluralization = null, $cause = null)
+    public function __construct(string $message, string $messageTemplate = null, array $messageParameters = [], int $messagePluralization = null, $cause = null)
     {
-        if (null === $message) {
-            @trigger_error(sprintf('Passing a null message when instantiating a "%s" is deprecated since Symfony 4.4.', __CLASS__), \E_USER_DEPRECATED);
-            $message = '';
-        }
-
         $this->message = $message;
         $this->messageTemplate = $messageTemplate ?: $message;
         $this->messageParameters = $messageParameters;
@@ -104,7 +99,7 @@ class FormError
     /**
      * Returns the cause of this error.
      *
-     * @return mixed The cause of this error
+     * @return mixed
      */
     public function getCause()
     {
@@ -130,7 +125,7 @@ class FormError
     /**
      * Returns the form that caused this error.
      *
-     * @return FormInterface|null The form that caused this error
+     * @return FormInterface|null
      */
     public function getOrigin()
     {

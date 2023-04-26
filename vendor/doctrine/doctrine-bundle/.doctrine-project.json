@@ -4,21 +4,52 @@
   "slug": "doctrine-bundle",
   "versions": [
     {
-      "name": "2.4",
-      "branchName": "2.4.x",
+      "name": "2.10",
+      "branchName": "2.10.x",
       "slug": "latest",
       "upcoming": true
     },
     {
+      "name": "2.9",
+      "branchName": "2.9.x",
+      "slug": "2.9",
+      "aliases": ["current", "stable"]
+    },
+    {
+      "name": "2.8",
+      "branchName": "2.8.x",
+      "slug": "2.8",
+      "maintained": false
+    },
+    {
+      "name": "2.7",
+      "branchName": "2.7.x",
+      "slug": "2.7",
+      "maintained": false
+    },
+    {
+      "name": "2.6",
+      "branchName": "2.6.x",
+      "slug": "2.6",
+      "maintained": false
+    },
+    {
+      "name": "2.5",
+      "branchName": "2.5.x",
+      "slug": "2.5",
+      "maintained": false
+    },
+    {
+      "name": "2.4",
+      "branchName": "2.4.x",
+      "slug": "2.4",
+      "maintained": false
+    },
+    {
       "name": "2.3",
       "branchName": "2.3.x",
-      "slug": "2.2",
-      "aliases": [
-        "current",
-        "stable"
-      ],
-      "current": true,
-      "maintained": true
+      "slug": "2.3",
+      "maintained": false
     },
     {
       "name": "2.2",

@@ -1,28 +1,12 @@
 <?php
 
-/*
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the MIT license. For more information, see
- * <http://www.doctrine-project.org>.
- */
+declare(strict_types=1);
 
 namespace Doctrine\ORM\Query\AST;
 
 use Doctrine\ORM\Query\SqlWalker;
 
-use function get_class;
+use function get_debug_type;
 use function get_object_vars;
 use function is_array;
 use function is_object;
@@ -65,19 +49,19 @@ abstract class Node
     }
 
     /**
-     * @param object $obj
+     * @param mixed $value
      *
      * @return string
      */
-    public function dump($obj)
+    public function dump($value)
     {
         static $ident = 0;
 
         $str = '';
 
-        if ($obj instanceof Node) {
-            $str  .= get_class($obj) . '(' . PHP_EOL;
-            $props = get_object_vars($obj);
+        if ($value instanceof Node) {
+            $str  .= get_debug_type($value) . '(' . PHP_EOL;
+            $props = get_object_vars($value);
 
             foreach ($props as $name => $prop) {
                 $ident += 4;
@@ -87,12 +71,12 @@ abstract class Node
             }
 
             $str .= str_repeat(' ', $ident) . ')';
-        } elseif (is_array($obj)) {
+        } elseif (is_array($value)) {
             $ident += 4;
             $str   .= 'array(';
             $some   = false;
 
-            foreach ($obj as $k => $v) {
+            foreach ($value as $k => $v) {
                 $str .= PHP_EOL . str_repeat(' ', $ident) . '"'
                       . $k . '" => ' . $this->dump($v) . ',';
                 $some = true;
@@ -100,10 +84,10 @@ abstract class Node
 
             $ident -= 4;
             $str   .= ($some ? PHP_EOL . str_repeat(' ', $ident) : '') . ')';
-        } elseif (is_object($obj)) {
-            $str .= 'instanceof(' . get_class($obj) . ')';
+        } elseif (is_object($value)) {
+            $str .= 'instanceof(' . get_debug_type($value) . ')';
         } else {
-            $str .= var_export($obj, true);
+            $str .= var_export($value, true);
         }
 
         return $str;

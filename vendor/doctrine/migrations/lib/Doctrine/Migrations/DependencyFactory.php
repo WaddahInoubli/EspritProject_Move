@@ -62,32 +62,25 @@ class DependencyFactory
     /** @psalm-var array<string, bool> */
     private $inResolution = [];
 
-    /** @var Configuration */
-    private $configuration;
+    private ?Configuration $configuration = null;
 
     /** @var object[]|callable[] */
-    private $dependencies = [];
+    private array $dependencies = [];
 
-    /** @var Connection */
-    private $connection;
+    private ?Connection $connection = null;
 
-    /** @var EntityManagerInterface|null */
-    private $em;
+    private ?EntityManagerInterface $em = null;
 
-    /** @var bool */
-    private $frozen = false;
+    private bool $frozen = false;
 
-    /** @var ConfigurationLoader */
-    private $configurationLoader;
+    private ConfigurationLoader $configurationLoader;
 
-    /** @var ConnectionLoader */
-    private $connectionLoader;
+    private ConnectionLoader $connectionLoader;
 
-    /** @var EntityManagerLoader|null */
-    private $emLoader;
+    private ?EntityManagerLoader $emLoader = null;
 
     /** @var callable[] */
-    private $factories = [];
+    private array $factories = [];
 
     public static function fromConnection(
         ConfigurationLoader $configurationLoader,
@@ -231,7 +224,7 @@ class DependencyFactory
 
             return new SchemaDumper(
                 $this->getConnection()->getDatabasePlatform(),
-                $this->getConnection()->getSchemaManager(),
+                $this->getConnection()->createSchemaManager(),
                 $this->getMigrationGenerator(),
                 $this->getMigrationSqlGenerator(),
                 $excludedTables
@@ -242,9 +235,7 @@ class DependencyFactory
     private function getEmptySchemaProvider(): SchemaProvider
     {
         return $this->getDependency(EmptySchemaProvider::class, function (): SchemaProvider {
-            return new EmptySchemaProvider(
-                $this->getConnection()->getSchemaManager()
-            );
+            return new EmptySchemaProvider($this->connection->createSchemaManager());
         });
     }
 
@@ -275,7 +266,7 @@ class DependencyFactory
         return $this->getDependency(DiffGenerator::class, function (): DiffGenerator {
             return new DiffGenerator(
                 $this->getConnection()->getConfiguration(),
-                $this->getConnection()->getSchemaManager(),
+                $this->getConnection()->createSchemaManager(),
                 $this->getSchemaProvider(),
                 $this->getConnection()->getDatabasePlatform(),
                 $this->getMigrationGenerator(),
@@ -288,9 +279,9 @@ class DependencyFactory
     public function getSchemaDiffProvider(): SchemaDiffProvider
     {
         return $this->getDependency(SchemaDiffProvider::class, function (): LazySchemaDiffProvider {
-            return LazySchemaDiffProvider::fromDefaultProxyFactoryConfiguration(
+            return new LazySchemaDiffProvider(
                 new DBALSchemaDiffProvider(
-                    $this->getConnection()->getSchemaManager(),
+                    $this->getConnection()->createSchemaManager(),
                     $this->getConnection()->getDatabasePlatform()
                 )
             );

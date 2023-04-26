@@ -31,14 +31,11 @@ use function uasort;
  */
 final class SortedMigrationPlanCalculator implements MigrationPlanCalculator
 {
-    /** @var MigrationsRepository */
-    private $migrationRepository;
+    private MigrationsRepository $migrationRepository;
 
-    /** @var MetadataStorage */
-    private $metadataStorage;
+    private MetadataStorage $metadataStorage;
 
-    /** @var Comparator */
-    private $sorter;
+    private Comparator $sorter;
 
     public function __construct(
         MigrationsRepository $migrationRepository,
@@ -83,10 +80,10 @@ final class SortedMigrationPlanCalculator implements MigrationPlanCalculator
             throw MigrationClassNotFound::new((string) $to);
         }
 
-        $availableMigrations = $this->getMigrations();
+        $availableMigrations = $this->getMigrations(); // migrations are sorted at this point
         $executedMigrations  = $this->metadataStorage->getExecutedMigrations();
 
-        $direction = $this->findDirection($to, $executedMigrations);
+        $direction = $this->findDirection($to, $executedMigrations, $availableMigrations);
 
         $migrationsToCheck = $this->arrangeMigrationsForDirection($direction, $availableMigrations);
 
@@ -107,9 +104,23 @@ final class SortedMigrationPlanCalculator implements MigrationPlanCalculator
         return new AvailableMigrationsList($availableMigrations);
     }
 
-    private function findDirection(Version $to, ExecutedMigrationsList $executedMigrations): string
+    private function findDirection(Version $to, ExecutedMigrationsList $executedMigrations, AvailableMigrationsList $availableMigrations): string
     {
-        if ((string) $to === '0' || ($executedMigrations->hasMigration($to) && ! $executedMigrations->getLast()->getVersion()->equals($to))) {
+        if ((string) $to === '0') {
+            return Direction::DOWN;
+        }
+
+        foreach ($availableMigrations->getItems() as $availableMigration) {
+            if ($availableMigration->getVersion()->equals($to)) {
+                break;
+            }
+
+            if (! $executedMigrations->hasMigration($availableMigration->getVersion())) {
+                return Direction::UP;
+            }
+        }
+
+        if ($executedMigrations->hasMigration($to) && ! $executedMigrations->getLast()->getVersion()->equals($to)) {
             return Direction::DOWN;
         }
 

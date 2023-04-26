@@ -1,19 +1,11 @@
 <?php
 
-/**
- * @see       https://github.com/laminas/laminas-code for the canonical source repository
- * @copyright https://github.com/laminas/laminas-code/blob/master/COPYRIGHT.md
- * @license   https://github.com/laminas/laminas-code/blob/master/LICENSE.md New BSD License
- */
-
 namespace Laminas\Code\Generator;
 
 use Traversable;
 
-use function get_class;
-use function gettype;
+use function get_debug_type;
 use function is_array;
-use function is_object;
 use function method_exists;
 use function sprintf;
 
@@ -109,7 +101,7 @@ abstract class AbstractGenerator implements GeneratorInterface
             throw new Exception\InvalidArgumentException(sprintf(
                 '%s expects an array or Traversable object; received "%s"',
                 __METHOD__,
-                is_object($options) ? get_class($options) : gettype($options)
+                get_debug_type($options)
             ));
         }
 

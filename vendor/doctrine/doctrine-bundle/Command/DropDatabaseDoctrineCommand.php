@@ -3,15 +3,18 @@
 namespace Doctrine\Bundle\DoctrineBundle\Command;
 
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Schema\SqliteSchemaManager;
 use InvalidArgumentException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 
-use function array_merge;
+use function file_exists;
 use function in_array;
+use function method_exists;
 use function sprintf;
+use function unlink;
 
 /**
  * Database tool allows you to easily drop your configured databases.
@@ -24,15 +27,12 @@ class DropDatabaseDoctrineCommand extends DoctrineCommand
 
     public const RETURN_CODE_NO_FORCE = 2;
 
-    /**
-     * {@inheritDoc}
-     */
+    /** @return void */
     protected function configure()
     {
         $this
             ->setName('doctrine:database:drop')
             ->setDescription('Drops the configured database')
-            ->addOption('shard', 's', InputOption::VALUE_REQUIRED, 'The shard connection to use for this command')
             ->addOption('connection', 'c', InputOption::VALUE_OPTIONAL, 'The connection to use for this command')
             ->addOption('if-exists', null, InputOption::VALUE_NONE, 'Don\'t trigger an error, when the database doesn\'t exist')
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Set this parameter to execute this action')
@@ -52,10 +52,7 @@ EOT
         );
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $connectionName = $input->getOption('connection');
         if (empty($connectionName)) {
@@ -66,38 +63,10 @@ EOT
 
         $ifExists = $input->getOption('if-exists');
 
-        $driverOptions = [];
-        $params        = $connection->getParams();
+        $params = $connection->getParams();
 
-        if (isset($params['driverOptions'])) {
-            $driverOptions = $params['driverOptions'];
-        }
-
-        // Since doctrine/dbal 2.11 master has been replaced by primary
         if (isset($params['primary'])) {
-            $params                  = $params['primary'];
-            $params['driverOptions'] = $driverOptions;
-        }
-
-        if (isset($params['master'])) {
-            $params                  = $params['master'];
-            $params['driverOptions'] = $driverOptions;
-        }
-
-        if (isset($params['shards'])) {
-            $shards = $params['shards'];
-            // Default select global
-            $params = array_merge($params, $params['global'] ?? []);
-            if ($input->getOption('shard')) {
-                foreach ($shards as $shard) {
-                    if ($shard['id'] === (int) $input->getOption('shard')) {
-                        // Select sharded database
-                        $params = array_merge($params, $shard);
-                        unset($params['id']);
-                        break;
-                    }
-                }
-            }
+            $params = $params['primary'];
         }
 
         $name = $params['path'] ?? ($params['dbname'] ?? false);
@@ -120,8 +89,11 @@ EOT
         // Reopen connection without database name set
         // as some vendors do not allow dropping the database connected to.
         $connection->close();
-        $connection         = DriverManager::getConnection($params);
-        $shouldDropDatabase = ! $ifExists || in_array($name, $connection->getSchemaManager()->listDatabases());
+        $connection         = DriverManager::getConnection($params, $connection->getConfiguration());
+        $schemaManager      = method_exists($connection, 'createSchemaManager')
+            ? $connection->createSchemaManager()
+            : $connection->getSchemaManager();
+        $shouldDropDatabase = ! $ifExists || in_array($name, $schemaManager->listDatabases());
 
         // Only quote if we don't have a path
         if (! isset($params['path'])) {
@@ -130,7 +102,15 @@ EOT
 
         try {
             if ($shouldDropDatabase) {
-                $connection->getSchemaManager()->dropDatabase($name);
+                if ($schemaManager instanceof SqliteSchemaManager) {
+                    // dropDatabase() is deprecated for Sqlite
+                    if (file_exists($name)) {
+                        unlink($name);
+                    }
+                } else {
+                    $schemaManager->dropDatabase($name);
+                }
+
                 $output->writeln(sprintf('<info>Dropped database <comment>%s</comment> for connection named <comment>%s</comment></info>', $name, $connectionName));
             } else {
                 $output->writeln(sprintf('<info>Database <comment>%s</comment> for connection named <comment>%s</comment> doesn\'t exist. Skipped.</info>', $name, $connectionName));

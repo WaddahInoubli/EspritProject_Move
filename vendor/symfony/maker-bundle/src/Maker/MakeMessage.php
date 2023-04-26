@@ -16,10 +16,12 @@ use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
+use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\MakerBundle\Util\YamlSourceManipulator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 /**
@@ -30,11 +32,8 @@ use Symfony\Component\Messenger\MessageBusInterface;
  */
 final class MakeMessage extends AbstractMaker
 {
-    private $fileManager;
-
-    public function __construct(FileManager $fileManager)
+    public function __construct(private FileManager $fileManager)
     {
-        $this->fileManager = $fileManager;
     }
 
     public static function getCommandName(): string
@@ -47,7 +46,7 @@ final class MakeMessage extends AbstractMaker
         return 'Creates a new message and handler';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConf)
+    public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the message class (e.g. <fg=yellow>SendEmailMessage</>)')
@@ -55,17 +54,19 @@ final class MakeMessage extends AbstractMaker
         ;
     }
 
-    public function interact(InputInterface $input, ConsoleStyle $io, Command $command)
+    public function interact(InputInterface $input, ConsoleStyle $io, Command $command): void
     {
         $command->addArgument('chosen-transport', InputArgument::OPTIONAL);
+
+        $messengerData = [];
 
         try {
             $manipulator = new YamlSourceManipulator($this->fileManager->getFileContents('config/packages/messenger.yaml'));
             $messengerData = $manipulator->getData();
-        } catch (\Exception $e) {
+        } catch (\Exception) {
         }
 
-        if (!isset($messengerData, $messengerData['framework']['messenger']['transports'])) {
+        if (!isset($messengerData['framework']['messenger']['transports'])) {
             return;
         }
 
@@ -83,7 +84,7 @@ final class MakeMessage extends AbstractMaker
         }
     }
 
-    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $messageClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
@@ -101,11 +102,16 @@ final class MakeMessage extends AbstractMaker
             'message/Message.tpl.php'
         );
 
+        $useStatements = new UseStatementGenerator([
+            MessageHandlerInterface::class,
+            $messageClassNameDetails->getFullName(),
+        ]);
+
         $generator->generateClass(
             $handlerClassNameDetails->getFullName(),
             'message/MessageHandler.tpl.php',
             [
-                'message_full_class_name' => $messageClassNameDetails->getFullName(),
+                'use_statements' => $useStatements,
                 'message_class_name' => $messageClassNameDetails->getShortName(),
             ]
         );
@@ -125,7 +131,7 @@ final class MakeMessage extends AbstractMaker
         ]);
     }
 
-    private function updateMessengerConfig(Generator $generator, string $chosenTransport, string $messageClass)
+    private function updateMessengerConfig(Generator $generator, string $chosenTransport, string $messageClass): void
     {
         $manipulator = new YamlSourceManipulator($this->fileManager->getFileContents($configFilePath = 'config/packages/messenger.yaml'));
         $messengerData = $manipulator->getData();
@@ -140,7 +146,7 @@ final class MakeMessage extends AbstractMaker
         $generator->dumpFile($configFilePath, $manipulator->getContents());
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
         $dependencies->addClassDependency(
             MessageBusInterface::class,

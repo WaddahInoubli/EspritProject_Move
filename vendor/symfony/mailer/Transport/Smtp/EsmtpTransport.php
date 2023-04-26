@@ -11,12 +11,12 @@
 
 namespace Symfony\Component\Mailer\Transport\Smtp;
 
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Mailer\Exception\TransportException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\Transport\Smtp\Auth\AuthenticatorInterface;
 use Symfony\Component\Mailer\Transport\Smtp\Stream\SocketStream;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Sends Emails over SMTP with ESMTP support.
@@ -63,6 +63,9 @@ class EsmtpTransport extends SmtpTransport
         $stream->setPort($port);
     }
 
+    /**
+     * @return $this
+     */
     public function setUsername(string $username): self
     {
         $this->username = $username;
@@ -75,6 +78,9 @@ class EsmtpTransport extends SmtpTransport
         return $this->username;
     }
 
+    /**
+     * @return $this
+     */
     public function setPassword(string $password): self
     {
         $this->password = $password;
@@ -94,15 +100,9 @@ class EsmtpTransport extends SmtpTransport
 
     protected function doHeloCommand(): void
     {
-        try {
-            $response = $this->executeCommand(sprintf("EHLO %s\r\n", $this->getLocalDomain()), [250]);
-        } catch (TransportExceptionInterface $e) {
-            parent::doHeloCommand();
-
+        if (!$capabilities = $this->callHeloCommand()) {
             return;
         }
-
-        $capabilities = $this->getCapabilities($response);
 
         /** @var SocketStream $stream */
         $stream = $this->getStream();
@@ -116,14 +116,7 @@ class EsmtpTransport extends SmtpTransport
                 throw new TransportException('Unable to connect with STARTTLS.');
             }
 
-            try {
-                $response = $this->executeCommand(sprintf("EHLO %s\r\n", $this->getLocalDomain()), [250]);
-                $capabilities = $this->getCapabilities($response);
-            } catch (TransportExceptionInterface $e) {
-                parent::doHeloCommand();
-
-                return;
-            }
+            $capabilities = $this->callHeloCommand();
         }
 
         if (\array_key_exists('AUTH', $capabilities)) {
@@ -131,10 +124,26 @@ class EsmtpTransport extends SmtpTransport
         }
     }
 
-    private function getCapabilities(string $ehloResponse): array
+    private function callHeloCommand(): array
     {
+        try {
+            $response = $this->executeCommand(sprintf("EHLO %s\r\n", $this->getLocalDomain()), [250]);
+        } catch (TransportExceptionInterface $e) {
+            try {
+                parent::doHeloCommand();
+
+                return [];
+            } catch (TransportExceptionInterface $ex) {
+                if (!$ex->getCode()) {
+                    throw $e;
+                }
+
+                throw $ex;
+            }
+        }
+
         $capabilities = [];
-        $lines = explode("\r\n", trim($ehloResponse));
+        $lines = explode("\r\n", trim($response));
         array_shift($lines);
         foreach ($lines as $line) {
             if (preg_match('/^[0-9]{3}[ -]([A-Z0-9-]+)((?:[ =].*)?)$/Di', $line, $matches)) {
@@ -173,12 +182,12 @@ class EsmtpTransport extends SmtpTransport
                 }
 
                 // keep the error message, but tries the other authenticators
-                $errors[$authenticator->getAuthKeyword()] = $e;
+                $errors[$authenticator->getAuthKeyword()] = $e->getMessage();
             }
         }
 
         if (!$authNames) {
-            throw new TransportException('Failed to find an authenticator supported by the SMTP server.');
+            throw new TransportException(sprintf('Failed to find an authenticator supported by the SMTP server, which currently supports: "%s".', implode('", "', $modes)));
         }
 
         $message = sprintf('Failed to authenticate on SMTP server with username "%s" using the following authenticators: "%s".', $this->username, implode('", "', $authNames));

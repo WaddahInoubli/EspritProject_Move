@@ -1,11 +1,5 @@
 <?php
 
-/**
- * @see       https://github.com/laminas/laminas-code for the canonical source repository
- * @copyright https://github.com/laminas/laminas-code/blob/master/COPYRIGHT.md
- * @license   https://github.com/laminas/laminas-code/blob/master/LICENSE.md New BSD License
- */
-
 namespace Laminas\Code\Generator;
 
 use Laminas\Code\Generator\DocBlock\Tag;
@@ -59,6 +53,9 @@ class DocBlockGenerator extends AbstractGenerator
 
     /**
      * Generate from array
+     *
+     * @deprecated this API is deprecated, and will be removed in the next major release. Please
+     *             use the other constructors of this class instead.
      *
      * @configkey shortdescription string The short description for this doc block
      * @configkey longdescription  string The long description for this doc block
@@ -228,10 +225,10 @@ class DocBlockGenerator extends AbstractGenerator
         }
 
         $output = '';
-        if (null !== ($sd = $this->getShortDescription())) {
+        if ($sd = $this->getShortDescription()) {
             $output .= $sd . self::LINE_FEED . self::LINE_FEED;
         }
-        if (null !== ($ld = $this->getLongDescription())) {
+        if ($ld = $this->getLongDescription()) {
             $output .= $ld . self::LINE_FEED . self::LINE_FEED;
         }
 

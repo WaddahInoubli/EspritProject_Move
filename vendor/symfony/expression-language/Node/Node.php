@@ -67,7 +67,7 @@ class Node
         }
     }
 
-    public function evaluate($functions, $values)
+    public function evaluate(array $functions, array $values)
     {
         $results = [];
         foreach ($this->nodes as $node) {
@@ -87,13 +87,13 @@ class Node
         $dump = '';
 
         foreach ($this->toArray() as $v) {
-            $dump .= is_scalar($v) ? $v : $v->dump();
+            $dump .= \is_scalar($v) ? $v : $v->dump();
         }
 
         return $dump;
     }
 
-    protected function dumpString($value)
+    protected function dumpString(string $value)
     {
         return sprintf('"%s"', addcslashes($value, "\0\t\"\\"));
     }

@@ -11,6 +11,10 @@
 
 namespace Symfony\Component\Security\Core\Encoder;
 
+use Symfony\Component\PasswordHasher\Hasher\MigratingPasswordHasher;
+
+trigger_deprecation('symfony/security-core', '5.3', 'The "%s" class is deprecated, use "%s" instead.', MigratingPasswordEncoder::class, MigratingPasswordHasher::class);
+
 /**
  * Hashes passwords using the best available encoder.
  * Validates them using a chain of encoders.
@@ -19,6 +23,8 @@ namespace Symfony\Component\Security\Core\Encoder;
  * could be used to authenticate successfully without knowing the cleartext password.
  *
  * @author Nicolas Grekas <p@tchwork.com>
+ *
+ * @deprecated since Symfony 5.3, use {@link MigratingPasswordHasher} instead
  */
 final class MigratingPasswordEncoder extends BasePasswordEncoder implements SelfSaltingEncoderInterface
 {
@@ -34,7 +40,7 @@ final class MigratingPasswordEncoder extends BasePasswordEncoder implements Self
     /**
      * {@inheritdoc}
      */
-    public function encodePassword($raw, $salt): string
+    public function encodePassword(string $raw, ?string $salt): string
     {
         return $this->bestEncoder->encodePassword($raw, $salt);
     }
@@ -42,7 +48,7 @@ final class MigratingPasswordEncoder extends BasePasswordEncoder implements Self
     /**
      * {@inheritdoc}
      */
-    public function isPasswordValid($encoded, $raw, $salt): bool
+    public function isPasswordValid(string $encoded, string $raw, ?string $salt): bool
     {
         if ($this->bestEncoder->isPasswordValid($encoded, $raw, $salt)) {
             return true;

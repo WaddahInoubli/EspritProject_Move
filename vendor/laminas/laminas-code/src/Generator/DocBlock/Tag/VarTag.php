@@ -1,19 +1,12 @@
 <?php
 
-/**
- * @see       https://github.com/laminas/laminas-code for the canonical source repository
- * @copyright https://github.com/laminas/laminas-code/blob/master/COPYRIGHT.md
- * @license   https://github.com/laminas/laminas-code/blob/master/LICENSE.md New BSD License
- */
-
 namespace Laminas\Code\Generator\DocBlock\Tag;
 
 use function ltrim;
 
 class VarTag extends AbstractTypeableTag implements TagInterface
 {
-    /** @var string|null */
-    private $variableName;
+    private ?string $variableName = null;
 
     /**
      * @param string|string[] $types
@@ -27,9 +20,7 @@ class VarTag extends AbstractTypeableTag implements TagInterface
         parent::__construct($types, $description);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** @inheritDoc */
     public function getName(): string
     {
         return 'var';
@@ -53,9 +44,7 @@ class VarTag extends AbstractTypeableTag implements TagInterface
         return $this->variableName;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** @inheritDoc */
     public function generate(): string
     {
         return '@var'

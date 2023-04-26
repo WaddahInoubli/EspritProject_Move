@@ -11,12 +11,17 @@
 
 namespace Symfony\Component\Security\Core\Encoder;
 
+use Symfony\Component\PasswordHasher\Hasher\MessageDigestPasswordHasher;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
+
+trigger_deprecation('symfony/security-core', '5.3', 'The "%s" class is deprecated, use "%s" instead.', MessageDigestPasswordEncoder::class, MessageDigestPasswordHasher::class);
 
 /**
  * MessageDigestPasswordEncoder uses a message digest algorithm.
  *
  * @author Fabien Potencier <fabien@symfony.com>
+ *
+ * @deprecated since Symfony 5.3, use {@link MessageDigestPasswordHasher} instead
  */
 class MessageDigestPasswordEncoder extends BasePasswordEncoder
 {
@@ -47,7 +52,7 @@ class MessageDigestPasswordEncoder extends BasePasswordEncoder
     /**
      * {@inheritdoc}
      */
-    public function encodePassword($raw, $salt)
+    public function encodePassword(string $raw, ?string $salt)
     {
         if ($this->isPasswordTooLong($raw)) {
             throw new BadCredentialsException('Invalid password.');
@@ -71,9 +76,9 @@ class MessageDigestPasswordEncoder extends BasePasswordEncoder
     /**
      * {@inheritdoc}
      */
-    public function isPasswordValid($encoded, $raw, $salt)
+    public function isPasswordValid(string $encoded, string $raw, ?string $salt)
     {
-        if (\strlen($encoded) !== $this->encodedLength || false !== strpos($encoded, '$')) {
+        if (\strlen($encoded) !== $this->encodedLength || str_contains($encoded, '$')) {
             return false;
         }
 

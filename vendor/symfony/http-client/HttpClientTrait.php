@@ -12,17 +12,29 @@
 namespace Symfony\Component\HttpClient;
 
 use Symfony\Component\HttpClient\Exception\InvalidArgumentException;
+use Symfony\Component\HttpClient\Exception\TransportException;
 
 /**
  * Provides the common logic from writing HttpClientInterface implementations.
  *
- * All methods are static to prevent implementers from creating memory leaks via circular references.
+ * All private methods are static to prevent implementers from creating memory leaks via circular references.
  *
  * @author Nicolas Grekas <p@tchwork.com>
  */
 trait HttpClientTrait
 {
     private static $CHUNK_SIZE = 16372;
+
+    /**
+     * {@inheritdoc}
+     */
+    public function withOptions(array $options): self
+    {
+        $clone = clone $this;
+        $clone->defaultOptions = self::mergeDefaultOptions($options, $this->defaultOptions);
+
+        return $clone;
+    }
 
     /**
      * Validates and normalizes method, URL and options, and merges them with defaults.
@@ -36,7 +48,7 @@ trait HttpClientTrait
                 throw new InvalidArgumentException(sprintf('Invalid HTTP method "%s", only uppercase letters are accepted.', $method));
             }
             if (!$method) {
-                throw new InvalidArgumentException('The HTTP method can not be empty.');
+                throw new InvalidArgumentException('The HTTP method cannot be empty.');
             }
         }
 
@@ -48,7 +60,7 @@ trait HttpClientTrait
             $options['buffer'] = static function (array $headers) use ($buffer) {
                 if (!\is_bool($buffer = $buffer($headers))) {
                     if (!\is_array($bufferInfo = @stream_get_meta_data($buffer))) {
-                        throw new \LogicException(sprintf('The closure passed as option "buffer" must return bool or stream resource, got "%s".', \is_resource($buffer) ? get_resource_type($buffer).' resource' : \gettype($buffer)));
+                        throw new \LogicException(sprintf('The closure passed as option "buffer" must return bool or stream resource, got "%s".', get_debug_type($buffer)));
                     }
 
                     if (false === strpbrk($bufferInfo['mode'], 'acew+')) {
@@ -60,7 +72,7 @@ trait HttpClientTrait
             };
         } elseif (!\is_bool($buffer)) {
             if (!\is_array($bufferInfo = @stream_get_meta_data($buffer))) {
-                throw new InvalidArgumentException(sprintf('Option "buffer" must be bool, stream resource or Closure, "%s" given.', \is_resource($buffer) ? get_resource_type($buffer).' resource' : \gettype($buffer)));
+                throw new InvalidArgumentException(sprintf('Option "buffer" must be bool, stream resource or Closure, "%s" given.', get_debug_type($buffer)));
             }
 
             if (false === strpbrk($bufferInfo['mode'], 'acew+')) {
@@ -76,16 +88,28 @@ trait HttpClientTrait
             unset($options['json']);
 
             if (!isset($options['normalized_headers']['content-type'])) {
-                $options['normalized_headers']['content-type'] = [$options['headers'][] = 'Content-Type: application/json'];
+                $options['normalized_headers']['content-type'] = ['Content-Type: application/json'];
             }
         }
 
         if (!isset($options['normalized_headers']['accept'])) {
-            $options['normalized_headers']['accept'] = [$options['headers'][] = 'Accept: */*'];
+            $options['normalized_headers']['accept'] = ['Accept: */*'];
         }
 
         if (isset($options['body'])) {
             $options['body'] = self::normalizeBody($options['body']);
+
+            if (\is_string($options['body'])
+                && (string) \strlen($options['body']) !== substr($h = $options['normalized_headers']['content-length'][0] ?? '', 16)
+                && ('' !== $h || '' !== $options['body'])
+            ) {
+                if ('chunked' === substr($options['normalized_headers']['transfer-encoding'][0] ?? '', \strlen('Transfer-Encoding: '))) {
+                    unset($options['normalized_headers']['transfer-encoding']);
+                    $options['body'] = self::dechunk($options['body']);
+                }
+
+                $options['normalized_headers']['content-length'] = [substr_replace($h ?: 'Content-Length: ', \strlen($options['body']), 16)];
+            }
         }
 
         if (isset($options['peer_fingerprint'])) {
@@ -93,8 +117,8 @@ trait HttpClientTrait
         }
 
         // Validate on_progress
-        if (!\is_callable($onProgress = $options['on_progress'] ?? 'var_dump')) {
-            throw new InvalidArgumentException(sprintf('Option "on_progress" must be callable, "%s" given.', \is_object($onProgress) ? \get_class($onProgress) : \gettype($onProgress)));
+        if (isset($options['on_progress']) && !\is_callable($onProgress = $options['on_progress'])) {
+            throw new InvalidArgumentException(sprintf('Option "on_progress" must be callable, "%s" given.', get_debug_type($onProgress)));
         }
 
         if (\is_array($options['auth_basic'] ?? null)) {
@@ -107,12 +131,12 @@ trait HttpClientTrait
         }
 
         if (!\is_string($options['auth_basic'] ?? '')) {
-            throw new InvalidArgumentException(sprintf('Option "auth_basic" must be string or an array, "%s" given.', \gettype($options['auth_basic'])));
+            throw new InvalidArgumentException(sprintf('Option "auth_basic" must be string or an array, "%s" given.', get_debug_type($options['auth_basic'])));
         }
 
         if (isset($options['auth_bearer'])) {
             if (!\is_string($options['auth_bearer'])) {
-                throw new InvalidArgumentException(sprintf('Option "auth_bearer" must be a string, "%s" given.', \gettype($options['auth_bearer'])));
+                throw new InvalidArgumentException(sprintf('Option "auth_bearer" must be a string, "%s" given.', get_debug_type($options['auth_bearer'])));
             }
             if (preg_match('{[^\x21-\x7E]}', $options['auth_bearer'])) {
                 throw new InvalidArgumentException('Invalid character found in option "auth_bearer": '.json_encode($options['auth_bearer']).'.');
@@ -126,11 +150,11 @@ trait HttpClientTrait
         if (null !== $url) {
             // Merge auth with headers
             if (($options['auth_basic'] ?? false) && !($options['normalized_headers']['authorization'] ?? false)) {
-                $options['normalized_headers']['authorization'] = [$options['headers'][] = 'Authorization: Basic '.base64_encode($options['auth_basic'])];
+                $options['normalized_headers']['authorization'] = ['Authorization: Basic '.base64_encode($options['auth_basic'])];
             }
             // Merge bearer with headers
             if (($options['auth_bearer'] ?? false) && !($options['normalized_headers']['authorization'] ?? false)) {
-                $options['normalized_headers']['authorization'] = [$options['headers'][] = 'Authorization: Bearer '.$options['auth_bearer']];
+                $options['normalized_headers']['authorization'] = ['Authorization: Bearer '.$options['auth_bearer']];
             }
 
             unset($options['auth_basic'], $options['auth_bearer']);
@@ -147,8 +171,12 @@ trait HttpClientTrait
 
         // Finalize normalization of options
         $options['http_version'] = (string) ($options['http_version'] ?? '') ?: null;
-        $options['timeout'] = (float) ($options['timeout'] ?? ini_get('default_socket_timeout'));
+        if (0 > $options['timeout'] = (float) ($options['timeout'] ?? \ini_get('default_socket_timeout'))) {
+            $options['timeout'] = 172800.0; // 2 days
+        }
+
         $options['max_duration'] = isset($options['max_duration']) ? (float) $options['max_duration'] : 0;
+        $options['headers'] = array_merge(...array_values($options['normalized_headers']));
 
         return [$url, $options];
     }
@@ -176,9 +204,13 @@ trait HttpClientTrait
         // Option "query" is never inherited from defaults
         $options['query'] = $options['query'] ?? [];
 
-        foreach ($defaultOptions as $k => $v) {
-            if ('normalized_headers' !== $k && !isset($options[$k])) {
-                $options[$k] = $v;
+        $options += $defaultOptions;
+
+        if (isset(self::$emptyDefaults)) {
+            foreach (self::$emptyDefaults as $k => $v) {
+                if (!isset($options[$k])) {
+                    $options[$k] = $v;
+                }
             }
         }
 
@@ -214,9 +246,9 @@ trait HttpClientTrait
 
             $alternatives = [];
 
-            foreach ($defaultOptions as $key => $v) {
-                if (levenshtein($name, $key) <= \strlen($name) / 3 || false !== strpos($key, $name)) {
-                    $alternatives[] = $key;
+            foreach ($defaultOptions as $k => $v) {
+                if (levenshtein($name, $k) <= \strlen($name) / 3 || str_contains($k, $name)) {
+                    $alternatives[] = $k;
                 }
             }
 
@@ -242,13 +274,13 @@ trait HttpClientTrait
 
             if (\is_int($name)) {
                 if (!\is_string($values)) {
-                    throw new InvalidArgumentException(sprintf('Invalid value for header "%s": expected string, "%s" given.', $name, \gettype($values)));
+                    throw new InvalidArgumentException(sprintf('Invalid value for header "%s": expected string, "%s" given.', $name, get_debug_type($values)));
                 }
                 [$name, $values] = explode(':', $values, 2);
                 $values = [ltrim($values)];
             } elseif (!is_iterable($values)) {
                 if (\is_object($values)) {
-                    throw new InvalidArgumentException(sprintf('Invalid value for header "%s": expected string, "%s" given.', $name, \get_class($values)));
+                    throw new InvalidArgumentException(sprintf('Invalid value for header "%s": expected string, "%s" given.', $name, get_debug_type($values)));
                 }
 
                 $values = (array) $values;
@@ -279,11 +311,45 @@ trait HttpClientTrait
     private static function normalizeBody($body)
     {
         if (\is_array($body)) {
-            return http_build_query($body, '', '&', \PHP_QUERY_RFC1738);
+            array_walk_recursive($body, $caster = static function (&$v) use (&$caster) {
+                if (\is_object($v)) {
+                    if ($vars = get_object_vars($v)) {
+                        array_walk_recursive($vars, $caster);
+                        $v = $vars;
+                    } elseif (method_exists($v, '__toString')) {
+                        $v = (string) $v;
+                    }
+                }
+            });
+
+            return http_build_query($body, '', '&');
+        }
+
+        if (\is_string($body)) {
+            return $body;
+        }
+
+        $generatorToCallable = static function (\Generator $body): \Closure {
+            return static function () use ($body) {
+                while ($body->valid()) {
+                    $chunk = $body->current();
+                    $body->next();
+
+                    if ('' !== $chunk) {
+                        return $chunk;
+                    }
+                }
+
+                return '';
+            };
+        };
+
+        if ($body instanceof \Generator) {
+            return $generatorToCallable($body);
         }
 
         if ($body instanceof \Traversable) {
-            $body = function () use ($body) { yield from $body; };
+            return $generatorToCallable((static function ($body) { yield from $body; })($body));
         }
 
         if ($body instanceof \Closure) {
@@ -292,25 +358,31 @@ trait HttpClientTrait
 
             if ($r->isGenerator()) {
                 $body = $body(self::$CHUNK_SIZE);
-                $body = function () use ($body) {
-                    while ($body->valid()) {
-                        $chunk = $body->current();
-                        $body->next();
 
-                        if ('' !== $chunk) {
-                            return $chunk;
-                        }
-                    }
-
-                    return '';
-                };
+                return $generatorToCallable($body);
             }
 
             return $body;
         }
 
-        if (!\is_string($body) && !\is_array(@stream_get_meta_data($body))) {
-            throw new InvalidArgumentException(sprintf('Option "body" must be string, stream resource, iterable or callable, "%s" given.', \is_resource($body) ? get_resource_type($body) : \gettype($body)));
+        if (!\is_array(@stream_get_meta_data($body))) {
+            throw new InvalidArgumentException(sprintf('Option "body" must be string, stream resource, iterable or callable, "%s" given.', get_debug_type($body)));
+        }
+
+        return $body;
+    }
+
+    private static function dechunk(string $body): string
+    {
+        $h = fopen('php://temp', 'w+');
+        stream_filter_append($h, 'dechunk', \STREAM_FILTER_WRITE);
+        fwrite($h, $body);
+        $body = stream_get_contents($h, -1, 0);
+        rewind($h);
+        ftruncate($h, 0);
+
+        if (fwrite($h, '-') && '' !== stream_get_contents($h, -1, 0)) {
+            throw new TransportException('Request body has broken chunked encoding.');
         }
 
         return $body;
@@ -336,7 +408,7 @@ trait HttpClientTrait
                 $fingerprint[$algo] = 'pin-sha256' === $algo ? (array) $hash : str_replace(':', '', $hash);
             }
         } else {
-            throw new InvalidArgumentException(sprintf('Option "peer_fingerprint" must be string or array, "%s" given.', \gettype($fingerprint)));
+            throw new InvalidArgumentException(sprintf('Option "peer_fingerprint" must be string or array, "%s" given.', get_debug_type($fingerprint)));
         }
 
         return $fingerprint;
@@ -422,6 +494,10 @@ trait HttpClientTrait
             $url['path'] = '/';
         }
 
+        if ('?' === ($url['query'] ?? '')) {
+            $url['query'] = null;
+        }
+
         return $url;
     }
 
@@ -456,7 +532,7 @@ trait HttpClientTrait
                 throw new InvalidArgumentException(sprintf('Unsupported IDN "%s", try enabling the "intl" PHP extension or running "composer require symfony/polyfill-intl-idn".', $host));
             }
 
-            $host = \defined('INTL_IDNA_VARIANT_UTS46') ? idn_to_ascii($host, \IDNA_DEFAULT, \INTL_IDNA_VARIANT_UTS46) ?: strtolower($host) : strtolower($host);
+            $host = \defined('INTL_IDNA_VARIANT_UTS46') ? idn_to_ascii($host, \IDNA_DEFAULT | \IDNA_USE_STD3_RULES | \IDNA_CHECK_BIDI | \IDNA_CHECK_CONTEXTJ | \IDNA_NONTRANSITIONAL_TO_ASCII, \INTL_IDNA_VARIANT_UTS46) ?: strtolower($host) : strtolower($host);
             $host .= $port ? ':'.$port : '';
         }
 
@@ -465,13 +541,13 @@ trait HttpClientTrait
                 continue;
             }
 
-            if (false !== strpos($parts[$part], '%')) {
+            if (str_contains($parts[$part], '%')) {
                 // https://tools.ietf.org/html/rfc3986#section-2.3
                 $parts[$part] = preg_replace_callback('/%(?:2[DE]|3[0-9]|[46][1-9A-F]|5F|[57][0-9A]|7E)++/i', function ($m) { return rawurldecode($m[0]); }, $parts[$part]);
             }
 
             // https://tools.ietf.org/html/rfc3986#section-3.3
-            $parts[$part] = preg_replace_callback("#[^-A-Za-z0-9._~!$&/'()*+,;=:@%]++#", function ($m) { return rawurlencode($m[0]); }, $parts[$part]);
+            $parts[$part] = preg_replace_callback("#[^-A-Za-z0-9._~!$&/'()[\]*+,;=:@\\\\^`{|}%]++#", function ($m) { return rawurlencode($m[0]); }, $parts[$part]);
         }
 
         return [
@@ -493,11 +569,11 @@ trait HttpClientTrait
         $result = '';
 
         while (!\in_array($path, ['', '.', '..'], true)) {
-            if ('.' === $path[0] && (0 === strpos($path, $p = '../') || 0 === strpos($path, $p = './'))) {
+            if ('.' === $path[0] && (str_starts_with($path, $p = '../') || str_starts_with($path, $p = './'))) {
                 $path = substr($path, \strlen($p));
-            } elseif ('/.' === $path || 0 === strpos($path, '/./')) {
+            } elseif ('/.' === $path || str_starts_with($path, '/./')) {
                 $path = substr_replace($path, '/', 0, 3);
-            } elseif ('/..' === $path || 0 === strpos($path, '/../')) {
+            } elseif ('/..' === $path || str_starts_with($path, '/../')) {
                 $i = strrpos($result, '/');
                 $result = $i ? substr($result, 0, $i) : '';
                 $path = substr_replace($path, '/', 0, 4);
@@ -545,12 +621,75 @@ trait HttpClientTrait
         $queryArray = [];
 
         if ($queryString) {
+            if (str_contains($queryString, '%')) {
+                // https://tools.ietf.org/html/rfc3986#section-2.3 + some chars not encoded by browsers
+                $queryString = strtr($queryString, [
+                    '%21' => '!',
+                    '%24' => '$',
+                    '%28' => '(',
+                    '%29' => ')',
+                    '%2A' => '*',
+                    '%2F' => '/',
+                    '%3A' => ':',
+                    '%3B' => ';',
+                    '%40' => '@',
+                    '%5B' => '[',
+                    '%5C' => '\\',
+                    '%5D' => ']',
+                    '%5E' => '^',
+                    '%60' => '`',
+                    '%7C' => '|',
+                ]);
+            }
+
             foreach (explode('&', $queryString) as $v) {
                 $queryArray[rawurldecode(explode('=', $v, 2)[0])] = $v;
             }
         }
 
         return implode('&', $replace ? array_replace($query, $queryArray) : ($query + $queryArray));
+    }
+
+    /**
+     * Loads proxy configuration from the same environment variables as curl when no proxy is explicitly set.
+     */
+    private static function getProxy(?string $proxy, array $url, ?string $noProxy): ?array
+    {
+        if (null === $proxy) {
+            // Ignore HTTP_PROXY except on the CLI to work around httpoxy set of vulnerabilities
+            $proxy = $_SERVER['http_proxy'] ?? (\in_array(\PHP_SAPI, ['cli', 'phpdbg'], true) ? $_SERVER['HTTP_PROXY'] ?? null : null) ?? $_SERVER['all_proxy'] ?? $_SERVER['ALL_PROXY'] ?? null;
+
+            if ('https:' === $url['scheme']) {
+                $proxy = $_SERVER['https_proxy'] ?? $_SERVER['HTTPS_PROXY'] ?? $proxy;
+            }
+        }
+
+        if (null === $proxy) {
+            return null;
+        }
+
+        $proxy = (parse_url($proxy) ?: []) + ['scheme' => 'http'];
+
+        if (!isset($proxy['host'])) {
+            throw new TransportException('Invalid HTTP proxy: host is missing.');
+        }
+
+        if ('http' === $proxy['scheme']) {
+            $proxyUrl = 'tcp://'.$proxy['host'].':'.($proxy['port'] ?? '80');
+        } elseif ('https' === $proxy['scheme']) {
+            $proxyUrl = 'ssl://'.$proxy['host'].':'.($proxy['port'] ?? '443');
+        } else {
+            throw new TransportException(sprintf('Unsupported proxy scheme "%s": "http" or "https" expected.', $proxy['scheme']));
+        }
+
+        $noProxy = $noProxy ?? $_SERVER['no_proxy'] ?? $_SERVER['NO_PROXY'] ?? '';
+        $noProxy = $noProxy ? preg_split('/[\s,]+/', $noProxy) : [];
+
+        return [
+            'url' => $proxyUrl,
+            'auth' => isset($proxy['user']) ? 'Basic '.base64_encode(rawurldecode($proxy['user']).':'.rawurldecode($proxy['pass'] ?? '')) : null,
+            'no_proxy' => $noProxy,
+        ];
     }
 
     private static function shouldBuffer(array $headers): bool

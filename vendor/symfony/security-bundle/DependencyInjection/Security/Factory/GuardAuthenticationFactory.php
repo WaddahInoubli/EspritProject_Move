@@ -12,24 +12,34 @@
 namespace Symfony\Bundle\SecurityBundle\DependencyInjection\Security\Factory;
 
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\Security\Guard\Authenticator\GuardBridgeAuthenticator;
 
 /**
  * Configures the "guard" authentication provider key under a firewall.
  *
  * @author Ryan Weaver <ryan@knpuniversity.com>
+ *
+ * @internal
  */
-class GuardAuthenticationFactory implements SecurityFactoryInterface
+class GuardAuthenticationFactory implements SecurityFactoryInterface, AuthenticatorFactoryInterface
 {
-    public function getPosition()
+    public function getPosition(): string
     {
         return 'pre_auth';
     }
 
-    public function getKey()
+    public function getPriority(): int
+    {
+        return 0;
+    }
+
+    public function getKey(): string
     {
         return 'guard';
     }
@@ -55,7 +65,7 @@ class GuardAuthenticationFactory implements SecurityFactoryInterface
         ;
     }
 
-    public function create(ContainerBuilder $container, $id, $config, $userProvider, $defaultEntryPoint)
+    public function create(ContainerBuilder $container, string $id, array $config, string $userProvider, ?string $defaultEntryPoint): array
     {
         $authenticatorIds = $config['authenticators'];
         $authenticatorReferences = [];
@@ -90,6 +100,27 @@ class GuardAuthenticationFactory implements SecurityFactoryInterface
             ->addTag('security.remember_me_aware', ['id' => $id, 'provider' => $userProvider]);
 
         return [$providerId, $listenerId, $entryPointId];
+    }
+
+    public function createAuthenticator(ContainerBuilder $container, string $firewallName, array $config, string $userProviderId)
+    {
+        $userProvider = new Reference($userProviderId);
+        $authenticatorIds = [];
+
+        if (isset($config['entry_point'])) {
+            throw new InvalidConfigurationException('The "security.firewall.'.$firewallName.'.guard.entry_point" option has no effect in the new authenticator system, configure "security.firewall.'.$firewallName.'.entry_point" instead.');
+        }
+
+        $guardAuthenticatorIds = $config['authenticators'];
+        foreach ($guardAuthenticatorIds as $i => $guardAuthenticatorId) {
+            $container->setDefinition($authenticatorIds[] = 'security.authenticator.guard.'.$firewallName.'.'.$i, new Definition(GuardBridgeAuthenticator::class))
+                ->setArguments([
+                    new Reference($guardAuthenticatorId),
+                    $userProvider,
+                ]);
+        }
+
+        return $authenticatorIds;
     }
 
     private function determineEntryPoint(?string $defaultEntryPointId, array $config): string

@@ -5,12 +5,12 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
-    phpVersion="8.0"
+    phpVersion="8.1"
 >
     <projectFiles>
-        <directory name="lib/Doctrine/Common" />
+        <directory name="src" />
         <ignoreFiles>
-            <directory name="vendor" />
+            <file name="src/Proxy/ProxyGenerator.php" />
         </ignoreFiles>
     </projectFiles>
 </psalm>

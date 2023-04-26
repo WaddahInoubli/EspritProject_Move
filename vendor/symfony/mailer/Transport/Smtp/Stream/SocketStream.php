@@ -26,11 +26,14 @@ final class SocketStream extends AbstractStream
     private $url;
     private $host = 'localhost';
     private $port = 465;
-    private $timeout = 5;
+    private $timeout;
     private $tls = true;
     private $sourceIp;
     private $streamContextOptions = [];
 
+    /**
+     * @return $this
+     */
     public function setTimeout(float $timeout): self
     {
         $this->timeout = $timeout;
@@ -40,11 +43,13 @@ final class SocketStream extends AbstractStream
 
     public function getTimeout(): float
     {
-        return $this->timeout;
+        return $this->timeout ?? (float) \ini_get('default_socket_timeout');
     }
 
     /**
      * Literal IPv6 addresses should be wrapped in square brackets.
+     *
+     * @return $this
      */
     public function setHost(string $host): self
     {
@@ -58,6 +63,9 @@ final class SocketStream extends AbstractStream
         return $this->host;
     }
 
+    /**
+     * @return $this
+     */
     public function setPort(int $port): self
     {
         $this->port = $port;
@@ -72,6 +80,8 @@ final class SocketStream extends AbstractStream
 
     /**
      * Sets the TLS/SSL on the socket (disables STARTTLS).
+     *
+     * @return $this
      */
     public function disableTls(): self
     {
@@ -85,6 +95,9 @@ final class SocketStream extends AbstractStream
         return $this->tls;
     }
 
+    /**
+     * @return $this
+     */
     public function setStreamOptions(array $options): self
     {
         $this->streamContextOptions = $options;
@@ -101,6 +114,8 @@ final class SocketStream extends AbstractStream
      * Sets the source IP.
      *
      * IPv6 addresses should be wrapped in square brackets.
+     *
+     * @return $this
      */
     public function setSourceIp(string $ip): self
     {
@@ -130,28 +145,36 @@ final class SocketStream extends AbstractStream
         if ($this->streamContextOptions) {
             $options = array_merge($options, $this->streamContextOptions);
         }
-        // do it unconditionnally as it will be used by STARTTLS as well if supported
+        // do it unconditionally as it will be used by STARTTLS as well if supported
         $options['ssl']['crypto_method'] = $options['ssl']['crypto_method'] ?? \STREAM_CRYPTO_METHOD_TLS_CLIENT | \STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT | \STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT;
         $streamContext = stream_context_create($options);
 
+        $timeout = $this->getTimeout();
         set_error_handler(function ($type, $msg) {
             throw new TransportException(sprintf('Connection could not be established with host "%s": ', $this->url).$msg);
         });
         try {
-            $this->stream = stream_socket_client($this->url, $errno, $errstr, $this->timeout, \STREAM_CLIENT_CONNECT, $streamContext);
+            $this->stream = stream_socket_client($this->url, $errno, $errstr, $timeout, \STREAM_CLIENT_CONNECT, $streamContext);
         } finally {
             restore_error_handler();
         }
 
         stream_set_blocking($this->stream, true);
-        stream_set_timeout($this->stream, $this->timeout);
+        stream_set_timeout($this->stream, $timeout);
         $this->in = &$this->stream;
         $this->out = &$this->stream;
     }
 
     public function startTLS(): bool
     {
-        return (bool) stream_socket_enable_crypto($this->stream, true);
+        set_error_handler(function ($type, $msg) {
+            throw new TransportException('Unable to connect with STARTTLS: '.$msg);
+        });
+        try {
+            return stream_socket_enable_crypto($this->stream, true);
+        } finally {
+            restore_error_handler();
+        }
     }
 
     public function terminate(): void

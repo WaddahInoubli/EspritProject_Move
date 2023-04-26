@@ -47,6 +47,13 @@ final class XmlFile extends ConfigurationFile
             );
         }
 
+        if (isset($config['transactional'])) {
+            $config['transactional'] = BooleanStringFormatter::toBoolean(
+                $config['transactional'],
+                true
+            );
+        }
+
         if (isset($config['migrations_paths'])) {
             $config['migrations_paths'] = $this->getDirectoriesRelativeToFile(
                 $config['migrations_paths'],
@@ -80,16 +87,24 @@ final class XmlFile extends ConfigurationFile
             } elseif ($nodeName === 'storage' && $node->{'table-storage'} instanceof SimpleXMLElement) {
                 $config['table_storage'] = $this->extractParameters($node->{'table-storage'}, false);
             } elseif ($nodeName === 'migrations') {
-                $config['migrations'] = [];
-                foreach ($node->{'migration'} as $pathNode) {
-                    $config['migrations'][] = (string) $pathNode;
-                }
+                $config['migrations'] = $this->extractMigrations($node);
             } else {
                 $config[$nodeName] = (string) $node;
             }
         }
 
         return $config;
+    }
+
+    /** @return list<string> */
+    private function extractMigrations(SimpleXMLElement $node): array
+    {
+        $migrations = [];
+        foreach ($node->{'migration'} as $pathNode) {
+            $migrations[] = (string) $pathNode;
+        }
+
+        return $migrations;
     }
 
     private function validateXml(string $file): void

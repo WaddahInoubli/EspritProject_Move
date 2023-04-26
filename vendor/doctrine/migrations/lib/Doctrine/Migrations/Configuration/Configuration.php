@@ -21,40 +21,32 @@ final class Configuration
     public const VERSIONS_ORGANIZATION_BY_YEAR_AND_MONTH = 'year_and_month';
 
     /** @var array<string, string> */
-    private $migrationsDirectories = [];
+    private array $migrationsDirectories = [];
 
     /** @var string[] */
-    private $migrationClasses = [];
+    private array $migrationClasses = [];
 
-    /** @var bool */
-    private $migrationsAreOrganizedByYear = false;
+    private bool $migrationsAreOrganizedByYear = false;
 
-    /** @var bool */
-    private $migrationsAreOrganizedByYearAndMonth = false;
+    private bool $migrationsAreOrganizedByYearAndMonth = false;
 
-    /** @var string|null */
-    private $customTemplate;
+    private ?string $customTemplate = null;
 
-    /** @var bool */
-    private $isDryRun = false;
+    private bool $isDryRun = false;
 
-    /** @var bool */
-    private $allOrNothing = false;
+    private bool $allOrNothing = false;
 
-    /** @var string|null */
-    private $connectionName;
+    private bool $transactional = true;
 
-    /** @var string|null */
-    private $entityManagerName;
+    private ?string $connectionName = null;
 
-    /** @var bool */
-    private $checkDbPlatform = true;
+    private ?string $entityManagerName = null;
 
-    /** @var MetadataStorageConfiguration */
-    private $metadataStorageConfiguration;
+    private bool $checkDbPlatform = true;
 
-    /** @var bool */
-    private $frozen = false;
+    private ?MetadataStorageConfiguration $metadataStorageConfiguration = null;
+
+    private bool $frozen = false;
 
     public function freeze(): void
     {
@@ -191,6 +183,17 @@ final class Configuration
     public function isAllOrNothing(): bool
     {
         return $this->allOrNothing;
+    }
+
+    public function setTransactional(bool $transactional): void
+    {
+        $this->assertNotFrozen();
+        $this->transactional = $transactional;
+    }
+
+    public function isTransactional(): bool
+    {
+        return $this->transactional;
     }
 
     public function setCheckDatabasePlatform(bool $checkDbPlatform): void

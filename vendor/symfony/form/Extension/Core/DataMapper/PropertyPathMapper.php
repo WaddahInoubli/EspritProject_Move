@@ -14,14 +14,19 @@ namespace Symfony\Component\Form\Extension\Core\DataMapper;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
 use Symfony\Component\PropertyAccess\Exception\AccessException;
+use Symfony\Component\PropertyAccess\Exception\NoSuchIndexException;
 use Symfony\Component\PropertyAccess\Exception\UninitializedPropertyException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
+
+trigger_deprecation('symfony/form', '5.2', 'The "%s" class is deprecated. Use "%s" instead.', PropertyPathMapper::class, DataMapper::class);
 
 /**
  * Maps arrays/objects to/from forms using property paths.
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
+ *
+ * @deprecated since symfony/form 5.2. Use {@see DataMapper} instead.
  */
 class PropertyPathMapper implements DataMapperInterface
 {
@@ -35,7 +40,7 @@ class PropertyPathMapper implements DataMapperInterface
     /**
      * {@inheritdoc}
      */
-    public function mapDataToForms($data, $forms)
+    public function mapDataToForms($data, iterable $forms)
     {
         $empty = null === $data || [] === $data;
 
@@ -58,7 +63,7 @@ class PropertyPathMapper implements DataMapperInterface
     /**
      * {@inheritdoc}
      */
-    public function mapFormsToData($forms, &$data)
+    public function mapFormsToData(iterable $forms, &$data)
     {
         if (null === $data) {
             return;
@@ -96,9 +101,13 @@ class PropertyPathMapper implements DataMapperInterface
         try {
             return $this->propertyAccessor->getValue($data, $propertyPath);
         } catch (AccessException $e) {
+            if (\is_array($data) && $e instanceof NoSuchIndexException) {
+                return null;
+            }
+
             if (!$e instanceof UninitializedPropertyException
                 // For versions without UninitializedPropertyException check the exception message
-                && (class_exists(UninitializedPropertyException::class) || false === strpos($e->getMessage(), 'You should initialize it'))
+                && (class_exists(UninitializedPropertyException::class) || !str_contains($e->getMessage(), 'You should initialize it'))
             ) {
                 throw $e;
             }

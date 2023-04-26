@@ -1,11 +1,5 @@
 <?php
 
-/**
- * @see       https://github.com/laminas/laminas-code for the canonical source repository
- * @copyright https://github.com/laminas/laminas-code/blob/master/COPYRIGHT.md
- * @license   https://github.com/laminas/laminas-code/blob/master/LICENSE.md New BSD License
- */
-
 namespace Laminas\Code\Generator\DocBlock;
 
 use Laminas\Code\Generator\DocBlock\Tag\TagInterface;
@@ -15,6 +9,7 @@ use ReflectionClass;
 use ReflectionMethod;
 
 use function method_exists;
+use function str_starts_with;
 use function strpos;
 use function substr;
 use function ucfirst;
@@ -58,12 +53,12 @@ class TagManager extends PrototypeClassFactory
         // transport any properties via accessors and mutators from reflection to codegen object
         $reflectionClass = new ReflectionClass($reflectionTag);
         foreach ($reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
-            if (0 === strpos($method->getName(), 'get')) {
+            if (str_starts_with($method->getName(), 'get')) {
                 $propertyName = substr($method->getName(), 3);
                 if (method_exists($newTag, 'set' . $propertyName)) {
                     $newTag->{'set' . $propertyName}($reflectionTag->{'get' . $propertyName}());
                 }
-            } elseif (0 === strpos($method->getName(), 'is')) {
+            } elseif (str_starts_with($method->getName(), 'is')) {
                 $propertyName = ucfirst($method->getName());
                 if (method_exists($newTag, 'set' . $propertyName)) {
                     $newTag->{'set' . $propertyName}($reflectionTag->{$method->getName()}());

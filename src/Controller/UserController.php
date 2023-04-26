@@ -2,28 +2,23 @@
 
 namespace App\Controller;
 
-use App\Entity\Publicity;
 use App\Entity\User;
-use App\Form\PublicityType;
 use App\Form\UserType;
+use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Core\Encoder\BCryptPasswordEncoder;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-
-/**
- * @Route("/admin/users")
- */
-class UserController extends AbstractController
-{
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 
-    /**
-     * @Route("/", name="back_users")
-     */
+#[Route('/admin/users')]
+class UserController extends AbstractController {
+
+
+
+    #[Route("/", name:"back_users")]
     public function users(): Response
     {
         return $this->render('back_template/user/index.html.twig', [
@@ -32,19 +27,26 @@ class UserController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/form", name="back_users_form")
-     */
-    public function newUser(Request $request, UserPasswordEncoderInterface $passwordEncoder): Response
+
+    #[Route("/form", name:"back_users_form")]
+    public function newUser(Request $request, UserPasswordEncoderInterface $passwordEncoder,ValidatorInterface $validator): Response
     {
         $user =new User();
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted()) {
+
+            $errors = $validator->validate($user);
+            if (count($errors) > 0) {
+                return $this->render('back_template/user/form.html.twig', [
+                    'form' => $form->createView(),
+                    'title'=>"Add User",
+                    'user'=>$user,
+                ]);
+            }
             if(!empty($this->getDoctrine()->getRepository(User::class)->findOneBy(['email' => $form["email"]->getData()]))){
                 $this->addFlash('danger', 'Duplicated Email');
                 return $this->render('back_template/user/form.html.twig', [
-                    'controller_name' => 'UserController',
                     'form' => $form->createView(),
                     'title'=>"Add User",
                     'user'=>$user
@@ -62,22 +64,28 @@ class UserController extends AbstractController
         }
 
             return $this->render('back_template/user/form.html.twig', [
-            'controller_name' => 'UserController',
             'form' => $form->createView(),
                 'title'=>"Add User",
                 'user'=>$user
         ]);
     }
 
-    /**
-     * @Route("/form/{id}", name="back_users_form_edit")
-     */
-    public function editUser(Request $request , $id ,UserPasswordEncoderInterface $passwordEncoder): Response
+
+    #[Route("/form/{id}", name:"back_users_form_edit")]
+    public function editUser(Request $request , $id ,UserPasswordEncoderInterface $passwordEncoder,ValidatorInterface $validator): Response
     {
         $user =$this->getDoctrine()->getRepository(User::class)->find($id);
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted()) {
+            $errors = $validator->validate($user);
+            if (count($errors) > 0) {
+                return $this->render('back_template/user/form.html.twig', [
+                    'form' => $form->createView(),
+                    'title'=>"Modifier ".$user->getNom()." ".$user->getPrenom(),
+                    'user'=>$user,
+                ]);
+            }
             if(!empty($this->getDoctrine()->getRepository(User::class)->findOneBy(['email' => $form["email"]->getData()]))){
                 if($this->getDoctrine()->getRepository(User::class)->findOneBy(['email' => $form["email"]->getData()])!=$user){
                     $this->addFlash('danger', 'Duplicated Email');
@@ -107,9 +115,8 @@ class UserController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/delete/{id}", name="back_users_delete")
-     */
+
+    #[Route("/delete/{id}", name:"back_users_delete")]
     public function deleteUser($id): Response
     {
         $user =$this->getDoctrine()->getRepository(User::class)->find($id);
@@ -120,4 +127,15 @@ class UserController extends AbstractController
         return $this->redirectToRoute('back_users');
 
     }
+    public function searchUser(Request $request, UserRepository $userRepository): Response
+    {
+        $name = $request->query->get('name');
+        $users = $userRepository->searchUsersByName($name);
+
+        return $this->render('user/search.html.twig', [
+            'users' => $users,
+            'name' => $name,
+        ]);
+    }
+
 }

@@ -6,10 +6,9 @@ namespace Doctrine\Migrations\Metadata\Storage;
 
 use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Connections\MasterSlaveConnection;
+use Doctrine\DBAL\Connections\PrimaryReadReplicaConnection;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
-use Doctrine\DBAL\Schema\Comparator;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\TableDiff;
 use Doctrine\DBAL\Types\Types;
@@ -18,6 +17,7 @@ use Doctrine\Migrations\Metadata\AvailableMigration;
 use Doctrine\Migrations\Metadata\ExecutedMigration;
 use Doctrine\Migrations\Metadata\ExecutedMigrationsList;
 use Doctrine\Migrations\MigrationsRepository;
+use Doctrine\Migrations\Query\Query;
 use Doctrine\Migrations\Version\Comparator as MigrationsComparator;
 use Doctrine\Migrations\Version\Direction;
 use Doctrine\Migrations\Version\ExecutionResult;
@@ -37,23 +37,22 @@ use const CASE_LOWER;
 
 final class TableMetadataStorage implements MetadataStorage
 {
-    /** @var Connection */
-    private $connection;
+    private bool $isInitialized = false;
 
-    /** @var AbstractSchemaManager */
-    private $schemaManager;
+    private bool $schemaUpToDate = false;
 
-    /** @var AbstractPlatform */
-    private $platform;
+    private Connection $connection;
 
-    /** @var TableMetadataStorageConfiguration */
-    private $configuration;
+    /** @var AbstractSchemaManager<AbstractPlatform> */
+    private AbstractSchemaManager $schemaManager;
 
-    /** @var MigrationsRepository|null */
-    private $migrationRepository;
+    private AbstractPlatform $platform;
 
-    /** @var MigrationsComparator */
-    private $comparator;
+    private TableMetadataStorageConfiguration $configuration;
+
+    private ?MigrationsRepository $migrationRepository = null;
+
+    private MigrationsComparator $comparator;
 
     public function __construct(
         Connection $connection,
@@ -63,7 +62,7 @@ final class TableMetadataStorage implements MetadataStorage
     ) {
         $this->migrationRepository = $migrationRepository;
         $this->connection          = $connection;
-        $this->schemaManager       = $connection->getSchemaManager();
+        $this->schemaManager       = $connection->createSchemaManager();
         $this->platform            = $connection->getDatabasePlatform();
 
         if ($configuration !== null && ! ($configuration instanceof TableMetadataStorageConfiguration)) {
@@ -81,7 +80,7 @@ final class TableMetadataStorage implements MetadataStorage
         }
 
         $this->checkInitialization();
-        $rows = $this->connection->fetchAll(sprintf('SELECT * FROM %s', $this->configuration->getTableName()));
+        $rows = $this->connection->fetchAllAssociative(sprintf('SELECT * FROM %s', $this->configuration->getTableName()));
 
         $migrations = [];
         foreach ($rows as $row) {
@@ -118,7 +117,7 @@ final class TableMetadataStorage implements MetadataStorage
     {
         $this->checkInitialization();
 
-        $this->connection->executeUpdate(
+        $this->connection->executeStatement(
             sprintf(
                 'DELETE FROM %s WHERE 1 = 1',
                 $this->platform->quoteIdentifier($this->configuration->getTableName())
@@ -147,38 +146,80 @@ final class TableMetadataStorage implements MetadataStorage
         }
     }
 
+    /**
+     * @return iterable<Query>
+     */
+    public function getSql(ExecutionResult $result): iterable
+    {
+        yield new Query('-- Version ' . (string) $result->getVersion() . ' update table metadata');
+
+        if ($result->getDirection() === Direction::DOWN) {
+            yield new Query(sprintf(
+                'DELETE FROM %s WHERE %s = %s',
+                $this->configuration->getTableName(),
+                $this->configuration->getVersionColumnName(),
+                $this->connection->quote((string) $result->getVersion())
+            ));
+
+            return;
+        }
+
+        yield new Query(sprintf(
+            'INSERT INTO %s (%s, %s, %s) VALUES (%s, %s, 0)',
+            $this->configuration->getTableName(),
+            $this->configuration->getVersionColumnName(),
+            $this->configuration->getExecutedAtColumnName(),
+            $this->configuration->getExecutionTimeColumnName(),
+            $this->connection->quote((string) $result->getVersion()),
+            $this->connection->quote(($result->getExecutedAt() ?? new DateTimeImmutable())->format('Y-m-d H:i:s'))
+        ));
+    }
+
     public function ensureInitialized(): void
     {
         if (! $this->isInitialized()) {
             $expectedSchemaChangelog = $this->getExpectedTable();
             $this->schemaManager->createTable($expectedSchemaChangelog);
+            $this->schemaUpToDate = true;
+            $this->isInitialized  = true;
 
             return;
         }
 
+        $this->isInitialized     = true;
         $expectedSchemaChangelog = $this->getExpectedTable();
         $diff                    = $this->needsUpdate($expectedSchemaChangelog);
         if ($diff === null) {
+            $this->schemaUpToDate = true;
+
             return;
         }
 
+        $this->schemaUpToDate = true;
         $this->schemaManager->alterTable($diff);
         $this->updateMigratedVersionsFromV1orV2toV3();
     }
 
     private function needsUpdate(Table $expectedTable): ?TableDiff
     {
-        $comparator   = new Comparator();
-        $currentTable = $this->schemaManager->listTableDetails($this->configuration->getTableName());
-        $diff         = $comparator->diffTable($currentTable, $expectedTable);
+        if ($this->schemaUpToDate) {
+            return null;
+        }
 
-        return $diff instanceof TableDiff ? $diff : null;
+        $currentTable = $this->schemaManager->introspectTable($this->configuration->getTableName());
+        $diff         = $this->schemaManager->createComparator()->compareTables($currentTable, $expectedTable);
+
+        return $diff->isEmpty() ? null : $diff;
     }
 
     private function isInitialized(): bool
     {
-        if ($this->connection instanceof MasterSlaveConnection) {
-            $this->connection->connect('master');
+        if ($this->isInitialized) {
+            return $this->isInitialized;
+        }
+
+        if ($this->connection instanceof PrimaryReadReplicaConnection) {
+            $this->connection->ensureConnectedToPrimary();
         }
 
         return $this->schemaManager->tablesExist([$this->configuration->getTableName()]);

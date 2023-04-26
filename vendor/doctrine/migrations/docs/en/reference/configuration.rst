@@ -27,7 +27,7 @@ Now, in the root of your project place a file named ``migrations.php``, ``migrat
             'table_storage' => [
                 'table_name' => 'doctrine_migration_versions',
                 'version_column_name' => 'version',
-                'version_column_length' => 1024,
+                'version_column_length' => 191,
                 'executed_at_column_name' => 'executed_at',
                 'execution_time_column_name' => 'execution_time',
             ],
@@ -38,6 +38,7 @@ Now, in the root of your project place a file named ``migrations.php``, ``migrat
             ],
 
             'all_or_nothing' => true,
+            'transactional' => true,
             'check_database_platform' => true,
             'organize_migrations' => 'none',
             'connection' => null,
@@ -49,7 +50,7 @@ Now, in the root of your project place a file named ``migrations.php``, ``migrat
         table_storage:
            table_name: doctrine_migration_versions
            version_column_name: version
-           version_column_length: 1024
+           version_column_length: 191
            executed_at_column_name: executed_at
            execution_time_column_name: execution_time
 
@@ -58,6 +59,7 @@ Now, in the root of your project place a file named ``migrations.php``, ``migrat
            'MyProject\Component\Migrations': ./Component/MyProject/Migrations
 
         all_or_nothing: true
+        transactional: true
         check_database_platform: true
         organize_migrations: none
 
@@ -79,7 +81,7 @@ Now, in the root of your project place a file named ``migrations.php``, ``migrat
                 <table-storage
                         table-name="doctrine_migration_versions"
                         version-column-name="version"
-                        version-column-length="1024"
+                        version-column-length="191"
                         executed-at-column-name="executed_at"
                         execution-time-column-name="execution_time"
                 />
@@ -90,6 +92,7 @@ Now, in the root of your project place a file named ``migrations.php``, ``migrat
             </migrations-paths>
 
             <all-or-nothing>true</all-or-nothing>
+            <transactional>true</transactional>
 
             <check-database-platform>true</check-database-platform>
             <organize_migrations>none</organize_migrations>
@@ -101,19 +104,20 @@ Now, in the root of your project place a file named ``migrations.php``, ``migrat
             "table_storage": {
                "table_name": "doctrine_migration_versions",
                "version_column_name": "version",
-               "version_column_length": 1024,
+               "version_column_length": 191,
                "executed_at_column_name": "executed_at",
                "execution_time_column_name": "execution_time"
             },
 
             "migrations_paths": {
-               "MyProject\Migrations": "/data/doctrine/migrations/lib/MyProject/Migrations",
-               "MyProject\Component\Migrations": "./Component/MyProject/Migrations"
+               "MyProject\\Migrations": "/data/doctrine/migrations/lib/MyProject/Migrations",
+               "MyProject\\Component\\Migrations": "./Component/MyProject/Migrations"
             },
 
             "all_or_nothing": true,
+            "transactional": true,
             "check_database_platform": true,
-            "organize_migrations": "none"
+            "organize_migrations": "none",
 
             "connection": null,
             "em": null
@@ -136,6 +140,9 @@ Here are details about what each configuration option does:
 +----------------------------+------------+------------------------------+----------------------------------------------------------------------------------+
 | all_or_nothing             | no         | false                        | Whether or not to wrap multiple migrations in a single transaction.              |
 +----------------------------+------------+------------------------------+----------------------------------------------------------------------------------+
+| transactional              | no         | true                         | Whether or not to wrap migrations in a single transaction.                       |
+|                            |            |                              |                                                                                  |
++----------------------------+------------+------------------------------+----------------------------------------------------------------------------------+
 | migrations                 | no         | []                           | Manually specify the array of migration versions instead of finding migrations.  |
 +----------------------------+------------+------------------------------+----------------------------------------------------------------------------------+
 | check_database_platform    | no         | true                         | Whether to add a database platform check at the beginning of the generated code. |
@@ -157,7 +164,7 @@ Here the possible options for ``table_storage``:
 +----------------------------+------------+------------------------------+----------------------------------------------------------------------------------+
 | version_column_name        | no         | version                      | The name of the column which stores the version name.                            |
 +----------------------------+------------+------------------------------+----------------------------------------------------------------------------------+
-| version_column_length      | no         | 1024                         | The length of the column which stores the version name.                          |
+| version_column_length      | no         | 191                         | The length of the column which stores the version name.                          |
 +----------------------------+------------+------------------------------+----------------------------------------------------------------------------------+
 | executed_at_column_name    | no         | executed_at                  | The name of the column which stores the date that a migration was executed.      |
 +----------------------------+------------+------------------------------+----------------------------------------------------------------------------------+
@@ -225,6 +232,13 @@ All or Nothing Transaction
 
 When using the ``all_or_nothing`` option, multiple migrations ran at the same time will be wrapped in a single
 transaction. If one migration fails, all migrations will be rolled back
+
+Using or not using transactions
+-------------------------------
+
+By default, migrations are transactional, meaning code in a migration
+is wrapped in a transaction.
+Setting ``transactional`` to ``false`` will disable that.
 
 From the Command Line
 ~~~~~~~~~~~~~~~~~~~~~
@@ -307,8 +321,8 @@ out of the root of your project.
     require 'vendor/autoload.php';
 
     use Doctrine\DBAL\DriverManager;
-    use Doctrine\Migrations\Configuration\Configuration\PhpFile;
     use Doctrine\Migrations\Configuration\Connection\ExistingConnection;
+    use Doctrine\Migrations\Configuration\Migration\PhpFile;
     use Doctrine\Migrations\DependencyFactory;
 
     $config = new PhpFile('migrations.php'); // Or use one of the Doctrine\Migrations\Configuration\Configuration\* loaders

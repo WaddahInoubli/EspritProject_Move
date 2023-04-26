@@ -22,9 +22,9 @@
         }
     ],
     "require": {
-        "php": "^7.3 || ^8.0",
-        "symfony/event-dispatcher-contracts": "^1.1 || ^2.0",
-        "symfony/http-foundation": "^4.4 || ^5.1"
+        "php": "^7.4 || ^8.0",
+        "symfony/event-dispatcher-contracts": "^2.0 || ^3.0",
+        "symfony/http-foundation": "^4.4 || ^5.4 || ^6.0"
     },
     "require-dev": {
         "ext-pdo_sqlite": "*",
@@ -33,9 +33,11 @@
         "doctrine/phpcr-odm": "^1.2",
         "jackalope/jackalope-doctrine-dbal": "^1.2",
         "phpunit/phpunit": "^9.5",
+        "propel/propel1": "^1.7",
         "ruflin/elastica": "^7.0",
-        "symfony/http-kernel": "^4.4 || ^5.1",
-        "symfony/property-access": "^4.4 || ^5.1"
+        "solarium/solarium": "^6.0",
+        "symfony/http-kernel": "^4.4 || ^5.4 || ^6.0",
+        "symfony/property-access": "^4.4 || ^5.4 || ^6.0"
     },
     "suggest": {
         "doctrine/common": "to allow usage pagination with Doctrine ArrayCollection",
@@ -46,6 +48,9 @@
         "ruflin/elastica": "to allow usage pagination with ElasticSearch Client",
         "solarium/solarium": "to allow usage pagination with Solarium Client",
         "symfony/property-access": "To allow sorting arrays"
+    },
+    "conflict": {
+        "doctrine/dbal": "<2.10"
     },
     "extra": {
         "branch-alias": {

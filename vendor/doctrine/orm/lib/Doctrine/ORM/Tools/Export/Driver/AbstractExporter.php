@@ -1,25 +1,10 @@
 <?php
 
-/*
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the MIT license. For more information, see
- * <http://www.doctrine-project.org>.
- */
+declare(strict_types=1);
 
 namespace Doctrine\ORM\Tools\Export\Driver;
 
+use Doctrine\Deprecations\Deprecation;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\Tools\Export\ExportException;
@@ -31,9 +16,6 @@ use function file_put_contents;
 use function is_dir;
 use function mkdir;
 use function str_replace;
-use function trigger_error;
-
-use const E_USER_DEPRECATED;
 
 /**
  * Abstract base class which is to be used for the Exporter drivers
@@ -57,12 +39,15 @@ abstract class AbstractExporter
     /** @var bool */
     protected $_overwriteExistingFiles = false;
 
-    /**
-     * @param string|null $dir
-     */
+    /** @param string|null $dir */
     public function __construct($dir = null)
     {
-        @trigger_error(static::class . ' is deprecated and will be removed in Doctrine ORM 3.0', E_USER_DEPRECATED);
+        Deprecation::trigger(
+            'doctrine/orm',
+            'https://github.com/doctrine/orm/issues/8458',
+            '%s is deprecated with no replacement',
+            self::class
+        );
 
         $this->_outputDir = $dir;
     }
@@ -88,9 +73,9 @@ abstract class AbstractExporter
     /**
      * Sets the array of ClassMetadata instances to export.
      *
-     * @return void
-     *
      * @psalm-param list<ClassMetadata> $metadata
+     *
+     * @return void
      */
     public function setMetadata(array $metadata)
     {
@@ -187,10 +172,9 @@ abstract class AbstractExporter
 
     /**
      * @param int $type
+     * @psalm-param ClassMetadataInfo::INHERITANCE_TYPE_* $type
      *
      * @return string
-     *
-     * @psalm-param ClassMetadataInfo::INHERITANCE_TYPE_* $type
      */
     protected function _getInheritanceTypeString($type)
     {
@@ -211,10 +195,9 @@ abstract class AbstractExporter
 
     /**
      * @param int $mode
+     * @psalm-param ClassMetadataInfo::FETCH_* $mode
      *
      * @return string
-     *
-     * @psalm-param ClassMetadataInfo::FETCH_* $mode
      */
     protected function _getFetchModeString($mode)
     {
@@ -232,10 +215,9 @@ abstract class AbstractExporter
 
     /**
      * @param int $policy
+     * @psalm-param ClassMetadataInfo::CHANGETRACKING_* $policy
      *
      * @return string
-     *
-     * @psalm-param ClassMetadataInfo::CHANGETRACKING_* $policy
      */
     protected function _getChangeTrackingPolicyString($policy)
     {
@@ -253,10 +235,9 @@ abstract class AbstractExporter
 
     /**
      * @param int $type
+     * @psalm-param ClassMetadataInfo::GENERATOR_TYPE_* $type
      *
      * @return string
-     *
-     * @psalm-param ClassMetadataInfo::GENERATOR_TYPE_* $type
      */
     protected function _getIdGeneratorTypeString($type)
     {
@@ -266,9 +247,6 @@ abstract class AbstractExporter
 
             case ClassMetadataInfo::GENERATOR_TYPE_SEQUENCE:
                 return 'SEQUENCE';
-
-            case ClassMetadataInfo::GENERATOR_TYPE_TABLE:
-                return 'TABLE';
 
             case ClassMetadataInfo::GENERATOR_TYPE_IDENTITY:
                 return 'IDENTITY';

@@ -22,6 +22,7 @@ interface PaginatorInterface
     public const DISTINCT = 'distinct';
     public const PAGE_OUT_OF_RANGE = 'pageOutOfRange';
     public const DEFAULT_LIMIT = 'defaultLimit';
+    public const ODM_QUERY_OPTIONS = 'odmQueryOptions';
 
     public const PAGE_OUT_OF_RANGE_IGNORE = 'ignore'; // do nothing (default)
     public const PAGE_OUT_OF_RANGE_FIX = 'fix'; // replace page number out of range with max page
@@ -34,14 +35,13 @@ interface PaginatorInterface
      * pagination object (might be aggregated helper object)
      * responsible for the pagination result representation
      *
-     * @param mixed $target  anything what needs to be paginated
-     * @param int   $page    page number, starting from 1
-     * @param int   $limit   number of items per page
-     * @param array $options less used options:
+     * @param mixed    $target  anything what needs to be paginated
+     * @param int      $page    page number, starting from 1
+     * @param int|null $limit   number of items per page
+     * @param array    $options less used options:
      *                          bool   $distinct           default true for distinction of results
      *                          string $alias              pagination alias, default none
      *                          array  $sortFieldAllowList sortable allow list for target fields being paginated
-     * @throws \LogicException
      */
     public function paginate($target, int $page = 1, int $limit = null, array $options = []): PaginationInterface;
 }

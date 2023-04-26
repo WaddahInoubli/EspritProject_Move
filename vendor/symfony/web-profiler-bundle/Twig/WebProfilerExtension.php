@@ -23,7 +23,7 @@ use Twig\TwigFunction;
  *
  * @author Fabien Potencier <fabien@symfony.com>
  *
- * @internal since Symfony 4.4
+ * @internal
  */
 class WebProfilerExtension extends ProfilerExtension
 {
@@ -44,22 +44,16 @@ class WebProfilerExtension extends ProfilerExtension
 
     public function __construct(HtmlDumper $dumper = null)
     {
-        $this->dumper = $dumper ?: new HtmlDumper();
+        $this->dumper = $dumper ?? new HtmlDumper();
         $this->dumper->setOutput($this->output = fopen('php://memory', 'r+'));
     }
 
-    /**
-     * @return void
-     */
-    public function enter(Profile $profile)
+    public function enter(Profile $profile): void
     {
         ++$this->stackLevel;
     }
 
-    /**
-     * @return void
-     */
-    public function leave(Profile $profile)
+    public function leave(Profile $profile): void
     {
         if (0 === --$this->stackLevel) {
             $this->dumper->setOutput($this->output = fopen('php://memory', 'r+'));
@@ -68,10 +62,8 @@ class WebProfilerExtension extends ProfilerExtension
 
     /**
      * {@inheritdoc}
-     *
-     * @return TwigFunction[]
      */
-    public function getFunctions()
+    public function getFunctions(): array
     {
         return [
             new TwigFunction('profiler_dump', [$this, 'dumpData'], ['is_safe' => ['html'], 'needs_environment' => true]),
@@ -79,7 +71,7 @@ class WebProfilerExtension extends ProfilerExtension
         ];
     }
 
-    public function dumpData(Environment $env, Data $data, $maxDepth = 0)
+    public function dumpData(Environment $env, Data $data, int $maxDepth = 0)
     {
         $this->dumper->setCharset($env->getCharset());
         $this->dumper->dump($data, null, [
@@ -93,18 +85,24 @@ class WebProfilerExtension extends ProfilerExtension
         return str_replace("\n</pre", '</pre', rtrim($dump));
     }
 
-    public function dumpLog(Environment $env, $message, Data $context = null)
+    public function dumpLog(Environment $env, string $message, Data $context = null)
     {
         $message = twig_escape_filter($env, $message);
         $message = preg_replace('/&quot;(.*?)&quot;/', '&quot;<b>$1</b>&quot;', $message);
 
-        if (null === $context || false === strpos($message, '{')) {
+        $replacements = [];
+        foreach ($context ?? [] as $k => $v) {
+            $k = '{'.twig_escape_filter($env, $k).'}';
+            if (str_contains($message, $k)) {
+                $replacements[$k] = $v;
+            }
+        }
+
+        if (!$replacements) {
             return '<span class="dump-inline">'.$message.'</span>';
         }
 
-        $replacements = [];
-        foreach ($context as $k => $v) {
-            $k = '{'.twig_escape_filter($env, $k).'}';
+        foreach ($replacements as $k => $v) {
             $replacements['&quot;<b>'.$k.'</b>&quot;'] = $replacements['&quot;'.$k.'&quot;'] = $replacements[$k] = $this->dumpData($env, $v);
         }
 

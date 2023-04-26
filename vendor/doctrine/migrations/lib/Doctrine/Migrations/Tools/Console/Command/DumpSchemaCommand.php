@@ -27,7 +27,7 @@ use function strpos;
  */
 final class DumpSchemaCommand extends DoctrineCommand
 {
-    /** @var string */
+    /** @var string|null */
     protected static $defaultName = 'migrations:dump-schema';
 
     protected function configure(): void
@@ -68,7 +68,7 @@ EOT
                 null,
                 InputOption::VALUE_OPTIONAL,
                 'Max line length of unformatted lines.',
-                120
+                '120'
             );
     }
 

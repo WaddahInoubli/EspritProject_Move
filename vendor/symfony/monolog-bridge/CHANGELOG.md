@@ -1,6 +1,34 @@
 CHANGELOG
 =========
 
+5.4
+---
+
+ * Deprecate `ResetLoggersWorkerSubscriber` to reset buffered logs in messenger
+   workers, use "reset_on_message" option in messenger configuration instead.
+
+5.3
+---
+
+ * Add `ResetLoggersWorkerSubscriber` to reset buffered logs in messenger workers
+
+5.2.0
+-----
+
+ * The `$actionLevel` constructor argument of `Symfony\Bridge\Monolog\Handler\FingersCrossed\NotFoundActivationStrategy` has been deprecated and replaced by the `$inner` one which expects an ActivationStrategyInterface to decorate instead. `Symfony\Bridge\Monolog\Handler\FingersCrossed\NotFoundActivationStrategy` will become final in 6.0.
+ * The `$actionLevel` constructor argument of `Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy` has been deprecated and replaced by the `$inner` one which expects an ActivationStrategyInterface to decorate instead. `Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy` will become final in 6.0
+
+5.1.0
+-----
+
+ * Added `MailerHandler`
+
+5.0.0
+-----
+
+ * The methods `DebugProcessor::getLogs()`, `DebugProcessor::countErrors()`, `Logger::getLogs()` and `Logger::countErrors()` have a new `$request` argument.
+ * Added support for Monolog 2.
+
 4.4.0
 -----
 

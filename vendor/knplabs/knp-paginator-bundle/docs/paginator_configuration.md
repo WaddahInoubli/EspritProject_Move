@@ -1,6 +1,6 @@
 # Configuring paginator
 
-There's easy way to configure paginator - just add a `knp_paginator` entry to your configuration and change default values.
+There's an easy way to configure paginator - just add a `knp_paginator` entry to your configuration and change default values.
 Location of your configuration file depends on your Symfony versions: most common places are `config/packages/knp_paginator.yaml`
 for recent versions of Symfony and `app/config.yml` for older versions. If you can't find a configuration file, you can create it.
 
@@ -10,6 +10,7 @@ for recent versions of Symfony and `app/config.yml` for older versions. If you c
 knp_paginator:
     page_range: 5                      # default page range used in pagination control
     page_limit: 100                    # page limit for pagination control; to disable set this field to ~ (null)
+    convert_exception: false           # convert paginator exception (e.g. non-positive page and/or limit) into 404 error
     default_options:
         page_name: page                # page query parameter name
         sort_field_name: sort          # sort field query parameter name; to disable sorting set this field to ~ (null)
@@ -28,5 +29,6 @@ There are a few additional pagination templates, that could be used out of the b
 * `@KnpPaginator/Pagination/twitter_bootstrap_v4_pagination.html.twig`
 * `@KnpPaginator/Pagination/twitter_bootstrap_v3_pagination.html.twig`
 * `@KnpPaginator/Pagination/twitter_bootstrap_pagination.html.twig`
+* `@KnpPaginator/Pagination/foundation_v6_pagination.html.twig`
 * `@KnpPaginator/Pagination/foundation_v5_pagination.html.twig`
 * `@KnpPaginator/Pagination/bulma_pagination.html.twig`

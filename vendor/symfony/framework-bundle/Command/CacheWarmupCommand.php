@@ -16,6 +16,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\DependencyInjection\Dumper\Preloader;
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerAggregate;
 
 /**
@@ -28,6 +29,7 @@ use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerAggregate;
 class CacheWarmupCommand extends Command
 {
     protected static $defaultName = 'cache:warmup';
+    protected static $defaultDescription = 'Warm up an empty cache';
 
     private $cacheWarmer;
 
@@ -47,16 +49,11 @@ class CacheWarmupCommand extends Command
             ->setDefinition([
                 new InputOption('no-optional-warmers', '', InputOption::VALUE_NONE, 'Skip optional cache warmers (faster)'),
             ])
-            ->setDescription('Warm up an empty cache')
+            ->setDescription(self::$defaultDescription)
             ->setHelp(<<<'EOF'
 The <info>%command.name%</info> command warms up the cache.
 
 Before running this command, the cache must be empty.
-
-This command does not generate the classes cache (as when executing this
-command, too many classes that should be part of the cache are already loaded
-in memory). Use <comment>curl</comment> or any other similar tool to warm up
-the classes cache if you want.
 
 EOF
             )
@@ -77,7 +74,11 @@ EOF
             $this->cacheWarmer->enableOptionalWarmers();
         }
 
-        $this->cacheWarmer->warmUp($kernel->getContainer()->getParameter('kernel.cache_dir'));
+        $preload = $this->cacheWarmer->warmUp($cacheDir = $kernel->getContainer()->getParameter('kernel.cache_dir'));
+
+        if ($preload && file_exists($preloadFile = $cacheDir.'/'.$kernel->getContainer()->getParameter('kernel.container_class').'.preload.php')) {
+            Preloader::append($preloadFile, $preload);
+        }
 
         $io->success(sprintf('Cache for the "%s" environment (debug=%s) was successfully warmed.', $kernel->getEnvironment(), var_export($kernel->isDebug(), true)));
 

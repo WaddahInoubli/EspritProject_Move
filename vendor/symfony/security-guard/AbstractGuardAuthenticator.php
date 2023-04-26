@@ -18,6 +18,8 @@ use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
  * An optional base class that creates a PostAuthenticationGuardToken for you.
  *
  * @author Ryan Weaver <ryan@knpuniversity.com>
+ *
+ * @deprecated since Symfony 5.3, use the new authenticator system instead
  */
 abstract class AbstractGuardAuthenticator implements AuthenticatorInterface
 {
@@ -25,11 +27,9 @@ abstract class AbstractGuardAuthenticator implements AuthenticatorInterface
      * Shortcut to create a PostAuthenticationGuardToken for you, if you don't really
      * care about which authenticated token you're using.
      *
-     * @param string $providerKey
-     *
      * @return PostAuthenticationGuardToken
      */
-    public function createAuthenticatedToken(UserInterface $user, $providerKey)
+    public function createAuthenticatedToken(UserInterface $user, string $providerKey)
     {
         return new PostAuthenticationGuardToken(
             $user,

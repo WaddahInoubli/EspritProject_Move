@@ -21,40 +21,47 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class UsernamePasswordToken extends AbstractToken
 {
     private $credentials;
-    private $providerKey;
+    private $firewallName;
 
     /**
-     * @param string|\Stringable|UserInterface $user        The username (like a nickname, email address, etc.) or a UserInterface instance
-     * @param mixed                            $credentials
-     * @param string[]                         $roles
+     * @param UserInterface $user
+     * @param string[]      $roles
      *
      * @throws \InvalidArgumentException
      */
-    public function __construct($user, $credentials, string $providerKey, array $roles = [])
+    public function __construct($user, /* string */ $firewallName, /* array */ $roles = [])
     {
+        if (\is_string($roles)) {
+            trigger_deprecation('symfony/security-core', '5.4', 'The $credentials argument of "%s" is deprecated.', static::class.'::__construct');
+
+            $credentials = $firewallName;
+            $firewallName = $roles;
+            $roles = \func_num_args() > 3 ? func_get_arg(3) : [];
+        }
+
         parent::__construct($roles);
 
-        if (empty($providerKey)) {
-            throw new \InvalidArgumentException('$providerKey must not be empty.');
+        if ('' === $firewallName) {
+            throw new \InvalidArgumentException('$firewallName must not be empty.');
         }
 
         $this->setUser($user);
-        $this->credentials = $credentials;
-        $this->providerKey = $providerKey;
+        $this->credentials = $credentials ?? null;
+        $this->firewallName = $firewallName;
 
-        parent::setAuthenticated(\count($roles) > 0);
+        parent::setAuthenticated(\count($roles) > 0, false);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function setAuthenticated($isAuthenticated)
+    public function setAuthenticated(bool $isAuthenticated)
     {
         if ($isAuthenticated) {
             throw new \LogicException('Cannot set this token to trusted after instantiation.');
         }
 
-        parent::setAuthenticated(false);
+        parent::setAuthenticated(false, false);
     }
 
     /**
@@ -62,6 +69,8 @@ class UsernamePasswordToken extends AbstractToken
      */
     public function getCredentials()
     {
+        trigger_deprecation('symfony/security-core', '5.4', 'Method "%s" is deprecated.', __METHOD__);
+
         return $this->credentials;
     }
 
@@ -69,10 +78,21 @@ class UsernamePasswordToken extends AbstractToken
      * Returns the provider key.
      *
      * @return string The provider key
+     *
+     * @deprecated since Symfony 5.2, use getFirewallName() instead
      */
     public function getProviderKey()
     {
-        return $this->providerKey;
+        if (1 !== \func_num_args() || true !== func_get_arg(0)) {
+            trigger_deprecation('symfony/security-core', '5.2', 'Method "%s" is deprecated, use "getFirewallName()" instead.', __METHOD__);
+        }
+
+        return $this->firewallName;
+    }
+
+    public function getFirewallName(): string
+    {
+        return $this->getProviderKey(true);
     }
 
     /**
@@ -90,7 +110,7 @@ class UsernamePasswordToken extends AbstractToken
      */
     public function __serialize(): array
     {
-        return [$this->credentials, $this->providerKey, parent::__serialize()];
+        return [$this->credentials, $this->firewallName, parent::__serialize()];
     }
 
     /**
@@ -98,7 +118,7 @@ class UsernamePasswordToken extends AbstractToken
      */
     public function __unserialize(array $data): void
     {
-        [$this->credentials, $this->providerKey, $parentData] = $data;
+        [$this->credentials, $this->firewallName, $parentData] = $data;
         $parentData = \is_array($parentData) ? $parentData : unserialize($parentData);
         parent::__unserialize($parentData);
     }

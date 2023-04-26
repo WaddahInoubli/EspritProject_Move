@@ -1,43 +1,31 @@
 <?php
 
-/*
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the MIT license. For more information, see
- * <http://www.doctrine-project.org>.
- */
+declare(strict_types=1);
 
 namespace Doctrine\ORM\Mapping;
 
-use Doctrine\ORM\ORMException;
+use BackedEnum;
+use Doctrine\ORM\Exception\ORMException;
+use LibXMLError;
 use ReflectionException;
+use ValueError;
 
 use function array_keys;
 use function array_map;
 use function array_values;
+use function get_debug_type;
 use function get_parent_class;
 use function implode;
 use function sprintf;
+
+use const PHP_EOL;
 
 /**
  * A MappingException indicates that something is wrong with the mapping setup.
  */
 class MappingException extends ORMException
 {
-    /**
-     * @return MappingException
-     */
+    /** @return MappingException */
     public static function pathRequired()
     {
         return new self('Specifying the paths to your entities is required ' .
@@ -68,7 +56,7 @@ class MappingException extends ORMException
 
     /**
      * @param string $entityName
-     * @param string $type
+     * @param int    $type
      *
      * @return MappingException
      */
@@ -77,9 +65,7 @@ class MappingException extends ORMException
         return new self(sprintf("The inheritance type '%s' specified for '%s' does not exist.", $type, $entityName));
     }
 
-    /**
-     * @return MappingException
-     */
+    /** @return MappingException */
     public static function generatorNotAllowedWithCompositeId()
     {
         return new self("Id generators can't be used with a composite id.");
@@ -278,14 +264,13 @@ class MappingException extends ORMException
         return new self(sprintf("Result set mapping name on entity class '%s' is not defined.", $className));
     }
 
-    /**
-     * @param string $fieldName
-     *
-     * @return MappingException
-     */
-    public static function oneToManyRequiresMappedBy($fieldName)
+    public static function oneToManyRequiresMappedBy(string $entityName, string $fieldName): MappingException
     {
-        return new self(sprintf("OneToMany mapping on field '%s' requires the 'mappedBy' attribute.", $fieldName));
+        return new self(sprintf(
+            "OneToMany mapping on entity '%s' field '%s' requires the 'mappedBy' attribute.",
+            $entityName,
+            $fieldName
+        ));
     }
 
     /**
@@ -383,6 +368,8 @@ class MappingException extends ORMException
     }
 
     /**
+     * @deprecated 2.9 no longer in use
+     *
      * @param string $className
      * @param string $propertyName
      *
@@ -395,16 +382,6 @@ class MappingException extends ORMException
             $className,
             $propertyName
         ));
-    }
-
-    /**
-     * @param string $className
-     *
-     * @return MappingException
-     */
-    public static function tableIdGeneratorNotImplemented($className)
-    {
-        return new self(sprintf('TableIdGenerator is not yet implemented for use with class %s', $className));
     }
 
     /**
@@ -836,15 +813,16 @@ class MappingException extends ORMException
         return new self(sprintf('Entity Listener "%s#%s()" in "%s" was already declared, but it must be declared only once.', $listenerName, $methodName, $className));
     }
 
-    /**
-     * @param string $className
-     * @param string $annotation
-     *
-     * @return MappingException
-     */
-    public static function invalidFetchMode($className, $annotation)
+    /** @param class-string $className */
+    public static function invalidFetchMode(string $className, string $fetchMode): self
     {
-        return new self("Entity '" . $className . "' has a mapping with invalid fetch mode '" . $annotation . "'");
+        return new self("Entity '" . $className . "' has a mapping with invalid fetch mode '" . $fetchMode . "'");
+    }
+
+    /** @param int|string $generatedMode */
+    public static function invalidGeneratedMode($generatedMode): self
+    {
+        return new self("Invalid generated mode '" . $generatedMode . "'");
     }
 
     /**
@@ -921,7 +899,10 @@ class MappingException extends ORMException
     }
 
     /**
-     * @return MappingException
+     * @param string $className
+     * @param string $propertyName
+     *
+     * @return self
      */
     public static function illegalOverrideOfInheritedProperty($className, $propertyName)
     {
@@ -933,5 +914,94 @@ class MappingException extends ORMException
                 $propertyName
             )
         );
+    }
+
+    /** @return self */
+    public static function invalidIndexConfiguration($className, $indexName)
+    {
+        return new self(
+            sprintf(
+                'Index %s for entity %s should contain columns or fields values, but not both.',
+                $indexName,
+                $className
+            )
+        );
+    }
+
+    /** @return self */
+    public static function invalidUniqueConstraintConfiguration($className, $indexName)
+    {
+        return new self(
+            sprintf(
+                'Unique constraint %s for entity %s should contain columns or fields values, but not both.',
+                $indexName,
+                $className
+            )
+        );
+    }
+
+    /** @param mixed $givenValue */
+    public static function invalidOverrideType(string $expectdType, $givenValue): self
+    {
+        return new self(sprintf(
+            'Expected %s, but %s was given.',
+            $expectdType,
+            get_debug_type($givenValue)
+        ));
+    }
+
+    public static function enumsRequirePhp81(string $className, string $fieldName): self
+    {
+        return new self(sprintf('Enum types require PHP 8.1 in %s::$%s', $className, $fieldName));
+    }
+
+    public static function nonEnumTypeMapped(string $className, string $fieldName, string $enumType): self
+    {
+        return new self(sprintf(
+            'Attempting to map non-enum type %s as enum in entity %s::$%s',
+            $enumType,
+            $className,
+            $fieldName
+        ));
+    }
+
+    /**
+     * @param class-string             $className
+     * @param class-string<BackedEnum> $enumType
+     */
+    public static function invalidEnumValue(
+        string $className,
+        string $fieldName,
+        string $value,
+        string $enumType,
+        ValueError $previous
+    ): self {
+        return new self(sprintf(
+            <<<'EXCEPTION'
+Context: Trying to hydrate enum property "%s::$%s"
+Problem: Case "%s" is not listed in enum "%s"
+Solution: Either add the case to the enum type or migrate the database column to use another case of the enum
+EXCEPTION
+            ,
+            $className,
+            $fieldName,
+            $value,
+            $enumType
+        ), 0, $previous);
+    }
+
+    /** @param LibXMLError[] $errors */
+    public static function fromLibXmlErrors(array $errors): self
+    {
+        $formatter = static function (LibXMLError $error): string {
+            return sprintf(
+                'libxml error: %s in %s at line %d',
+                $error->message,
+                $error->file,
+                $error->line
+            );
+        };
+
+        return new self(implode(PHP_EOL, array_map($formatter, $errors)));
     }
 }

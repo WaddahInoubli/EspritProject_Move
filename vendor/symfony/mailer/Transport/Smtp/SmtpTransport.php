@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\Mailer\Transport\Smtp;
 
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\Exception\LogicException;
@@ -21,7 +22,6 @@ use Symfony\Component\Mailer\Transport\AbstractTransport;
 use Symfony\Component\Mailer\Transport\Smtp\Stream\AbstractStream;
 use Symfony\Component\Mailer\Transport\Smtp\Stream\SocketStream;
 use Symfony\Component\Mime\RawMessage;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Sends emails over SMTP.
@@ -44,7 +44,7 @@ class SmtpTransport extends AbstractTransport
     {
         parent::__construct($dispatcher, $logger);
 
-        $this->stream = $stream ?: new SocketStream();
+        $this->stream = $stream ?? new SocketStream();
     }
 
     public function getStream(): AbstractStream
@@ -59,6 +59,8 @@ class SmtpTransport extends AbstractTransport
      *
      * @param int $threshold The maximum number of messages (0 to disable)
      * @param int $sleep     The number of seconds to sleep between stopping and re-starting the transport
+     *
+     * @return $this
      */
     public function setRestartThreshold(int $threshold, int $sleep = 0): self
     {
@@ -99,6 +101,8 @@ class SmtpTransport extends AbstractTransport
      * If your server does not have a domain name, use the IP address. This will
      * automatically be wrapped in square brackets as described in RFC 5321,
      * section 4.1.3.
+     *
+     * @return $this
      */
     public function setLocalDomain(string $domain): self
     {
@@ -167,8 +171,6 @@ class SmtpTransport extends AbstractTransport
      *
      * @param int[] $codes
      *
-     * @return string The server response
-     *
      * @throws TransportException when an invalid response if received
      *
      * @internal
@@ -194,9 +196,9 @@ class SmtpTransport extends AbstractTransport
 
         try {
             $envelope = $message->getEnvelope();
-            $this->doMailFromCommand($envelope->getSender()->getAddress());
+            $this->doMailFromCommand($envelope->getSender()->getEncodedAddress());
             foreach ($envelope->getRecipients() as $recipient) {
-                $this->doRcptToCommand($recipient->getAddress());
+                $this->doRcptToCommand($recipient->getEncodedAddress());
             }
 
             $this->executeCommand("DATA\r\n", [354]);
@@ -295,15 +297,14 @@ class SmtpTransport extends AbstractTransport
             throw new LogicException('You must set the expected response code.');
         }
 
-        if (!$response) {
-            throw new TransportException(sprintf('Expected response code "%s" but got an empty response.', implode('/', $codes)));
-        }
-
         [$code] = sscanf($response, '%3d');
         $valid = \in_array($code, $codes);
 
-        if (!$valid) {
-            throw new TransportException(sprintf('Expected response code "%s" but got code "%s", with message "%s".', implode('/', $codes), $code, trim($response)), $code);
+        if (!$valid || !$response) {
+            $codeStr = $code ? sprintf('code "%s"', $code) : 'empty code';
+            $responseStr = $response ? sprintf(', with message "%s"', trim($response)) : '';
+
+            throw new TransportException(sprintf('Expected response code "%s" but got ', implode('/', $codes)).$codeStr.$responseStr.'.', $code ?: 0);
         }
     }
 
@@ -340,6 +341,9 @@ class SmtpTransport extends AbstractTransport
         $this->restartCounter = 0;
     }
 
+    /**
+     * @return array
+     */
     public function __sleep()
     {
         throw new \BadMethodCallException('Cannot serialize '.__CLASS__);

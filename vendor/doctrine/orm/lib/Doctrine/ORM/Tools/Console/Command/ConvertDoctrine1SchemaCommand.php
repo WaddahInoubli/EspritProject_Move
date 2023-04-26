@@ -1,22 +1,6 @@
 <?php
 
-/*
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the MIT license. For more information, see
- * <http://www.doctrine-project.org>.
- */
+declare(strict_types=1);
 
 namespace Doctrine\ORM\Tools\Console\Command;
 
@@ -56,9 +40,7 @@ class ConvertDoctrine1SchemaCommand extends Command
     /** @var ClassMetadataExporter|null */
     private $metadataExporter = null;
 
-    /**
-     * @return EntityGenerator
-     */
+    /** @return EntityGenerator */
     public function getEntityGenerator()
     {
         if ($this->entityGenerator === null) {
@@ -68,17 +50,13 @@ class ConvertDoctrine1SchemaCommand extends Command
         return $this->entityGenerator;
     }
 
-    /**
-     * @return void
-     */
+    /** @return void */
     public function setEntityGenerator(EntityGenerator $entityGenerator)
     {
         $this->entityGenerator = $entityGenerator;
     }
 
-    /**
-     * @return ClassMetadataExporter
-     */
+    /** @return ClassMetadataExporter */
     public function getMetadataExporter()
     {
         if ($this->metadataExporter === null) {
@@ -88,17 +66,13 @@ class ConvertDoctrine1SchemaCommand extends Command
         return $this->metadataExporter;
     }
 
-    /**
-     * @return void
-     */
+    /** @return void */
     public function setMetadataExporter(ClassMetadataExporter $metadataExporter)
     {
         $this->metadataExporter = $metadataExporter;
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    /** @return void */
     protected function configure()
     {
         $this->setName('orm:convert-d1-schema')
@@ -115,11 +89,13 @@ class ConvertDoctrine1SchemaCommand extends Command
 
     /**
      * {@inheritdoc}
+     *
+     * @return int
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $ui = new SymfonyStyle($input, $output);
-        $ui->warning('Command ' . $this->getName() . ' is deprecated and will be removed in Doctrine ORM 3.0.');
+        $ui->getErrorStyle()->warning('Command ' . $this->getName() . ' is deprecated and will be removed in Doctrine ORM 3.0.');
 
         // Process source directories
         $fromPaths = array_merge([$input->getArgument('from-path')], $input->getOption('from'));
@@ -142,6 +118,8 @@ class ConvertDoctrine1SchemaCommand extends Command
      * @param string      $toType
      * @param int         $numSpaces
      * @param string|null $extend
+     *
+     * @return void
      *
      * @throws InvalidArgumentException
      */

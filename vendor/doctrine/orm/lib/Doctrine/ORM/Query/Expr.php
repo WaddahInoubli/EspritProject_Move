@@ -1,22 +1,6 @@
 <?php
 
-/*
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the MIT license. For more information, see
- * <http://www.doctrine-project.org>.
- */
+declare(strict_types=1);
 
 namespace Doctrine\ORM\Query;
 
@@ -25,9 +9,9 @@ use Traversable;
 use function func_get_args;
 use function implode;
 use function is_bool;
+use function is_float;
+use function is_int;
 use function is_iterable;
-use function is_numeric;
-use function is_string;
 use function iterator_to_array;
 use function str_replace;
 
@@ -52,6 +36,7 @@ class Expr
      * @param Expr\Comparison|Expr\Func|Expr\Andx|Expr\Orx|string $x Optional clause. Defaults to null,
      *                                                               but requires at least one defined
      *                                                               when converting to string.
+     * @psalm-param Expr\Comparison|Expr\Func|Expr\Andx|Expr\Orx|string ...$x
      *
      * @return Expr\Andx
      */
@@ -72,6 +57,7 @@ class Expr
      * @param Expr\Comparison|Expr\Func|Expr\Andx|Expr\Orx|string $x Optional clause. Defaults to null,
      *                                                               but requires at least one defined
      *                                                               when converting to string.
+     * @psalm-param Expr\Comparison|Expr\Func|Expr\Andx|Expr\Orx|string ...$x
      *
      * @return Expr\Orx
      */
@@ -352,6 +338,17 @@ class Expr
     }
 
     /**
+     * Creates a MOD($x, $y) function expression to return the remainder of $x divided by $y.
+     *
+     * @param mixed $x
+     * @param mixed $y
+     */
+    public function mod($x, $y): Expr\Func
+    {
+        return new Expr\Func('MOD', [$x, $y]);
+    }
+
+    /**
      * Creates a product mathematical expression with the given arguments.
      *
      * First argument is considered the left expression and the second is the right expression.
@@ -611,7 +608,7 @@ class Expr
     /**
      * Creates a literal expression of the given argument.
      *
-     * @param mixed $literal Argument to be converted to literal.
+     * @param scalar $literal Argument to be converted to literal.
      *
      * @return Expr\Literal
      */
@@ -623,13 +620,15 @@ class Expr
     /**
      * Quotes a literal value, if necessary, according to the DQL syntax.
      *
-     * @param mixed $literal The literal value.
+     * @param scalar $literal The literal value.
      */
     private function quoteLiteral($literal): string
     {
-        if (is_numeric($literal) && ! is_string($literal)) {
+        if (is_int($literal) || is_float($literal)) {
             return (string) $literal;
-        } elseif (is_bool($literal)) {
+        }
+
+        if (is_bool($literal)) {
             return $literal ? 'true' : 'false';
         }
 

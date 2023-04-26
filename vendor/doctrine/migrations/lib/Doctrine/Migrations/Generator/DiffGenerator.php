@@ -24,27 +24,24 @@ use function substr;
  */
 class DiffGenerator
 {
-    /** @var DBALConfiguration */
-    private $dbalConfiguration;
+    private DBALConfiguration $dbalConfiguration;
 
-    /** @var AbstractSchemaManager */
-    private $schemaManager;
+    /** @var AbstractSchemaManager<AbstractPlatform> */
+    private AbstractSchemaManager $schemaManager;
 
-    /** @var SchemaProvider */
-    private $schemaProvider;
+    private SchemaProvider $schemaProvider;
 
-    /** @var AbstractPlatform */
-    private $platform;
+    private AbstractPlatform $platform;
 
-    /** @var Generator */
-    private $migrationGenerator;
+    private Generator $migrationGenerator;
 
-    /** @var SqlGenerator */
-    private $migrationSqlGenerator;
+    private SqlGenerator $migrationSqlGenerator;
 
-    /** @var SchemaProvider */
-    private $emptySchemaProvider;
+    private SchemaProvider $emptySchemaProvider;
 
+    /**
+     * @param AbstractSchemaManager<AbstractPlatform> $schemaManager
+     */
     public function __construct(
         DBALConfiguration $dbalConfiguration,
         AbstractSchemaManager $schemaManager,
@@ -92,15 +89,21 @@ class DiffGenerator
 
         $toSchema = $this->createToSchema();
 
+        $comparator = $this->schemaManager->createComparator();
+
+        $upSql = $this->platform->getAlterSchemaSQL($comparator->compareSchemas($fromSchema, $toSchema));
+
         $up = $this->migrationSqlGenerator->generate(
-            $fromSchema->getMigrateToSql($toSchema, $this->platform),
+            $upSql,
             $formatted,
             $lineLength,
             $checkDbPlatform
         );
 
+        $downSql = $this->platform->getAlterSchemaSQL($comparator->compareSchemas($toSchema, $fromSchema));
+
         $down = $this->migrationSqlGenerator->generate(
-            $fromSchema->getMigrateFromSql($toSchema, $this->platform),
+            $downSql,
             $formatted,
             $lineLength,
             $checkDbPlatform
@@ -124,7 +127,7 @@ class DiffGenerator
 
     private function createFromSchema(): Schema
     {
-        return $this->schemaManager->createSchema();
+        return $this->schemaManager->introspectSchema();
     }
 
     private function createToSchema(): Schema

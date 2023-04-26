@@ -11,15 +11,17 @@
 
 namespace Symfony\Component\Mailer\Transport;
 
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\LegacyEventDispatcherProxy;
 use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\Event\MessageEvent;
 use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\RawMessage;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherInterface;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
@@ -33,12 +35,14 @@ abstract class AbstractTransport implements TransportInterface
 
     public function __construct(EventDispatcherInterface $dispatcher = null, LoggerInterface $logger = null)
     {
-        $this->dispatcher = LegacyEventDispatcherProxy::decorate($dispatcher);
-        $this->logger = $logger ?: new NullLogger();
+        $this->dispatcher = class_exists(Event::class) && $dispatcher instanceof SymfonyEventDispatcherInterface ? LegacyEventDispatcherProxy::decorate($dispatcher) : $dispatcher;
+        $this->logger = $logger ?? new NullLogger();
     }
 
     /**
      * Sets the maximum number of messages to send per second (0 to disable).
+     *
+     * @return $this
      */
     public function setMaxPerSecond(float $rate): self
     {
@@ -61,6 +65,7 @@ abstract class AbstractTransport implements TransportInterface
             $event = new MessageEvent($message, $envelope, (string) $this);
             $this->dispatcher->dispatch($event);
             $envelope = $event->getEnvelope();
+            $message = $event->getMessage();
         }
 
         $message = new SentMessage($message, $envelope);

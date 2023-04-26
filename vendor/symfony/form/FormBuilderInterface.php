@@ -13,6 +13,8 @@ namespace Symfony\Component\Form;
 
 /**
  * @author Bernhard Schussek <bschussek@gmail.com>
+ *
+ * @extends \Traversable<string, FormBuilderInterface>
  */
 interface FormBuilderInterface extends \Traversable, \Countable, FormConfigBuilderInterface
 {
@@ -24,62 +26,57 @@ interface FormBuilderInterface extends \Traversable, \Countable, FormConfigBuild
      * object hierarchy.
      *
      * @param string|FormBuilderInterface $child
-     * @param string|null                 $type
+     * @param array<string, mixed>        $options
      *
-     * @return self
+     * @return static
      */
-    public function add($child, $type = null, array $options = []);
+    public function add($child, string $type = null, array $options = []);
 
     /**
      * Creates a form builder.
      *
-     * @param string      $name The name of the form or the name of the property
-     * @param string|null $type The type of the form or null if name is a property
+     * @param string               $name    The name of the form or the name of the property
+     * @param string|null          $type    The type of the form or null if name is a property
+     * @param array<string, mixed> $options
      *
      * @return self
      */
-    public function create($name, $type = null, array $options = []);
+    public function create(string $name, string $type = null, array $options = []);
 
     /**
      * Returns a child by name.
-     *
-     * @param string $name The name of the child
      *
      * @return self
      *
      * @throws Exception\InvalidArgumentException if the given child does not exist
      */
-    public function get($name);
+    public function get(string $name);
 
     /**
      * Removes the field with the given name.
      *
-     * @param string $name
-     *
-     * @return self
+     * @return static
      */
-    public function remove($name);
+    public function remove(string $name);
 
     /**
      * Returns whether a field with the given name exists.
      *
-     * @param string $name
-     *
      * @return bool
      */
-    public function has($name);
+    public function has(string $name);
 
     /**
      * Returns the children.
      *
-     * @return array
+     * @return array<string, self>
      */
     public function all();
 
     /**
      * Creates the form.
      *
-     * @return FormInterface The form
+     * @return FormInterface
      */
     public function getForm();
 }

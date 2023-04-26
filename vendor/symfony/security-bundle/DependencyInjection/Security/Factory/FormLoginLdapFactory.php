@@ -15,16 +15,21 @@ use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\Security\Core\Exception\LogicException;
 
 /**
  * FormLoginLdapFactory creates services for form login ldap authentication.
  *
  * @author Grégoire Pineau <lyrixx@lyrixx.info>
  * @author Charles Sarrazin <charles@sarraz.in>
+ *
+ * @internal
  */
 class FormLoginLdapFactory extends FormLoginFactory
 {
-    protected function createAuthProvider(ContainerBuilder $container, $id, $config, $userProviderId)
+    use LdapFactoryTrait;
+
+    protected function createAuthProvider(ContainerBuilder $container, string $id, array $config, string $userProviderId): string
     {
         $provider = 'security.authentication.provider.ldap_bind.'.$id;
         $definition = $container
@@ -40,7 +45,7 @@ class FormLoginLdapFactory extends FormLoginFactory
 
         if (!empty($config['query_string'])) {
             if ('' === $config['search_dn'] || '' === $config['search_password']) {
-                @trigger_error('Using the "query_string" config without using a "search_dn" and a "search_password" is deprecated since Symfony 4.4 and will throw an exception in Symfony 5.0.', \E_USER_DEPRECATED);
+                throw new LogicException('Using the "query_string" config without using a "search_dn" and a "search_password" is not supported.');
             }
             $definition->addMethodCall('setQueryString', [$config['query_string']]);
         }
@@ -61,10 +66,5 @@ class FormLoginLdapFactory extends FormLoginFactory
                 ->scalarNode('search_password')->defaultValue('')->end()
             ->end()
         ;
-    }
-
-    public function getKey()
-    {
-        return 'form-login-ldap';
     }
 }

@@ -1,22 +1,6 @@
 <?php
 
-/*
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the MIT license. For more information, see
- * <http://www.doctrine-project.org>.
- */
+declare(strict_types=1);
 
 namespace Doctrine\ORM\Tools\Console\Command;
 
@@ -24,19 +8,18 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\Persistence\Mapping\MappingException;
 use InvalidArgumentException;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 use function array_filter;
 use function array_map;
 use function array_merge;
-use function assert;
 use function count;
 use function current;
-use function get_class;
+use function get_debug_type;
 use function implode;
 use function is_array;
 use function is_bool;
@@ -57,17 +40,15 @@ use const JSON_UNESCAPED_UNICODE;
  *
  * @link    www.doctrine-project.org
  */
-final class MappingDescribeCommand extends Command
+final class MappingDescribeCommand extends AbstractEntityManagerCommand
 {
-    /**
-     * {@inheritdoc}
-     */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('orm:mapping:describe')
              ->addArgument('entityName', InputArgument::REQUIRED, 'Full or partial name of entity')
              ->setDescription('Display information about mapped objects')
-             ->setHelp(<<<EOT
+             ->addOption('em', null, InputOption::VALUE_REQUIRED, 'Name of the entity manager to operate on')
+             ->setHelp(<<<'EOT'
 The %command.full_name% command describes the metadata for the given full or partial entity class name.
 
     <info>%command.full_name%</info> My\Namespace\Entity\MyEntity
@@ -79,15 +60,11 @@ EOT
              );
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $ui = new SymfonyStyle($input, $output);
+        $ui = (new SymfonyStyle($input, $output))->getErrorStyle();
 
-        $entityManager = $this->getHelper('em')->getEntityManager();
-        assert($entityManager instanceof EntityManagerInterface);
+        $entityManager = $this->getEntityManager($input);
 
         $this->displayEntity($input->getArgument('entityName'), $entityManager, $ui);
 
@@ -99,8 +76,11 @@ EOT
      *
      * @param string $entityName Full or partial entity class name
      */
-    private function displayEntity($entityName, EntityManagerInterface $entityManager, SymfonyStyle $ui)
-    {
+    private function displayEntity(
+        string $entityName,
+        EntityManagerInterface $entityManager,
+        SymfonyStyle $ui
+    ): void {
         $metadata = $this->getClassMetadata($entityName, $entityManager);
 
         $ui->table(
@@ -128,8 +108,8 @@ EOT
                     $this->formatField('Table', $metadata->table),
                     $this->formatField('Composite identifier?', $metadata->isIdentifierComposite),
                     $this->formatField('Foreign identifier?', $metadata->containsForeignIdentifier),
+                    $this->formatField('Enum identifier?', $metadata->containsEnumIdentifier),
                     $this->formatField('Sequence generator definition', $metadata->sequenceGeneratorDefinition),
-                    $this->formatField('Table generator definition', $metadata->tableGeneratorDefinition),
                     $this->formatField('Change tracking policy', $metadata->changeTrackingPolicy),
                     $this->formatField('Versioned?', $metadata->isVersioned),
                     $this->formatField('Version field', $metadata->versionField),
@@ -149,6 +129,7 @@ EOT
      * Return all mapped entity class names
      *
      * @return string[]
+     * @psalm-return class-string[]
      */
     private function getMappedEntities(EntityManagerInterface $entityManager): array
     {
@@ -171,11 +152,11 @@ EOT
      * name
      *
      * @param string $entityName Full or partial entity name
-     *
-     * @return ClassMetadata
      */
-    private function getClassMetadata($entityName, EntityManagerInterface $entityManager)
-    {
+    private function getClassMetadata(
+        string $entityName,
+        EntityManagerInterface $entityManager
+    ): ClassMetadata {
         try {
             return $entityManager->getClassMetadata($entityName);
         } catch (MappingException $e) {
@@ -210,10 +191,8 @@ EOT
      * Format the given value for console output
      *
      * @param mixed $value
-     *
-     * @return string
      */
-    private function formatValue($value)
+    private function formatValue($value): string
     {
         if ($value === '') {
             return '';
@@ -236,7 +215,7 @@ EOT
         }
 
         if (is_object($value)) {
-            return sprintf('<%s>', get_class($value));
+            return sprintf('<%s>', get_debug_type($value));
         }
 
         if (is_scalar($value)) {
@@ -253,10 +232,9 @@ EOT
      * @param mixed  $value A Value to show
      *
      * @return string[]
-     *
      * @psalm-return array{0: string, 1: string}
      */
-    private function formatField($label, $value): array
+    private function formatField(string $label, $value): array
     {
         if ($value === null) {
             $value = '<comment>None</comment>';
@@ -268,9 +246,9 @@ EOT
     /**
      * Format the association mappings
      *
-     * @return string[][]
-     *
      * @psalm-param array<string, array<string, mixed>> $propertyMappings
+     *
+     * @return string[][]
      * @psalm-return list<array{0: string, 1: string}>
      */
     private function formatMappings(array $propertyMappings): array
@@ -291,9 +269,9 @@ EOT
     /**
      * Format the entity listeners
      *
-     * @return string[]
-     *
      * @psalm-param list<object> $entityListeners
+     *
+     * @return string[]
      * @psalm-return array{0: string, 1: string}
      */
     private function formatEntityListeners(array $entityListeners): array

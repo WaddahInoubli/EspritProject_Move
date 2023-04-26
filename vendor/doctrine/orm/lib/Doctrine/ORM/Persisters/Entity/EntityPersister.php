@@ -1,26 +1,11 @@
 <?php
 
-/*
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the MIT license. For more information, see
- * <http://www.doctrine-project.org>.
- */
+declare(strict_types=1);
 
 namespace Doctrine\ORM\Persisters\Entity;
 
 use Doctrine\Common\Collections\Criteria;
+use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\PersistentCollection;
@@ -32,9 +17,7 @@ use Doctrine\ORM\Query\ResultSetMapping;
  */
 interface EntityPersister
 {
-    /**
-     * @return ClassMetadata
-     */
+    /** @return ClassMetadata */
     public function getClassMetadata();
 
     /**
@@ -47,17 +30,17 @@ interface EntityPersister
     /**
      * Get all queued inserts.
      *
-     * @psalm-return array<string, object>
+     * @return object[]
      */
     public function getInserts();
 
      /**
+      * Gets the INSERT SQL used by the persister to persist a new entity.
+      *
       * @return string
       *
-      * @TODO - It should not be here.
-      * But its necessary since JoinedSubclassPersister#executeInserts invoke the root persister.
-      *
-      * Gets the INSERT SQL used by the persister to persist a new entity.
+      * @TODO It should not be here.
+      *       But its necessary since JoinedSubclassPersister#executeInserts invoke the root persister.
       */
     public function getInsertSQL();
 
@@ -70,6 +53,7 @@ interface EntityPersister
      * @param int|null         $limit
      * @param int|null         $offset
      * @param mixed[]|null     $orderBy
+     * @psalm-param LockMode::*|null $lockMode
      *
      * @return string
      */
@@ -103,13 +87,13 @@ interface EntityPersister
     /**
      * Gets the SQL WHERE condition for matching a field with a given value.
      *
-     * @param string      $field
-     * @param mixed       $value
-     * @param string|null $comparison
+     * @param string       $field
+     * @param mixed        $value
+     * @param mixed[]|null $assoc
+     * @param string|null  $comparison
+     * @psalm-param array<string, mixed>|null  $assoc
      *
      * @return string
-     *
-     * @psalm-param array<string, mixed>|null  $assoc
      */
     public function getSelectConditionStatementSQL($field, $value, $assoc = null, $comparison = null);
 
@@ -187,22 +171,25 @@ interface EntityPersister
     /**
      * Loads an entity by a list of field criteria.
      *
-     * @param object|null $entity   The entity to load the data into. If not specified, a new entity is created.
-     * @param int|null    $lockMode One of the \Doctrine\DBAL\LockMode::* constants
-     *                              or NULL if no specific lock mode should be used
-     *                              for loading the entity.
-     * @param int|null    $limit    Limit number of results.
+     * @param mixed[]       $criteria The criteria by which to load the entity.
+     * @param object|null   $entity   The entity to load the data into. If not specified,
+     *                                a new entity is created.
+     * @param mixed[]|null  $assoc    The association that connects the entity
+     *                                to load to another entity, if any.
+     * @param mixed[]       $hints    Hints for entity creation.
+     * @param int|null      $lockMode One of the \Doctrine\DBAL\LockMode::* constants
+     *                                or NULL if no specific lock mode should be used
+     *                                for loading the entity.
+     * @param int|null      $limit    Limit number of results.
+     * @param string[]|null $orderBy  Criteria to order by.
+     * @psalm-param array<string, mixed>       $criteria
+     * @psalm-param array<string, mixed>|null  $assoc
+     * @psalm-param array<string, mixed>       $hints
+     * @psalm-param LockMode::*|null           $lockMode
+     * @psalm-param array<string, string>|null $orderBy
      *
      * @return object|null The loaded and managed entity instance or NULL if the entity can not be found.
      *
-     * @psalm-param array<string, mixed>       $hints    Hints for entity creation.
-     * @psalm-param array<string, mixed>       $criteria The criteria by which
-     *                                                   to load the entity.
-     * @psalm-param array<string, mixed>|null  $assoc    The association that
-     *                                                   connects the entity to
-     *                                                   load to another entity,
-     *                                                   if any.
-     * @psalm-param array<string, string>|null $orderBy  Criteria to order by.
      * @todo Check identity map? loadById method? Try to guess whether $criteria is the id?
      */
     public function load(
@@ -219,10 +206,10 @@ interface EntityPersister
      * Loads an entity by identifier.
      *
      * @param object|null $entity The entity to load the data into. If not specified, a new entity is created.
-     *
-     * @return object The loaded and managed entity instance or NULL if the entity can not be found.
-     *
      * @psalm-param array<string, mixed> $identifier The entity identifier.
+     *
+     * @return object|null The loaded and managed entity instance or NULL if the entity can not be found.
+     *
      * @todo Check parameters
      */
     public function loadById(array $identifier, $entity = null);
@@ -232,15 +219,14 @@ interface EntityPersister
      * association from another entity.
      *
      * @param object $sourceEntity The entity that owns the association (not necessarily the "owning side").
-     *
-     * @return object The loaded and managed entity instance or NULL if the entity can not be found.
-     *
-     * @throws MappingException
-     *
      * @psalm-param array<string, mixed> $identifier The identifier of the entity to load. Must be provided if
      *                                               the association to load represents the owning side, otherwise
      *                                               the identifier is derived from the $sourceEntity.
      * @psalm-param array<string, mixed> $assoc        The association to load.
+     *
+     * @return object The loaded and managed entity instance or NULL if the entity can not be found.
+     *
+     * @throws MappingException
      */
     public function loadOneToOneEntity(array $assoc, $sourceEntity, array $identifier = []);
 
@@ -251,12 +237,12 @@ interface EntityPersister
      * @param int|null $lockMode One of the \Doctrine\DBAL\LockMode::* constants
      *                           or NULL if no specific lock mode should be used
      *                           for refreshing the managed entity.
-     *
-     * @return void
-     *
      * @psalm-param array<string, mixed> $id The identifier of the entity as an
      *                                       associative array from column or
      *                                       field names to values.
+     * @psalm-param LockMode::*|null $lockMode
+     *
+     * @return void
      */
     public function refresh(array $id, $entity, $lockMode = null);
 
@@ -272,9 +258,8 @@ interface EntityPersister
      *
      * @param int|null $limit
      * @param int|null $offset
-     *
-     * @psalm-param list<string>|null $orderBy
-     * @psalm-param array<string, mixed> $criteria
+     * @psalm-param array<string, string>|null $orderBy
+     * @psalm-param array<string, mixed>       $criteria
      */
     public function loadAll(array $criteria = [], ?array $orderBy = null, $limit = null, $offset = null);
 
@@ -284,10 +269,9 @@ interface EntityPersister
      * @param object   $sourceEntity
      * @param int|null $offset
      * @param int|null $limit
+     * @psalm-param array<string, mixed> $assoc
      *
      * @return mixed[]
-     *
-     * @psalm-param array<string, mixed> $assoc
      */
     public function getManyToManyCollection(array $assoc, $sourceEntity, $offset = null, $limit = null);
 
@@ -296,10 +280,9 @@ interface EntityPersister
      *
      * @param object               $sourceEntity The entity that owns the collection.
      * @param PersistentCollection $collection   The collection to fill.
+     * @psalm-param array<string, mixed> $assoc The association mapping of the association being loaded.
      *
      * @return mixed[]
-     *
-     * @psalm-param array<string, mixed> $assoc The association mapping of the association being loaded.
      */
     public function loadManyToManyCollection(array $assoc, $sourceEntity, PersistentCollection $collection);
 
@@ -308,10 +291,9 @@ interface EntityPersister
      *
      * @param object               $sourceEntity
      * @param PersistentCollection $collection   The collection to load/fill.
+     * @psalm-param array<string, mixed> $assoc
      *
      * @return mixed
-     *
-     * @psalm-param array<string, mixed> $assoc
      */
     public function loadOneToManyCollection(array $assoc, $sourceEntity, PersistentCollection $collection);
 
@@ -319,10 +301,10 @@ interface EntityPersister
      * Locks all rows of this entity matching the given criteria with the specified pessimistic lock mode.
      *
      * @param int $lockMode One of the Doctrine\DBAL\LockMode::* constants.
+     * @psalm-param array<string, mixed> $criteria
+     * @psalm-param LockMode::* $lockMode
      *
      * @return void
-     *
-     * @psalm-param array<string, mixed> $criteria
      */
     public function lock(array $criteria, $lockMode);
 
@@ -332,10 +314,9 @@ interface EntityPersister
      * @param object   $sourceEntity
      * @param int|null $offset
      * @param int|null $limit
+     * @psalm-param array<string, mixed> $assoc
      *
      * @return mixed[]
-     *
-     * @psalm-param array<string, mixed> $assoc
      */
     public function getOneToManyCollection(array $assoc, $sourceEntity, $offset = null, $limit = null);
 

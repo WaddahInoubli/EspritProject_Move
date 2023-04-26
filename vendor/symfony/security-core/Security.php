@@ -13,6 +13,7 @@ namespace Symfony\Component\Security\Core;
 
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
@@ -20,7 +21,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  *
  * @final
  */
-class Security
+class Security implements AuthorizationCheckerInterface
 {
     public const ACCESS_DENIED_ERROR = '_security.403_error';
     public const AUTHENTICATION_ERROR = '_security.last_error';
@@ -34,23 +35,17 @@ class Security
         $this->container = $container;
     }
 
-    /**
-     * @return UserInterface|null
-     */
-    public function getUser()
+    public function getUser(): ?UserInterface
     {
         if (!$token = $this->getToken()) {
             return null;
         }
 
         $user = $token->getUser();
-        if (!\is_object($user)) {
-            return null;
-        }
 
+        // @deprecated since Symfony 5.4, $user will always be a UserInterface instance
         if (!$user instanceof UserInterface) {
-            @trigger_error(sprintf('Accessing the user object "%s" that is not an instance of "%s" from "%s()" is deprecated since Symfony 4.2, use "getToken()->getUser()" instead.', \get_class($user), UserInterface::class, __METHOD__), \E_USER_DEPRECATED);
-            //return null; // 5.0 behavior
+            return null;
         }
 
         return $user;

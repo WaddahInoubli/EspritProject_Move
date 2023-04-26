@@ -27,10 +27,11 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface;
-use Symfony\Component\HttpClient\Response\ResponseTrait;
+use Symfony\Component\HttpClient\Response\StreamableInterface;
 use Symfony\Component\HttpClient\Response\StreamWrapper;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\Service\ResetInterface;
 
 if (!interface_exists(RequestFactoryInterface::class)) {
     throw new \LogicException('You cannot use the "Symfony\Component\HttpClient\Psr18Client" as the "psr/http-factory" package is not installed. Try running "composer require nyholm/psr7".');
@@ -49,7 +50,7 @@ if (!interface_exists(ClientInterface::class)) {
  *
  * @author Nicolas Grekas <p@tchwork.com>
  */
-final class Psr18Client implements ClientInterface, RequestFactoryInterface, StreamFactoryInterface, UriFactoryInterface
+final class Psr18Client implements ClientInterface, RequestFactoryInterface, StreamFactoryInterface, UriFactoryInterface, ResetInterface
 {
     private $client;
     private $responseFactory;
@@ -90,21 +91,30 @@ final class Psr18Client implements ClientInterface, RequestFactoryInterface, Str
                 $body->seek(0);
             }
 
-            $response = $this->client->request($request->getMethod(), (string) $request->getUri(), [
+            $options = [
                 'headers' => $request->getHeaders(),
                 'body' => $body->getContents(),
-                'http_version' => '1.0' === $request->getProtocolVersion() ? '1.0' : null,
-            ]);
+            ];
+
+            if ('1.0' === $request->getProtocolVersion()) {
+                $options['http_version'] = '1.0';
+            }
+
+            $response = $this->client->request($request->getMethod(), (string) $request->getUri(), $options);
 
             $psrResponse = $this->responseFactory->createResponse($response->getStatusCode());
 
             foreach ($response->getHeaders(false) as $name => $values) {
                 foreach ($values as $value) {
-                    $psrResponse = $psrResponse->withAddedHeader($name, $value);
+                    try {
+                        $psrResponse = $psrResponse->withAddedHeader($name, $value);
+                    } catch (\InvalidArgumentException $e) {
+                        // ignore invalid header
+                    }
                 }
             }
 
-            $body = isset(class_uses($response)[ResponseTrait::class]) ? $response->toStream(false) : StreamWrapper::createResource($response, $this->client);
+            $body = $response instanceof StreamableInterface ? $response->toStream(false) : StreamWrapper::createResource($response, $this->client);
             $body = $this->streamFactory->createStreamFromResource($body);
 
             if ($body->isSeekable()) {
@@ -189,6 +199,13 @@ final class Psr18Client implements ClientInterface, RequestFactoryInterface, Str
         }
 
         throw new \LogicException(sprintf('You cannot use "%s()" as the "nyholm/psr7" package is not installed. Try running "composer require nyholm/psr7".', __METHOD__));
+    }
+
+    public function reset()
+    {
+        if ($this->client instanceof ResetInterface) {
+            $this->client->reset();
+        }
     }
 }
 

@@ -2,32 +2,12 @@
 
 namespace <?= $namespace ?>;
 
-use <?= $entity_full_class_name ?>;
-use <?= $form_full_class_name ?>;
-<?php if (isset($repository_full_class_name)): ?>
-use <?= $repository_full_class_name ?>;
-<?php endif ?>
-use Symfony\Bundle\FrameworkBundle\Controller\<?= $parent_class_name ?>;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+<?= $use_statements; ?>
 
-<?php if ($use_attributes) { ?>
 #[Route('<?= $route_path ?>')]
-<?php } else { ?>
-/**
- * @Route("<?= $route_path ?>")
- */
-<?php } ?>
-class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
+class <?= $class_name ?> extends AbstractController
 {
-<?php if ($use_attributes) { ?>
-    #[Route('/', name: '<?= $route_name ?>_index', methods: ['GET'])]
-<?php } else { ?>
-    /**
-     * @Route("/", name="<?= $route_name ?>_index", methods={"GET"})
-     */
-<?php } ?>
+<?= $generator->generateRouteForControllerMethod('/', sprintf('%s_index', $route_name), ['GET']) ?>
 <?php if (isset($repository_full_class_name)): ?>
     public function index(<?= $repository_class_name ?> $<?= $repository_var ?>): Response
     {
@@ -36,9 +16,9 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
         ]);
     }
 <?php else: ?>
-    public function index(): Response
+    public function index(EntityManagerInterface $entityManager): Response
     {
-        $<?= $entity_var_plural ?> = $this->getDoctrine()
+        $<?= $entity_var_plural ?> = $entityManager
             ->getRepository(<?= $entity_class_name ?>::class)
             ->findAll();
 
@@ -48,40 +28,46 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
     }
 <?php endif ?>
 
-<?php if ($use_attributes) { ?>
-    #[Route('/new', name: '<?= $route_name ?>_new', methods: ['GET', 'POST'])]
+<?= $generator->generateRouteForControllerMethod('/new', sprintf('%s_new', $route_name), ['GET', 'POST']) ?>
+<?php if (isset($repository_full_class_name) && $generator->repositoryHasSaveAndRemoveMethods($repository_full_class_name)) { ?>
+    public function new(Request $request, <?= $repository_class_name ?> $<?= $repository_var ?>): Response
 <?php } else { ?>
-    /**
-     * @Route("/new", name="<?= $route_name ?>_new", methods={"GET","POST"})
-     */
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
 <?php } ?>
-    public function new(Request $request): Response
     {
         $<?= $entity_var_singular ?> = new <?= $entity_class_name ?>();
         $form = $this->createForm(<?= $form_class_name ?>::class, $<?= $entity_var_singular ?>);
         $form->handleRequest($request);
 
+<?php if (isset($repository_full_class_name) && $generator->repositoryHasSaveAndRemoveMethods($repository_full_class_name)) { ?>
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager = $this->getDoctrine()->getManager();
+            $<?= $repository_var ?>->save($<?= $entity_var_singular ?>, true);
+
+            return $this->redirectToRoute('<?= $route_name ?>_index', [], Response::HTTP_SEE_OTHER);
+        }
+<?php } else { ?>
+        if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($<?= $entity_var_singular ?>);
             $entityManager->flush();
 
-            return $this->redirectToRoute('<?= $route_name ?>_index');
+            return $this->redirectToRoute('<?= $route_name ?>_index', [], Response::HTTP_SEE_OTHER);
         }
+<?php } ?>
 
+<?php if ($use_render_form) { ?>
+        return $this->renderForm('<?= $templates_path ?>/new.html.twig', [
+            '<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>,
+            'form' => $form,
+        ]);
+<?php } else { ?>
         return $this->render('<?= $templates_path ?>/new.html.twig', [
             '<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>,
             'form' => $form->createView(),
         ]);
+<?php } ?>
     }
 
-<?php if ($use_attributes) { ?>
-    #[Route('/{<?= $entity_identifier ?>}', name: '<?= $route_name ?>_show', methods: ['GET'])]
-<?php } else { ?>
-    /**
-     * @Route("/{<?= $entity_identifier ?>}", name="<?= $route_name ?>_show", methods={"GET"})
-     */
-<?php } ?>
+<?= $generator->generateRouteForControllerMethod(sprintf('/{%s}', $entity_identifier), sprintf('%s_show', $route_name), ['GET']) ?>
     public function show(<?= $entity_class_name ?> $<?= $entity_var_singular ?>): Response
     {
         return $this->render('<?= $templates_path ?>/show.html.twig', [
@@ -89,45 +75,61 @@ class <?= $class_name ?> extends <?= $parent_class_name; ?><?= "\n" ?>
         ]);
     }
 
-<?php if ($use_attributes) { ?>
-    #[Route('/{<?= $entity_identifier ?>}/edit', name: '<?= $route_name ?>_edit', methods: ['GET', 'POST'])]
+<?= $generator->generateRouteForControllerMethod(sprintf('/{%s}/edit', $entity_identifier), sprintf('%s_edit', $route_name), ['GET', 'POST']) ?>
+<?php if (isset($repository_full_class_name) && $generator->repositoryHasSaveAndRemoveMethods($repository_full_class_name)) { ?>
+    public function edit(Request $request, <?= $entity_class_name ?> $<?= $entity_var_singular ?>, <?= $repository_class_name ?> $<?= $repository_var ?>): Response
 <?php } else { ?>
-    /**
-     * @Route("/{<?= $entity_identifier ?>}/edit", name="<?= $route_name ?>_edit", methods={"GET","POST"})
-     */
+    public function edit(Request $request, <?= $entity_class_name ?> $<?= $entity_var_singular ?>, EntityManagerInterface $entityManager): Response
 <?php } ?>
-    public function edit(Request $request, <?= $entity_class_name ?> $<?= $entity_var_singular ?>): Response
     {
         $form = $this->createForm(<?= $form_class_name ?>::class, $<?= $entity_var_singular ?>);
         $form->handleRequest($request);
 
+<?php if (isset($repository_full_class_name) && $generator->repositoryHasSaveAndRemoveMethods($repository_full_class_name)) { ?>
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $<?= $repository_var ?>->save($<?= $entity_var_singular ?>, true);
 
-            return $this->redirectToRoute('<?= $route_name ?>_index');
+            return $this->redirectToRoute('<?= $route_name ?>_index', [], Response::HTTP_SEE_OTHER);
         }
+<?php } else { ?>
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
 
+            return $this->redirectToRoute('<?= $route_name ?>_index', [], Response::HTTP_SEE_OTHER);
+        }
+<?php } ?>
+
+<?php if ($use_render_form) { ?>
+        return $this->renderForm('<?= $templates_path ?>/edit.html.twig', [
+            '<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>,
+            'form' => $form,
+        ]);
+<?php } else { ?>
         return $this->render('<?= $templates_path ?>/edit.html.twig', [
             '<?= $entity_twig_var_singular ?>' => $<?= $entity_var_singular ?>,
             'form' => $form->createView(),
         ]);
+<?php } ?>
     }
 
-<?php if ($use_attributes) { ?>
-    #[Route('/{<?= $entity_identifier ?>}', name: '<?= $route_name ?>_delete', methods: ['POST'])]
+<?= $generator->generateRouteForControllerMethod(sprintf('/{%s}', $entity_identifier), sprintf('%s_delete', $route_name), ['POST']) ?>
+<?php if (isset($repository_full_class_name) && $generator->repositoryHasSaveAndRemoveMethods($repository_full_class_name)) { ?>
+    public function delete(Request $request, <?= $entity_class_name ?> $<?= $entity_var_singular ?>, <?= $repository_class_name ?> $<?= $repository_var ?>): Response
 <?php } else { ?>
-    /**
-     * @Route("/{<?= $entity_identifier ?>}", name="<?= $route_name ?>_delete", methods={"POST"})
-     */
+    public function delete(Request $request, <?= $entity_class_name ?> $<?= $entity_var_singular ?>, EntityManagerInterface $entityManager): Response
 <?php } ?>
-    public function delete(Request $request, <?= $entity_class_name ?> $<?= $entity_var_singular ?>): Response
     {
+<?php if (isset($repository_full_class_name) && $generator->repositoryHasSaveAndRemoveMethods($repository_full_class_name)) { ?>
         if ($this->isCsrfTokenValid('delete'.$<?= $entity_var_singular ?>->get<?= ucfirst($entity_identifier) ?>(), $request->request->get('_token'))) {
-            $entityManager = $this->getDoctrine()->getManager();
+            $<?= $repository_var ?>->remove($<?= $entity_var_singular ?>, true);
+        }
+<?php } else { ?>
+        if ($this->isCsrfTokenValid('delete'.$<?= $entity_var_singular ?>->get<?= ucfirst($entity_identifier) ?>(), $request->request->get('_token'))) {
             $entityManager->remove($<?= $entity_var_singular ?>);
             $entityManager->flush();
         }
+<?php } ?>
 
-        return $this->redirectToRoute('<?= $route_name ?>_index');
+        return $this->redirectToRoute('<?= $route_name ?>_index', [], Response::HTTP_SEE_OTHER);
     }
 }

@@ -10,19 +10,15 @@ use Doctrine\DBAL\Schema\AbstractAsset;
 class SchemaAssetsFilterManager
 {
     /** @var callable[] */
-    private $schemaAssetFilters;
+    private array $schemaAssetFilters;
 
-    /**
-     * @param callable[] $schemaAssetFilters
-     */
+    /** @param callable[] $schemaAssetFilters */
     public function __construct(array $schemaAssetFilters)
     {
         $this->schemaAssetFilters = $schemaAssetFilters;
     }
 
-    /**
-     * @param string|AbstractAsset $assetName
-     */
+    /** @param string|AbstractAsset $assetName */
     public function __invoke($assetName): bool
     {
         foreach ($this->schemaAssetFilters as $schemaAssetFilter) {

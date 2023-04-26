@@ -12,16 +12,23 @@
 namespace Symfony\Bundle\MakerBundle\Maker;
 
 use Doctrine\Common\Annotations\Annotation;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Str;
+use Symfony\Bundle\MakerBundle\Util\PhpCompatUtil;
+use Symfony\Bundle\MakerBundle\Util\UseStatementGenerator;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
@@ -29,6 +36,17 @@ use Symfony\Component\Console\Input\InputOption;
  */
 final class MakeController extends AbstractMaker
 {
+    private PhpCompatUtil $phpCompatUtil;
+
+    public function __construct(PhpCompatUtil $phpCompatUtil = null)
+    {
+        if (null === $phpCompatUtil) {
+            @trigger_error(sprintf('Passing a "%s" instance is mandatory since version 1.42.0', PhpCompatUtil::class), \E_USER_DEPRECATED);
+        }
+
+        $this->phpCompatUtil = $phpCompatUtil;
+    }
+
     public static function getCommandName(): string
     {
         return 'make:controller';
@@ -39,7 +57,7 @@ final class MakeController extends AbstractMaker
         return 'Creates a new controller class';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConf)
+    public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
             ->addArgument('controller-class', InputArgument::OPTIONAL, sprintf('Choose a name for your controller class (e.g. <fg=yellow>%sController</>)', Str::asClassName(Str::getRandomTerm())))
@@ -48,7 +66,7 @@ final class MakeController extends AbstractMaker
         ;
     }
 
-    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $controllerClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('controller-class'),
@@ -56,20 +74,28 @@ final class MakeController extends AbstractMaker
             'Controller'
         );
 
-        $noTemplate = $input->getOption('no-template');
+        $withTemplate = $this->isTwigInstalled() && !$input->getOption('no-template');
+
+        $useStatements = new UseStatementGenerator([
+            AbstractController::class,
+            $withTemplate ? Response::class : JsonResponse::class,
+            Route::class,
+        ]);
+
         $templateName = Str::asFilePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()).'/index.html.twig';
         $controllerPath = $generator->generateController(
             $controllerClassNameDetails->getFullName(),
             'controller/Controller.tpl.php',
             [
+                'use_statements' => $useStatements,
                 'route_path' => Str::asRoutePath($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
                 'route_name' => Str::asRouteName($controllerClassNameDetails->getRelativeNameWithoutSuffix()),
-                'with_template' => $this->isTwigInstalled() && !$noTemplate,
+                'with_template' => $withTemplate,
                 'template_name' => $templateName,
             ]
         );
 
-        if ($this->isTwigInstalled() && !$noTemplate) {
+        if ($withTemplate) {
             $generator->generateTemplate(
                 $templateName,
                 'controller/twig_template.tpl.php',
@@ -87,15 +113,20 @@ final class MakeController extends AbstractMaker
         $io->text('Next: Open your new controller class and add some pages!');
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
+        // @legacy - Remove method when support for Symfony 5.4 is dropped
+        if (null !== $this->phpCompatUtil && 60000 <= Kernel::VERSION_ID) {
+            return;
+        }
+
         $dependencies->addClassDependency(
             Annotation::class,
             'doctrine/annotations'
         );
     }
 
-    private function isTwigInstalled()
+    private function isTwigInstalled(): bool
     {
         return class_exists(TwigBundle::class);
     }

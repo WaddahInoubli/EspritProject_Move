@@ -34,7 +34,7 @@ class StaticVersionStrategy implements VersionStrategyInterface
     /**
      * {@inheritdoc}
      */
-    public function getVersion($path)
+    public function getVersion(string $path)
     {
         return $this->version;
     }
@@ -42,11 +42,11 @@ class StaticVersionStrategy implements VersionStrategyInterface
     /**
      * {@inheritdoc}
      */
-    public function applyVersion($path)
+    public function applyVersion(string $path)
     {
         $versionized = sprintf($this->format, ltrim($path, '/'), $this->getVersion($path));
 
-        if ($path && '/' == $path[0]) {
+        if ($path && '/' === $path[0]) {
             return '/'.$versionized;
         }
 

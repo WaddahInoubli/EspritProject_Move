@@ -8,17 +8,14 @@ use function preg_match;
 
 class RegexSchemaAssetFilter
 {
-    /** @var string */
-    private $filterExpression;
+    private string $filterExpression;
 
     public function __construct(string $filterExpression)
     {
         $this->filterExpression = $filterExpression;
     }
 
-    /**
-     * @param string|AbstractAsset $assetName
-     */
+    /** @param string|AbstractAsset $assetName */
     public function __invoke($assetName): bool
     {
         if ($assetName instanceof AbstractAsset) {

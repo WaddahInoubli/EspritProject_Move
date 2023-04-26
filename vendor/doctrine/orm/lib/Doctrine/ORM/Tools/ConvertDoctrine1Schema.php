@@ -1,26 +1,11 @@
 <?php
 
-/*
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the MIT license. For more information, see
- * <http://www.doctrine-project.org>.
- */
+declare(strict_types=1);
 
 namespace Doctrine\ORM\Tools;
 
 use Doctrine\DBAL\Types\Type;
+use Doctrine\Deprecations\Deprecation;
 use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Symfony\Component\Yaml\Yaml;
@@ -39,6 +24,8 @@ use function strtolower;
 
 /**
  * Class to help with converting Doctrine 1 schema files to Doctrine 2 mapping files
+ *
+ * @deprecated This class is being removed from the ORM and won't have any replacement
  *
  * @link    www.doctrine-project.org
  */
@@ -59,11 +46,19 @@ class ConvertDoctrine1Schema
      * Constructor passes the directory or array of directories
      * to convert the Doctrine 1 schema files from.
      *
+     * @param string[]|string $from
      * @psalm-param list<string>|string $from
      */
     public function __construct($from)
     {
         $this->from = (array) $from;
+
+        Deprecation::trigger(
+            'doctrine/orm',
+            'https://github.com/doctrine/orm/issues/8458',
+            '%s is deprecated with no replacement',
+            self::class
+        );
     }
 
     /**
@@ -71,7 +66,6 @@ class ConvertDoctrine1Schema
      * Doctrine 1 schema.
      *
      * @return ClassMetadataInfo[] An array of ClassMetadataInfo instances
-     *
      * @psalm-return list<ClassMetadataInfo>
      */
     public function getMetadata()
@@ -98,9 +92,12 @@ class ConvertDoctrine1Schema
 
     /**
      * @param mixed[] $mappingInformation
+     * @psalm-param class-string $className
      */
-    private function convertToClassMetadataInfo(string $className, $mappingInformation): ClassMetadataInfo
-    {
+    private function convertToClassMetadataInfo(
+        string $className,
+        array $mappingInformation
+    ): ClassMetadataInfo {
         $metadata = new ClassMetadataInfo($className);
 
         $this->convertTableName($className, $mappingInformation, $metadata);
@@ -111,9 +108,7 @@ class ConvertDoctrine1Schema
         return $metadata;
     }
 
-    /**
-     * @param mixed[] $model
-     */
+    /** @param mixed[] $model */
     private function convertTableName(string $className, array $model, ClassMetadataInfo $metadata): void
     {
         if (isset($model['tableName']) && $model['tableName']) {
@@ -128,14 +123,12 @@ class ConvertDoctrine1Schema
         }
     }
 
-    /**
-     * @param string  $className
-     * @param mixed[] $model
-     *
-     * @return void
-     */
-    private function convertColumns($className, array $model, ClassMetadataInfo $metadata)
-    {
+    /** @param mixed[] $model */
+    private function convertColumns(
+        string $className,
+        array $model,
+        ClassMetadataInfo $metadata
+    ): void {
         $id = false;
 
         if (isset($model['columns']) && $model['columns']) {
@@ -161,16 +154,18 @@ class ConvertDoctrine1Schema
     }
 
     /**
-     * @param string         $className
-     * @param string         $name
      * @param string|mixed[] $column
      *
      * @return mixed[]
      *
      * @throws ToolsException
      */
-    private function convertColumn($className, $name, $column, ClassMetadataInfo $metadata)
-    {
+    private function convertColumn(
+        string $className,
+        string $name,
+        $column,
+        ClassMetadataInfo $metadata
+    ): array {
         if (is_string($column)) {
             $string         = $column;
             $column         = [];
@@ -203,7 +198,9 @@ class ConvertDoctrine1Schema
             throw ToolsException::couldNotMapDoctrine1Type($column['type']);
         }
 
-        $fieldMapping = [];
+        $fieldMapping = [
+            'nullable' => ! ($column['notnull'] ?? true), // Doctrine 1 columns are nullable by default
+        ];
 
         if (isset($column['primary'])) {
             $fieldMapping['id'] = true;
@@ -217,10 +214,10 @@ class ConvertDoctrine1Schema
             $fieldMapping['length'] = $column['length'];
         }
 
-        $allowed = ['precision', 'scale', 'unique', 'options', 'notnull', 'version'];
+        $allowed = ['precision', 'scale', 'unique', 'options', 'version'];
 
         foreach ($column as $key => $value) {
-            if (in_array($key, $allowed)) {
+            if (in_array($key, $allowed, true)) {
                 $fieldMapping[$key] = $value;
             }
         }
@@ -233,15 +230,15 @@ class ConvertDoctrine1Schema
             $metadata->setIdGeneratorType(ClassMetadataInfo::GENERATOR_TYPE_SEQUENCE);
 
             $definition = [
-                'sequenceName' => is_array($column['sequence']) ? $column['sequence']['name'] : $column['sequence'],
+                'sequenceName' => (string) (is_array($column['sequence']) ? $column['sequence']['name'] : $column['sequence']),
             ];
 
             if (isset($column['sequence']['size'])) {
-                $definition['allocationSize'] = $column['sequence']['size'];
+                $definition['allocationSize'] = (int) $column['sequence']['size'];
             }
 
             if (isset($column['sequence']['value'])) {
-                $definition['initialValue'] = $column['sequence']['value'];
+                $definition['initialValue'] = (int) $column['sequence']['value'];
             }
 
             $metadata->setSequenceGeneratorDefinition($definition);
@@ -250,14 +247,12 @@ class ConvertDoctrine1Schema
         return $fieldMapping;
     }
 
-    /**
-     * @param string  $className
-     * @param mixed[] $model
-     *
-     * @return void
-     */
-    private function convertIndexes($className, array $model, ClassMetadataInfo $metadata)
-    {
+    /** @param mixed[] $model */
+    private function convertIndexes(
+        string $className,
+        array $model,
+        ClassMetadataInfo $metadata
+    ): void {
         if (empty($model['indexes'])) {
             return;
         }
@@ -272,14 +267,12 @@ class ConvertDoctrine1Schema
         }
     }
 
-    /**
-     * @param string  $className
-     * @param mixed[] $model
-     *
-     * @return void
-     */
-    private function convertRelations($className, array $model, ClassMetadataInfo $metadata)
-    {
+    /** @param mixed[] $model */
+    private function convertRelations(
+        string $className,
+        array $model,
+        ClassMetadataInfo $metadata
+    ): void {
         if (empty($model['relations'])) {
             return;
         }

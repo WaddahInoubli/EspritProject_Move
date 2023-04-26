@@ -38,7 +38,7 @@ class FormFactoryBuilder implements FormFactoryBuilderInterface
     private $types = [];
 
     /**
-     * @var FormTypeExtensionInterface[]
+     * @var FormTypeExtensionInterface[][]
      */
     private $typeExtensions = [];
 
@@ -109,12 +109,8 @@ class FormFactoryBuilder implements FormFactoryBuilderInterface
      */
     public function addTypeExtension(FormTypeExtensionInterface $typeExtension)
     {
-        if (method_exists($typeExtension, 'getExtendedTypes')) {
-            foreach ($typeExtension::getExtendedTypes() as $extendedType) {
-                $this->typeExtensions[$extendedType][] = $typeExtension;
-            }
-        } else {
-            $this->typeExtensions[$typeExtension->getExtendedType()][] = $typeExtension;
+        foreach ($typeExtension::getExtendedTypes() as $extendedType) {
+            $this->typeExtensions[$extendedType][] = $typeExtension;
         }
 
         return $this;
@@ -184,7 +180,7 @@ class FormFactoryBuilder implements FormFactoryBuilderInterface
             $extensions[] = new PreloadedExtension($this->types, $this->typeExtensions, $typeGuesser);
         }
 
-        $registry = new FormRegistry($extensions, $this->resolvedTypeFactory ?: new ResolvedFormTypeFactory());
+        $registry = new FormRegistry($extensions, $this->resolvedTypeFactory ?? new ResolvedFormTypeFactory());
 
         return new FormFactory($registry);
     }

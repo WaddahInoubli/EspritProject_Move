@@ -2,7 +2,7 @@
 
 Friendly Symfony paginator to paginate everything
 
-[![Build Status](https://travis-ci.org/KnpLabs/KnpPaginatorBundle.svg?branch=master)](https://travis-ci.org/KnpLabs/KnpPaginatorBundle)
+[![Build Status](https://github.com/KnpLabs/KnpPaginatorBundle/workflows/Build/badge.svg)](https://github.com/KnpLabs/KnpPaginatorBundle/actions)
 
 Generally this bundle is based on [Knp Pager component][knp_component_pager]. This
 component introduces a different way of pagination handling. You can read more about the
@@ -24,7 +24,7 @@ chapter of the documentation.
 
 - Knp Pager component `>=2.0`.
 - KnpPaginatorBundle's master is compatible with Symfony `>=4.4` versions.
-- Twig `>=2.0` version is required if you use twig templating engine.
+- Twig `>=2.0` version is required if you use the Twig templating engine.
 
 ## Features:
 
@@ -32,7 +32,7 @@ chapter of the documentation.
 - Can be customized in any way needed, etc.: pagination view, event subscribers.
 - Possibility to add custom filtering, sorting functionality depending on request parameters.
 - Separation of concerns, paginator is responsible for generating the pagination view only,
-pagination view - for representation purposes.
+  pagination view - for representation purposes.
 
 **Note:** using multiple paginators requires setting the **alias** in order to keep non
 conflicting parameters.
@@ -76,7 +76,7 @@ You can configure default query parameter names and templates
 #### YAML:
 ```yaml
 knp_paginator:
-    page_range: 5                       # number of links showed in the pagination menu (e.g: you have 10 pages, a page_range of 3, on the 5th page you'll see links to page 4, 5, 6)
+    page_range: 5                       # number of links shown in the pagination menu (e.g: you have 10 pages, a page_range of 3, on the 5th page you'll see links to page 4, 5, 6)
     default_options:
         page_name: page                 # page query parameter name
         sort_field_name: sort           # sort field query parameter name
@@ -100,7 +100,7 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 return static function (ContainerConfigurator $configurator): void
 {
     $configurator->extension('knp_paginator', [
-        'page_range' => 5,                        // number of links showed in the pagination menu (e.g: you have 10 pages, a page_range of 3, on the 5th page you'll see links
+        'page_range' => 5,                        // number of links shown in the pagination menu (e.g: you have 10 pages, a page_range of 3, on the 5th page you'll see links
         'default_options' => [
             'page_name' => 'page',                // page query parameter name
             'sort_field_name' => 'sort',          // sort field query parameter name
@@ -122,9 +122,11 @@ return static function (ContainerConfigurator $configurator): void
 That could be used out of the box in `knp_paginator.template.pagination` key:
 
 * `@KnpPaginator/Pagination/sliding.html.twig` (by default)
+* `@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig`
 * `@KnpPaginator/Pagination/twitter_bootstrap_v4_pagination.html.twig`
 * `@KnpPaginator/Pagination/twitter_bootstrap_v3_pagination.html.twig`
 * `@KnpPaginator/Pagination/twitter_bootstrap_pagination.html.twig`
+* `@KnpPaginator/Pagination/foundation_v6_pagination.html.twig`
 * `@KnpPaginator/Pagination/foundation_v5_pagination.html.twig`
 * `@KnpPaginator/Pagination/bulma_pagination.html.twig`
 * `@KnpPaginator/Pagination/semantic_ui_pagination.html.twig`
@@ -136,11 +138,21 @@ That could be used out of the box in `knp_paginator.template.pagination` key:
 That could be used out of the box in `knp_paginator.template.sortable` key:
 
 * `@KnpPaginator/Pagination/sortable_link.html.twig` (by default)
+* `@KnpPaginator/Pagination/bootstrap_v5_bi_sortable_link.html.twig`
+* `@KnpPaginator/Pagination/bootstrap_v5_fa_sortable_link.html.twig`
+* `@KnpPaginator/Pagination/bootstrap_v5_md_sortable_link.html.twig`
 * `@KnpPaginator/Pagination/twitter_bootstrap_v3_sortable_link.html.twig`
 * `@KnpPaginator/Pagination/twitter_bootstrap_v4_font_awesome_sortable_link.html.twig`
 * `@KnpPaginator/Pagination/twitter_bootstrap_v4_material_design_icons_sortable_link.html.twig`
 * `@KnpPaginator/Pagination/semantic_ui_sortable_link.html.twig`
 * `@KnpPaginator/Pagination/uikit_v3_sortable.html.twig`
+
+#### Additional filtration templates
+That could be used out of the box in `knp_paginator.template.filtration` key:
+
+* `@KnpPaginator/Pagination/filtration.html.twig` (by default)
+* `@KnpPaginator/Pagination/bootstrap_v5_filtration.html.twig`
+* `@KnpPaginator/Pagination/twitter_bootstrap_v4_filtration.html.twig`
 
 ## Usage examples:
 
@@ -234,7 +246,7 @@ translationCount and translationParameters can be combined.
 
 ### Adding translation files
 You can also override translations by creating a translation file in the following name format: `domain.locale.format`.
-So, to create a translation file for this bundle you need to create for instance `KnpPaginatorBundle.tr.yaml` file under `project_root/translations/` 
+So, to create a translation file for this bundle you need to create for instance `KnpPaginatorBundle.tr.yaml` file under `project_root/translations/`
 and add your translations there:
 ```yaml
 label_previous: "Önceki"
@@ -301,8 +313,8 @@ framework:
 ```
 
 - If your locale is not available, create your own translation file in
-`translations/KnpPaginatorBundle.en.yml` (substitute "en" for your own language code if needed).
-Then add these lines:
+  `translations/KnpPaginatorBundle.en.yml` (substitute "en" for your own language code if needed).
+  Then add these lines:
 
 ```yaml
 label_next: Next

@@ -33,7 +33,7 @@ class EntityFactory implements UserProviderFactoryInterface
         $this->providerId = $providerId;
     }
 
-    public function create(ContainerBuilder $container, $id, $config)
+    public function create(ContainerBuilder $container, string $id, array $config)
     {
         $container
             ->setDefinition($id, new ChildDefinition($this->providerId))
@@ -52,7 +52,11 @@ class EntityFactory implements UserProviderFactoryInterface
     {
         $node
             ->children()
-                ->scalarNode('class')->isRequired()->cannotBeEmpty()->end()
+                ->scalarNode('class')
+                    ->isRequired()
+                    ->info('The full entity class name of your user class.')
+                    ->cannotBeEmpty()
+                ->end()
                 ->scalarNode('property')->defaultNull()->end()
                 ->scalarNode('manager_name')->defaultNull()->end()
             ->end()

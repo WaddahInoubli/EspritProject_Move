@@ -43,15 +43,12 @@ class DateIntervalToArrayTransformer implements DataTransformerInterface
     private $pad;
 
     /**
-     * @param string[] $fields The date fields
-     * @param bool     $pad    Whether to use padding
+     * @param string[]|null $fields The date fields
+     * @param bool          $pad    Whether to use padding
      */
     public function __construct(array $fields = null, bool $pad = false)
     {
-        if (null === $fields) {
-            $fields = ['years', 'months', 'days', 'hours', 'minutes', 'seconds', 'invert'];
-        }
-        $this->fields = $fields;
+        $this->fields = $fields ?? ['years', 'months', 'days', 'hours', 'minutes', 'seconds', 'invert'];
         $this->pad = $pad;
     }
 
@@ -60,7 +57,7 @@ class DateIntervalToArrayTransformer implements DataTransformerInterface
      *
      * @param \DateInterval $dateInterval Normalized date interval
      *
-     * @return array Interval array
+     * @return array
      *
      * @throws UnexpectedTypeException if the given value is not a \DateInterval instance
      */
@@ -106,7 +103,7 @@ class DateIntervalToArrayTransformer implements DataTransformerInterface
      *
      * @param array $value Interval array
      *
-     * @return \DateInterval|null Normalized date interval
+     * @return \DateInterval|null
      *
      * @throws UnexpectedTypeException       if the given value is not an array
      * @throws TransformationFailedException if the value could not be transformed

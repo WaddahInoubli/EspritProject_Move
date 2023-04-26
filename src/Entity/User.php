@@ -3,70 +3,76 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Entity(repositoryClass=UserRepository::class)
- */
+
+#[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements UserInterface
 {
-    const ROLE_ADMIN = 'ROLE_ADMIN';
-    const ROLE_CLIENT = 'ROLE_CLIENT';
 
-    const ROLE_CONDUCTEUR = 'ROLE_CONDUCTEUR';
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    private $id;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $nom;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $prenom;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $email;
-
-    /**
-     * @var string The hashed password
-     * @ORM\Column(type="string")
-     */
-    private $password;
+    public const ROLE_ADMIN = 'ROLE_ADMIN';
+    public const ROLE_CLIENT = 'ROLE_CLIENT';
+    public const ROLE_CONDUCTEUR = 'ROLE_CONDUCTEUR';
 
 
-    /**
-     * @ORM\Column(type="string")
-     */
-    private $num_tel;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $role;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $address;
-
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private $age;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id;
 
 
+    #[ORM\Column]
+    #[Assert\NotBlank(message:"Le nom est requis")]
+    #[Assert\Length(max:255, maxMessage:'Le nom ne peut pas dépasser {{ limit }} caractères')]
+    private ?string $nom;
+
+
+    #[ORM\Column]
+    #[Assert\NotBlank(message:"Le prénom est requis")]
+    #[Assert\Length(max:255, maxMessage:"Le prénom ne peut pas dépasser {{ limit }} caractères")]
+    private ?string $prenom;
+
+
+    #[ORM\Column]
+    #[Assert\NotBlank(message:"L'adresse email est requise")]
+    #[Assert\Email(message:"L'adresse email '{{ value }}' n'est pas valide.")]
+    #[Assert\Length(max:255, maxMessage:"L'adresse email ne peut pas dépasser {{ limit }} caractères")]
+    private ?string $email;
+
+
+
+    #[ORM\Column]
+    #[Assert\NotBlank(message:"Le numéro de téléphone est requis")]
+    #[Assert\Length(min:8,minMessage:"Le numéro de téléphone doit etre compose au moins de {{ limit }} chiffres")]
+    private ?string $num_tel;
+
+
+    #[ORM\Column]
+    #[Assert\NotBlank(message:"Le rôle est requis")]
+    #[Assert\Length(max:255, maxMessage:"Le rôle ne peut pas dépasser {{ limit }} caractères")]
+    private ?string $role;
+
+
+    #[ORM\Column]
+    #[Assert\NotBlank(message:"L'adresse est requise")]
+    #[Assert\Length(max:255, maxMessage:"L'adresse ne peut pas dépasser {{ limit }} caractères")]
+    private ?string $address;
+
+
+    #[ORM\Column]
+    #[Assert\NotBlank(message:"L'âge est requis")]
+    #[Assert\Positive(message:"L'âge doit être un nombre positif")]
+    private ?int $age;
+
+
+    #[ORM\Column]
+    #[Assert\Length(min:8, minMessage:"Le mot de passe doit contenir au moins {{ limit }} caractéres")]
+    private ?string $password;
+
+    #[ORM\Column]
+    private ?string  $resetToken;
     public function __construct()
     {
 
@@ -77,49 +83,41 @@ class User implements UserInterface
         return $this->id;
     }
 
-    /**
-     * @return mixed
-     */
+
     public function getNom()
     {
         return $this->nom;
     }
 
-    /**
-     * @param mixed $nom
-     */
+
     public function setNom($nom): void
     {
         $this->nom = $nom;
     }
 
-    /**
-     * @return mixed
-     */
+
+
     public function getPrenom()
     {
         return $this->prenom;
     }
 
-    /**
-     * @param mixed $prenom
-     */
+
+
     public function setPrenom($prenom): void
     {
         $this->prenom = $prenom;
     }
 
-    /**
-     * @return mixed
-     */
+
+
     public function getNumTel()
     {
         return $this->num_tel;
     }
 
-    /**
-     * @param mixed $num_tel
-     */
+
+
     public function setNumTel($num_tel): void
     {
         $this->num_tel = $num_tel;
@@ -138,17 +136,15 @@ class User implements UserInterface
         return $this;
     }
 
-    /**
-     * @return string
-     */
+
+
     public function getPassword()
     {
         return $this->password;
     }
 
-    /**
-     * @param string $password
-     */
+
+
     public function setPassword(string $password): void
     {
         $this->password = $password;
@@ -160,9 +156,8 @@ class User implements UserInterface
         return $this->role;
     }
 
-    /**
-     * @param mixed $role
-     */
+
+
     public function setRole($role): void
     {
         $this->role = $role;
@@ -192,38 +187,49 @@ class User implements UserInterface
         return [$this->role];
     }
 
-    /**
-     * @return mixed
-     */
+
+
     public function getAddress()
     {
         return $this->address;
     }
 
-    /**
-     * @param mixed $address
-     */
+
+
     public function setAddress($address): void
     {
         $this->address = $address;
     }
 
-    /**
-     * @return mixed
-     */
+
+
     public function getAge()
     {
         return $this->age;
     }
 
-    /**
-     * @param mixed $age
-     */
+
+
     public function setAge($age): void
     {
         $this->age = $age;
     }
 
+    /**
+     * @return string|null
+     */
+    public function getResetToken(): ?string
+    {
+        return $this->resetToken;
+    }
+
+    /**
+     * @param string|null $resetToken
+     */
+    public function setResetToken(?string $resetToken): void
+    {
+        $this->resetToken = $resetToken;
+    }
 
 
 

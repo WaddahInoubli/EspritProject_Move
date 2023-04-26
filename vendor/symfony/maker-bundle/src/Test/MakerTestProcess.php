@@ -20,7 +20,7 @@ use Symfony\Component\Process\Process;
  */
 final class MakerTestProcess
 {
-    private $process;
+    private Process $process;
 
     private function __construct($commandLine, $cwd, array $envVars, $timeout)
     {
@@ -54,17 +54,17 @@ final class MakerTestProcess
         return $this;
     }
 
-    public function isSuccessful()
+    public function isSuccessful(): bool
     {
         return $this->process->isSuccessful();
     }
 
-    public function getOutput()
+    public function getOutput(): string
     {
         return $this->process->getOutput();
     }
 
-    public function getErrorOutput()
+    public function getErrorOutput(): string
     {
         return $this->process->getErrorOutput();
     }

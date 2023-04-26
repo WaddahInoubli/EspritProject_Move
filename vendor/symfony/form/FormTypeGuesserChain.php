@@ -25,23 +25,26 @@ class FormTypeGuesserChain implements FormTypeGuesserInterface
      */
     public function __construct(iterable $guessers)
     {
+        $tmpGuessers = [];
         foreach ($guessers as $guesser) {
             if (!$guesser instanceof FormTypeGuesserInterface) {
-                throw new UnexpectedTypeException($guesser, 'Symfony\Component\Form\FormTypeGuesserInterface');
+                throw new UnexpectedTypeException($guesser, FormTypeGuesserInterface::class);
             }
 
             if ($guesser instanceof self) {
-                $this->guessers = array_merge($this->guessers, $guesser->guessers);
+                $tmpGuessers[] = $guesser->guessers;
             } else {
-                $this->guessers[] = $guesser;
+                $tmpGuessers[] = [$guesser];
             }
         }
+
+        $this->guessers = array_merge([], ...$tmpGuessers);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function guessType($class, $property)
+    public function guessType(string $class, string $property)
     {
         return $this->guess(function ($guesser) use ($class, $property) {
             return $guesser->guessType($class, $property);
@@ -51,7 +54,7 @@ class FormTypeGuesserChain implements FormTypeGuesserInterface
     /**
      * {@inheritdoc}
      */
-    public function guessRequired($class, $property)
+    public function guessRequired(string $class, string $property)
     {
         return $this->guess(function ($guesser) use ($class, $property) {
             return $guesser->guessRequired($class, $property);
@@ -61,7 +64,7 @@ class FormTypeGuesserChain implements FormTypeGuesserInterface
     /**
      * {@inheritdoc}
      */
-    public function guessMaxLength($class, $property)
+    public function guessMaxLength(string $class, string $property)
     {
         return $this->guess(function ($guesser) use ($class, $property) {
             return $guesser->guessMaxLength($class, $property);
@@ -71,7 +74,7 @@ class FormTypeGuesserChain implements FormTypeGuesserInterface
     /**
      * {@inheritdoc}
      */
-    public function guessPattern($class, $property)
+    public function guessPattern(string $class, string $property)
     {
         return $this->guess(function ($guesser) use ($class, $property) {
             return $guesser->guessPattern($class, $property);

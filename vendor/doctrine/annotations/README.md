@@ -1,3 +1,9 @@
+⚠️ PHP 8 introduced
+[attributes](https://www.php.net/manual/en/language.attributes.overview.php),
+which are a native replacement for annotations. As such, this library is
+considered feature complete, and should receive exclusively bugfixes and
+security fixes.
+
 # Doctrine Annotations
 
 [![Build Status](https://github.com/doctrine/annotations/workflows/Continuous%20Integration/badge.svg?label=build)](https://github.com/doctrine/persistence/actions)
@@ -16,7 +22,3 @@ See the [doctrine-project website](https://www.doctrine-project.org/projects/doc
 
 When making a pull request, make sure your changes follow the
 [Coding Standard Guidelines](https://www.doctrine-project.org/projects/doctrine-coding-standard/en/current/reference/index.html#introduction).
-
-## Changelog
-
-See [CHANGELOG.md](CHANGELOG.md).

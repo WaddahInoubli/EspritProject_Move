@@ -9,6 +9,7 @@ use DateTimeInterface;
 use Psr\Log\AbstractLogger;
 use Psr\Log\InvalidArgumentException;
 use Psr\Log\LogLevel;
+use Stringable;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -33,11 +34,10 @@ final class ConsoleLogger extends AbstractLogger
     public const INFO  = 'info';
     public const ERROR = 'error';
 
-    /** @var OutputInterface */
-    private $output;
+    private OutputInterface $output;
 
     /** @var array<string, int> */
-    private $verbosityLevelMap = [
+    private array $verbosityLevelMap = [
         LogLevel::EMERGENCY => OutputInterface::VERBOSITY_NORMAL,
         LogLevel::ALERT => OutputInterface::VERBOSITY_NORMAL,
         LogLevel::CRITICAL => OutputInterface::VERBOSITY_NORMAL,
@@ -48,7 +48,7 @@ final class ConsoleLogger extends AbstractLogger
         LogLevel::DEBUG => OutputInterface::VERBOSITY_VERY_VERBOSE,
     ];
     /** @var array<string, string> */
-    private $formatLevelMap = [
+    private array $formatLevelMap = [
         LogLevel::EMERGENCY => self::ERROR,
         LogLevel::ALERT => self::ERROR,
         LogLevel::CRITICAL => self::ERROR,
@@ -72,6 +72,8 @@ final class ConsoleLogger extends AbstractLogger
 
     /**
      * {@inheritdoc}
+     *
+     * @param mixed[] $context
      */
     public function log($level, $message, array $context = []): void
     {
@@ -100,10 +102,12 @@ final class ConsoleLogger extends AbstractLogger
     /**
      * Interpolates context values into the message placeholders.
      *
-     * @param mixed[] $context
+     * @param string|Stringable $message
+     * @param mixed[]           $context
      */
-    private function interpolate(string $message, array $context): string
+    private function interpolate($message, array $context): string
     {
+        $message = (string) $message;
         if (strpos($message, '{') === false) {
             return $message;
         }

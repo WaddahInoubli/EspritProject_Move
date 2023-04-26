@@ -2,6 +2,7 @@
 
 namespace Doctrine\Bundle\DoctrineBundle\DataCollector;
 
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Cache\CacheConfiguration;
 use Doctrine\ORM\Cache\Logging\CacheLoggerChain;
 use Doctrine\ORM\Cache\Logging\StatisticsCacheLogger;
@@ -12,6 +13,7 @@ use Doctrine\ORM\Tools\SchemaValidator;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\AbstractClassMetadataFactory;
 use Symfony\Bridge\Doctrine\DataCollector\DoctrineDataCollector as BaseCollector;
+use Symfony\Bridge\Doctrine\Middleware\Debug\DebugDataHolder;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
@@ -24,12 +26,12 @@ use function usort;
 
 /**
  * @psalm-type QueryType = array{
- *    executionMS: int,
+ *    executionMS: float,
  *    explainable: bool,
  *    sql: string,
  *    params: ?array<array-key, mixed>,
  *    runnable: bool,
- *    types: ?array<array-key, \Doctrine\DBAL\Types\Type|int|string|null>,
+ *    types: ?array<array-key, Type|int|string|null>,
  * }
  * @psalm-type DataType = array{
  *    caches: array{
@@ -48,33 +50,30 @@ use function usort;
  */
 class DoctrineDataCollector extends BaseCollector
 {
-    /** @var ManagerRegistry */
-    private $registry;
-
-    /** @var int|null */
-    private $invalidEntityCount;
+    private ManagerRegistry $registry;
+    private ?int $invalidEntityCount = null;
 
     /**
-     * @var mixed[][]
+     * @var mixed[][]|null
      * @psalm-var ?array<string, list<QueryType&array{count: int, index: int, executionPercent: float}>>
      */
-    private $groupedQueries;
+    private ?array $groupedQueries = null;
 
-    /** @var bool */
-    private $shouldValidateSchema;
+    private bool $shouldValidateSchema;
 
-    public function __construct(ManagerRegistry $registry, bool $shouldValidateSchema = true)
+    public function __construct(ManagerRegistry $registry, bool $shouldValidateSchema = true, ?DebugDataHolder $debugDataHolder = null)
     {
         $this->registry             = $registry;
         $this->shouldValidateSchema = $shouldValidateSchema;
 
-        parent::__construct($registry);
+        if ($debugDataHolder === null) {
+            parent::__construct($registry);
+        } else {
+            parent::__construct($registry, $debugDataHolder);
+        }
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function collect(Request $request, Response $response, ?Throwable $exception = null)
+    public function collect(Request $request, Response $response, ?Throwable $exception = null): void
     {
         parent::collect($request, $response, $exception);
 
@@ -112,7 +111,12 @@ class DoctrineDataCollector extends BaseCollector
                     }
 
                     $classErrors                        = $validator->validateClass($class);
-                    $entities[$name][$class->getName()] = $class->getName();
+                    $r                                  = $class->getReflectionClass();
+                    $entities[$name][$class->getName()] = [
+                        'class' => $class->getName(),
+                        'file' => $r->getFileName(),
+                        'line' => $r->getStartLine(),
+                    ];
 
                     if (empty($classErrors)) {
                         continue;
@@ -180,49 +184,37 @@ class DoctrineDataCollector extends BaseCollector
         $this->groupedQueries   = null;
     }
 
-    /**
-     * @return array<string, array<string, string>>
-     */
+    /** @return array<string, array<string, string>> */
     public function getEntities()
     {
         return $this->data['entities'];
     }
 
-    /**
-     * @return array<string, array<string, list<string>>>
-     */
+    /** @return array<string, array<string, list<string>>> */
     public function getMappingErrors()
     {
         return $this->data['errors'];
     }
 
-    /**
-     * @return int
-     */
+    /** @return int */
     public function getCacheHitsCount()
     {
         return $this->data['caches']['counts']['hits'];
     }
 
-    /**
-     * @return int
-     */
+    /** @return int */
     public function getCachePutsCount()
     {
         return $this->data['caches']['counts']['puts'];
     }
 
-    /**
-     * @return int
-     */
+    /** @return int */
     public function getCacheMissesCount()
     {
         return $this->data['caches']['counts']['misses'];
     }
 
-    /**
-     * @return bool
-     */
+    /** @return bool */
     public function getCacheEnabled()
     {
         return $this->data['caches']['enabled'];
@@ -230,7 +222,6 @@ class DoctrineDataCollector extends BaseCollector
 
     /**
      * @return array<string, array<string, int>>
-     *
      * @psalm-return array<"puts"|"hits"|"misses", array<string, int>>
      */
     public function getCacheRegions()
@@ -238,29 +229,20 @@ class DoctrineDataCollector extends BaseCollector
         return $this->data['caches']['regions'];
     }
 
-    /**
-     * @return array<string, int>
-     */
+    /** @return array<string, int> */
     public function getCacheCounts()
     {
         return $this->data['caches']['counts'];
     }
 
-    /**
-     * @return int
-     */
+    /** @return int */
     public function getInvalidEntityCount()
     {
-        if ($this->invalidEntityCount === null) {
-            $this->invalidEntityCount = array_sum(array_map('count', $this->data['errors']));
-        }
-
-        return $this->invalidEntityCount;
+        return $this->invalidEntityCount ??= array_sum(array_map('count', $this->data['errors']));
     }
 
     /**
      * @return string[][]
-     *
      * @psalm-return array<string, list<QueryType&array{count: int, index: int, executionPercent: float}>>
      */
     public function getGroupedQueries()
@@ -307,7 +289,7 @@ class DoctrineDataCollector extends BaseCollector
         return $this->groupedQueries;
     }
 
-    private function executionTimePercentage(int $executionTimeMS, int $totalExecutionTimeMS): float
+    private function executionTimePercentage(float $executionTimeMS, float $totalExecutionTimeMS): float
     {
         if (! $totalExecutionTimeMS) {
             return 0;
@@ -316,9 +298,7 @@ class DoctrineDataCollector extends BaseCollector
         return $executionTimeMS / $totalExecutionTimeMS * 100;
     }
 
-    /**
-     * @return int
-     */
+    /** @return int */
     public function getGroupedQueryCount()
     {
         $count = 0;

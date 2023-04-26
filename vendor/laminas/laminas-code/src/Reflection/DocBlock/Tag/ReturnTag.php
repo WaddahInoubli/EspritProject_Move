@@ -1,11 +1,5 @@
 <?php
 
-/**
- * @see       https://github.com/laminas/laminas-code for the canonical source repository
- * @copyright https://github.com/laminas/laminas-code/blob/master/COPYRIGHT.md
- * @license   https://github.com/laminas/laminas-code/blob/master/LICENSE.md New BSD License
- */
-
 namespace Laminas\Code\Reflection\DocBlock\Tag;
 
 use function explode;
@@ -15,10 +9,10 @@ use function trim;
 
 class ReturnTag implements TagInterface, PhpDocTypedTagInterface
 {
-    /** @var array */
+    /** @var list<string> */
     protected $types = [];
 
-    /** @var string */
+    /** @var string|null */
     protected $description;
 
     /**
@@ -29,14 +23,11 @@ class ReturnTag implements TagInterface, PhpDocTypedTagInterface
         return 'return';
     }
 
-    /**
-     * @param  string $tagDocBlockLine
-     * @return void
-     */
-    public function initialize($tagDocBlockLine)
+    /** @inheritDoc */
+    public function initialize($content)
     {
         $matches = [];
-        if (! preg_match('#((?:[\w|\\\]+(?:\[\])*\|?)+)(?:\s+(.*))?#s', $tagDocBlockLine, $matches)) {
+        if (! preg_match('#((?:[\w|\\\]+(?:\[\])*\|?)+)(?:\s+(.*))?#s', $content, $matches)) {
             return;
         }
 
@@ -61,14 +52,14 @@ class ReturnTag implements TagInterface, PhpDocTypedTagInterface
         return $this->types[0];
     }
 
-    /** {@inheritDoc} */
+    /** @inheritDoc */
     public function getTypes()
     {
         return $this->types;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getDescription()
     {

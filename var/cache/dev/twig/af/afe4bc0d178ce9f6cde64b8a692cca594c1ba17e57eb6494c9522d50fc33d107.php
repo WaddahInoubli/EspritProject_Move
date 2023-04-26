@@ -436,6 +436,33 @@ class __TwigTemplate_e38ce1bd583e838f235c43731836adabe1d86868ff9a2f0991d564ac840
         // line 323
         echo twig_escape_filter($this->env, $this->extensions['Symfony\Bridge\Twig\Extension\AssetExtension']->getAssetUrl("assets/js/main.js"), "html", null, true);
         echo "\"></script>
+<th>
+    <a href=\"";
+        // line 325
+        echo twig_escape_filter($this->env, $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("my_entity_index", ["sort_order" => (isset($context["sort_order"]) || array_key_exists("sort_order", $context) ? $context["sort_order"] : (function () { throw new RuntimeError('Variable "sort_order" does not exist.', 325, $this->source); })()), "sort_field" => "name"]), "html", null, true);
+        echo "\">
+        Name
+        ";
+        // line 327
+        if (((isset($context["sort_field"]) || array_key_exists("sort_field", $context) ? $context["sort_field"] : (function () { throw new RuntimeError('Variable "sort_field" does not exist.', 327, $this->source); })()) == "name")) {
+            // line 328
+            echo "            ";
+            if (((isset($context["sort_order"]) || array_key_exists("sort_order", $context) ? $context["sort_order"] : (function () { throw new RuntimeError('Variable "sort_order" does not exist.', 328, $this->source); })()) == "ASC")) {
+                // line 329
+                echo "                <i class=\"fas fa-sort-down\"></i>
+            ";
+            } else {
+                // line 331
+                echo "                <i class=\"fas fa-sort-up\"></i>
+            ";
+            }
+            // line 333
+            echo "        ";
+        }
+        // line 334
+        echo "    </a>
+</th>
+
 
 </body>
 
@@ -500,7 +527,7 @@ class __TwigTemplate_e38ce1bd583e838f235c43731836adabe1d86868ff9a2f0991d564ac840
 
     public function getDebugInfo()
     {
-        return array (  482 => 304,  472 => 303,  462 => 298,  452 => 297,  437 => 323,  431 => 320,  427 => 319,  423 => 318,  419 => 317,  415 => 316,  411 => 315,  407 => 314,  403 => 313,  393 => 305,  391 => 303,  384 => 298,  382 => 297,  360 => 278,  337 => 258,  124 => 48,  103 => 30,  97 => 27,  93 => 26,  89 => 25,  85 => 24,  81 => 23,  77 => 22,  73 => 21,  63 => 14,  59 => 13,  45 => 1,);
+        return array (  509 => 304,  499 => 303,  489 => 298,  479 => 297,  463 => 334,  460 => 333,  456 => 331,  452 => 329,  449 => 328,  447 => 327,  442 => 325,  437 => 323,  431 => 320,  427 => 319,  423 => 318,  419 => 317,  415 => 316,  411 => 315,  407 => 314,  403 => 313,  393 => 305,  391 => 303,  384 => 298,  382 => 297,  360 => 278,  337 => 258,  124 => 48,  103 => 30,  97 => 27,  93 => 26,  89 => 25,  85 => 24,  81 => 23,  77 => 22,  73 => 21,  63 => 14,  59 => 13,  45 => 1,);
     }
 
     public function getSourceContext()
@@ -828,6 +855,19 @@ class __TwigTemplate_e38ce1bd583e838f235c43731836adabe1d86868ff9a2f0991d564ac840
 
 <!-- Template Main JS File -->
 <script src=\"{{ asset('assets/js/main.js') }}\"></script>
+<th>
+    <a href=\"{{ path('my_entity_index', { 'sort_order': sort_order, 'sort_field': 'name' }) }}\">
+        Name
+        {% if sort_field == 'name' %}
+            {% if sort_order == 'ASC' %}
+                <i class=\"fas fa-sort-down\"></i>
+            {% else %}
+                <i class=\"fas fa-sort-up\"></i>
+            {% endif %}
+        {% endif %}
+    </a>
+</th>
+
 
 </body>
 

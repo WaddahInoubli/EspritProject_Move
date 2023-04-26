@@ -5715,22 +5715,30 @@
         <argument key="passwordEncoder" type="service" id="security.user_password_encoder.generic"/>
       </argument>
     </service>
+    <service id=".service_locator.HauJMNx" class="Symfony\Component\DependencyInjection\ServiceLocator" public="false">
+      <tag name="container.service_locator"/>
+      <argument type="collection">
+        <argument key="userRepository" type="service" id="App\Repository\UserRepository"/>
+      </argument>
+    </service>
     <service id=".service_locator.yeYZd8o" class="Symfony\Component\DependencyInjection\ServiceLocator" public="false">
       <tag name="container.service_locator"/>
       <argument type="collection">
         <argument key="accessDeniedException" type="service" id=".errored..service_locator.yeYZd8o.Symfony\Component\Security\Core\Exception\AccessDeniedException"/>
       </argument>
     </service>
-    <service id=".service_locator.7xHk4.B" class="Symfony\Component\DependencyInjection\ServiceLocator" public="false">
+    <service id=".service_locator.4_sHyin" class="Symfony\Component\DependencyInjection\ServiceLocator" public="false">
       <tag name="container.service_locator"/>
       <argument type="collection">
         <argument key="App\Controller\LoginController::login" type="service" id=".service_locator.f94kp8W"/>
         <argument key="App\Controller\UserController::editUser" type="service" id=".service_locator.F8Oy7LC"/>
         <argument key="App\Controller\UserController::newUser" type="service" id=".service_locator.F8Oy7LC"/>
+        <argument key="App\Controller\UserController::searchUser" type="service" id=".service_locator.HauJMNx"/>
         <argument key="App\Security\AccessDeniedHandler::handle" type="service" id=".service_locator.yeYZd8o"/>
         <argument key="App\Controller\LoginController:login" type="service" id=".service_locator.f94kp8W"/>
         <argument key="App\Controller\UserController:editUser" type="service" id=".service_locator.F8Oy7LC"/>
         <argument key="App\Controller\UserController:newUser" type="service" id=".service_locator.F8Oy7LC"/>
+        <argument key="App\Controller\UserController:searchUser" type="service" id=".service_locator.HauJMNx"/>
         <argument key="App\Security\AccessDeniedHandler:handle" type="service" id=".service_locator.yeYZd8o"/>
       </argument>
     </service>
@@ -6186,12 +6194,12 @@
       <argument type="service" id="security.token_storage"/>
     </service>
     <service id="debug.argument_resolver.service.inner" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\ServiceValueResolver" public="false">
-      <argument type="service" id=".service_locator.7xHk4.B"/>
+      <argument type="service" id=".service_locator.4_sHyin"/>
     </service>
     <service id="debug.argument_resolver.default.inner" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\DefaultValueResolver" public="false"/>
     <service id="debug.argument_resolver.variadic.inner" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\VariadicValueResolver" public="false"/>
     <service id="debug.argument_resolver.not_tagged_controller.inner" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\NotTaggedControllerValueResolver" public="false">
-      <argument type="service" id=".service_locator.7xHk4.B"/>
+      <argument type="service" id=".service_locator.4_sHyin"/>
     </service>
     <service id=".debug.http_client.inner" class="Symfony\Contracts\HttpClient\HttpClientInterface" public="false">
       <argument type="collection"/>
@@ -6608,7 +6616,7 @@
     <service id="Knp\Component\Pager\PaginatorInterface" alias="knp_paginator"/>
     <service id="container.env_var_processors_locator" alias=".service_locator.CmORmuK" public="true"/>
     <service id="twig.loader.filesystem" alias="twig.loader.native_filesystem" public="false"/>
-    <service id="argument_resolver.controller_locator" alias=".service_locator.7xHk4.B"/>
+    <service id="argument_resolver.controller_locator" alias=".service_locator.4_sHyin"/>
     <service id="twig.loader" alias="twig.loader.native_filesystem"/>
     <service id="Psr\Log\LoggerInterface $requestLogger" alias="monolog.logger.request"/>
     <service id="Psr\Log\LoggerInterface $consoleLogger" alias="monolog.logger.console"/>

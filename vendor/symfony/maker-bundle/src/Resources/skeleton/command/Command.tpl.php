@@ -2,19 +2,15 @@
 
 namespace <?= $namespace; ?>;
 
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
+<?= $use_statements; ?>
 
+#[AsCommand(
+    name: '<?= $command_name; ?>',
+    description: 'Add a short description for your command',
+)]
 class <?= $class_name; ?> extends Command
 {
-    protected static $defaultName = '<?= $command_name; ?>';
-    protected static $defaultDescription = 'Add a short description for your command';
-
-    protected function configure()
+    protected function configure(): void
     {
         $this
 <?= $set_description ? "            ->setDescription(self::\$defaultDescription)\n" : '' ?>
@@ -38,6 +34,6 @@ class <?= $class_name; ?> extends Command
 
         $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
 
-        return <?= defined('Symfony\Component\Console\Command\Command::SUCCESS') ? 'Command::SUCCESS' : '0' ?>;
+        return Command::SUCCESS;
     }
 }

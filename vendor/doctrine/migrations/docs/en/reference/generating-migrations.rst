@@ -43,17 +43,17 @@ the ORM. To test this functionality, create a new ``User`` entity located at ``l
             $this->id = $id;
         }
 
-        public function getId() : ?int
+        public function getId(): ?int
         {
             return $this->id;
         }
 
-        public function setUsername(string $username) : void
+        public function setUsername(string $username): void
         {
             $this->username = $username;
         }
 
-        public function getUsername() : ?string
+        public function getUsername(): ?string
         {
             return $this->username;
         }
@@ -95,12 +95,12 @@ Take a look at the generated migration:
      */
     final class Version20180601215504 extends AbstractMigration
     {
-        public function getDescription() : string
+        public function getDescription(): string
         {
             return '';
         }
 
-        public function up(Schema $schema) : void
+        public function up(Schema $schema): void
         {
             // this up() migration is auto-generated, please modify it to your needs
             $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
@@ -109,7 +109,7 @@ Take a look at the generated migration:
             $this->addSql('DROP TABLE example_table');
         }
 
-        public function down(Schema $schema) : void
+        public function down(Schema $schema): void
         {
             // this down() migration is auto-generated, please modify it to your needs
             $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
@@ -216,9 +216,10 @@ It simply takes a schema object to its constructor and returns it from ``createS
     $provider->createSchema() === $schema; // true
 
 By default the Doctrine Migrations command line tool will only add the diff command if the ORM is present.
-Without the ORM, you'll have to add the diff command to your console application manually, passing in your schema
-provider implementation to the diff command's constructor. Take a look at the :ref:`Custom Integration <custom-integration>`
-chapter for information on how to setup a custom console application.
+Without the ORM, you'll have to add the diff command to your console application manually and set your
+custom schema provider to the dependency factory, which will be passed to the the diff command's constructor.
+Take a look at the :ref:`Custom Integration <custom-integration>` chapter for information on how to setup a
+custom console application.
 
 .. code-block:: php
 
@@ -227,9 +228,10 @@ chapter for information on how to setup a custom console application.
     use Doctrine\Migrations\Tools\Console\Command\DiffCommand;
 
     $schemaProvider = new CustomSchemaProvider();
+    $dependencyFactory->setDefinition(SchemaProvider::class, static fn () => $schemaProvider);
 
     /** @var Symfony\Component\Console\Application */
-    $cli->add(new DiffCommand($schemaProvider));
+    $cli->add(new DiffCommand($dependencyFactory);
 
     // ...
 
@@ -258,7 +260,13 @@ with a schema filter.
 
 .. code-block:: php
 
-    $connection->getConfiguration()->setFilterSchemaAssetsExpression("~^(?!t_)~");
+    $connection->getConfiguration()->setSchemaAssetsFilter(static function (string|AbstractAsset $assetName): bool {
+        if ($assetName instanceof AbstractAsset) {
+            $assetName = $assetName->getName();
+        }
+
+        return (bool) preg_match("~^(?!t_)~", $assetName);
+    });
 
 With this expression all tables prefixed with t_ will ignored by the schema tool.
 

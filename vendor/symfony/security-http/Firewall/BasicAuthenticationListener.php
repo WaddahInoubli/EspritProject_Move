@@ -22,17 +22,19 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 use Symfony\Component\Security\Http\Session\SessionAuthenticationStrategyInterface;
 
+trigger_deprecation('symfony/security-http', '5.3', 'The "%s" class is deprecated, use the new authenticator system instead.', AnonymousAuthenticationListener::class);
+
 /**
  * BasicAuthenticationListener implements Basic HTTP authentication.
  *
  * @author Fabien Potencier <fabien@symfony.com>
  *
- * @final since Symfony 4.3
+ * @final
+ *
+ * @deprecated since Symfony 5.3, use the new authenticator system instead
  */
-class BasicAuthenticationListener extends AbstractListener implements ListenerInterface
+class BasicAuthenticationListener extends AbstractListener
 {
-    use LegacyListenerTrait;
-
     private $tokenStorage;
     private $authenticationManager;
     private $providerKey;
@@ -75,7 +77,8 @@ class BasicAuthenticationListener extends AbstractListener implements ListenerIn
         }
 
         if (null !== $token = $this->tokenStorage->getToken()) {
-            if ($token instanceof UsernamePasswordToken && $token->isAuthenticated() && $token->getUsername() === $username) {
+            // @deprecated since Symfony 5.3, change to $token->getUserIdentifier() in 6.0
+            if ($token instanceof UsernamePasswordToken && $token->isAuthenticated(false) && (method_exists($token, 'getUserIdentifier') ? $token->getUserIdentifier() : $token->getUsername()) === $username) {
                 return;
             }
         }
@@ -85,14 +88,15 @@ class BasicAuthenticationListener extends AbstractListener implements ListenerIn
         }
 
         try {
+            $previousToken = $token;
             $token = $this->authenticationManager->authenticate(new UsernamePasswordToken($username, $request->headers->get('PHP_AUTH_PW'), $this->providerKey));
 
-            $this->migrateSession($request, $token);
+            $this->migrateSession($request, $token, $previousToken);
 
             $this->tokenStorage->setToken($token);
         } catch (AuthenticationException $e) {
             $token = $this->tokenStorage->getToken();
-            if ($token instanceof UsernamePasswordToken && $this->providerKey === $token->getProviderKey()) {
+            if ($token instanceof UsernamePasswordToken && $this->providerKey === $token->getFirewallName()) {
                 $this->tokenStorage->setToken(null);
             }
 
@@ -118,10 +122,19 @@ class BasicAuthenticationListener extends AbstractListener implements ListenerIn
         $this->sessionStrategy = $sessionStrategy;
     }
 
-    private function migrateSession(Request $request, TokenInterface $token)
+    private function migrateSession(Request $request, TokenInterface $token, ?TokenInterface $previousToken)
     {
         if (!$this->sessionStrategy || !$request->hasSession() || !$request->hasPreviousSession()) {
             return;
+        }
+
+        if ($previousToken) {
+            $user = method_exists($token, 'getUserIdentifier') ? $token->getUserIdentifier() : $token->getUsername();
+            $previousUser = method_exists($previousToken, 'getUserIdentifier') ? $previousToken->getUserIdentifier() : $previousToken->getUsername();
+
+            if ('' !== ($user ?? '') && $user === $previousUser) {
+                return;
+            }
         }
 
         $this->sessionStrategy->onAuthentication($request, $token);

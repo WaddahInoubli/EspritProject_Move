@@ -43,8 +43,6 @@ final class Locale extends \Locale
     /**
      * Returns the default fallback locale.
      *
-     * @return string|null The default fallback locale
-     *
      * @see setDefaultFallback()
      * @see getFallback()
      */
@@ -59,8 +57,6 @@ final class Locale extends \Locale
      * For example, the fallback of "fr_FR" is "fr". The fallback of "fr" is
      * the default fallback locale configured with {@link setDefaultFallback()}.
      * The default fallback locale has no fallback.
-     *
-     * @param string $locale The ICU locale code to find the fallback for
      *
      * @return string|null The ICU locale code of the fallback locale, or null
      *                     if no fallback exists

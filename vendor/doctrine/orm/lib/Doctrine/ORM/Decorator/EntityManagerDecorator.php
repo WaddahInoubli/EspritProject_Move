@@ -1,37 +1,30 @@
 <?php
 
-/*
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the MIT license. For more information, see
- * <http://www.doctrine-project.org>.
- */
+declare(strict_types=1);
 
 namespace Doctrine\ORM\Decorator;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Doctrine\Persistence\ObjectManagerDecorator;
 
+use function func_get_arg;
+use function func_num_args;
+use function get_debug_type;
+use function method_exists;
+use function sprintf;
+use function trigger_error;
+
+use const E_USER_NOTICE;
+
 /**
  * Base class for EntityManager decorators
+ *
+ * @extends ObjectManagerDecorator<EntityManagerInterface>
  */
 abstract class EntityManagerDecorator extends ObjectManagerDecorator implements EntityManagerInterface
 {
-    /** @var EntityManagerInterface */
-    protected $wrapped;
-
     public function __construct(EntityManagerInterface $wrapped)
     {
         $this->wrapped = $wrapped;
@@ -55,6 +48,28 @@ abstract class EntityManagerDecorator extends ObjectManagerDecorator implements 
 
     /**
      * {@inheritdoc}
+     *
+     * @psalm-param class-string<T> $className
+     *
+     * @psalm-return EntityRepository<T>
+     *
+     * @template T of object
+     */
+    public function getRepository($className)
+    {
+        return $this->wrapped->getRepository($className);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getClassMetadata($className)
+    {
+        return $this->wrapped->getClassMetadata($className);
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function beginTransaction()
     {
@@ -67,6 +82,23 @@ abstract class EntityManagerDecorator extends ObjectManagerDecorator implements 
     public function transactional($func)
     {
         return $this->wrapped->transactional($func);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function wrapInTransaction(callable $func)
+    {
+        if (! method_exists($this->wrapped, 'wrapInTransaction')) {
+            trigger_error(
+                sprintf('Calling `transactional()` instead of `wrapInTransaction()` which is not implemented on %s', get_debug_type($this->wrapped)),
+                E_USER_NOTICE
+            );
+
+            return $this->wrapped->transactional($func);
+        }
+
+        return $this->wrapped->wrapInTransaction($func);
     }
 
     /**
@@ -179,6 +211,20 @@ abstract class EntityManagerDecorator extends ObjectManagerDecorator implements 
     public function flush($entity = null)
     {
         $this->wrapped->flush($entity);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function refresh($object)
+    {
+        $lockMode = null;
+
+        if (func_num_args() > 1) {
+            $lockMode = func_get_arg(1);
+        }
+
+        $this->wrapped->refresh($object, $lockMode);
     }
 
     /**

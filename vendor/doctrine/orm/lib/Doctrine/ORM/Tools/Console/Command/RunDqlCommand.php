@@ -1,37 +1,18 @@
 <?php
 
-/*
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the MIT license. For more information, see
- * <http://www.doctrine-project.org>.
- */
+declare(strict_types=1);
 
 namespace Doctrine\ORM\Tools\Console\Command;
 
 use Doctrine\Common\Util\Debug;
-use Doctrine\ORM\EntityManagerInterface;
 use LogicException;
 use RuntimeException;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-use function assert;
 use function constant;
 use function defined;
 use function is_numeric;
@@ -44,33 +25,49 @@ use function strtoupper;
  *
  * @link    www.doctrine-project.org
  */
-class RunDqlCommand extends Command
+class RunDqlCommand extends AbstractEntityManagerCommand
 {
-    /**
-     * {@inheritdoc}
-     */
+    /** @return void */
     protected function configure()
     {
         $this->setName('orm:run-dql')
              ->setDescription('Executes arbitrary DQL directly from the command line')
              ->addArgument('dql', InputArgument::REQUIRED, 'The DQL to execute.')
+             ->addOption('em', null, InputOption::VALUE_REQUIRED, 'Name of the entity manager to operate on')
              ->addOption('hydrate', null, InputOption::VALUE_REQUIRED, 'Hydration mode of result set. Should be either: object, array, scalar or single-scalar.', 'object')
              ->addOption('first-result', null, InputOption::VALUE_REQUIRED, 'The first result in the result set.')
              ->addOption('max-result', null, InputOption::VALUE_REQUIRED, 'The maximum number of results in the result set.')
              ->addOption('depth', null, InputOption::VALUE_REQUIRED, 'Dumping depth of Entity graph.', 7)
              ->addOption('show-sql', null, InputOption::VALUE_NONE, 'Dump generated SQL instead of executing query')
-             ->setHelp('Executes arbitrary DQL directly from the command line.');
+             ->setHelp(<<<'EOT'
+The <info>%command.name%</info> command executes the given DQL query and
+outputs the results:
+
+<info>php %command.full_name% "SELECT u FROM App\Entity\User u"</info>
+
+You can also optionally specify some additional options like what type of
+hydration to use when executing the query:
+
+<info>php %command.full_name% "SELECT u FROM App\Entity\User u" --hydrate=array</info>
+
+Additionally you can specify the first result and maximum amount of results to
+show:
+
+<info>php %command.full_name% "SELECT u FROM App\Entity\User u" --first-result=0 --max-result=30</info>
+EOT
+             );
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @return int
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $ui = new SymfonyStyle($input, $output);
 
-        $em = $this->getHelper('em')->getEntityManager();
-        assert($em instanceof EntityManagerInterface);
+        $em = $this->getEntityManager($input);
 
         $dql = $input->getArgument('dql');
         if ($dql === null) {
@@ -83,7 +80,7 @@ class RunDqlCommand extends Command
             throw new LogicException("Option 'depth' must contain an integer value");
         }
 
-        $hydrationModeName = $input->getOption('hydrate');
+        $hydrationModeName = (string) $input->getOption('hydrate');
         $hydrationMode     = 'Doctrine\ORM\Query::HYDRATE_' . strtoupper(str_replace('-', '_', $hydrationModeName));
 
         if (! defined($hydrationMode)) {

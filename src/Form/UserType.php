@@ -34,40 +34,21 @@ class UserType extends AbstractType
                     'class' => 'form-control',
                     'placeholder'=>'Nom'
 
-                ],
-                'required' => false,
-
+                ]
             ])
             ->add('prenom', TextType::class, [
                 'attr' => [
                     'class' => 'form-control',
                     'placeholder'=>'Prenom'
 
-                ],
-                'required' => false,
+                ]
             ])
             ->add('password', TextType::class, [
                 'attr' => [
                     'class' => 'form-control',
                     'placeholder'=>'Password',
 
-                ],
-                'constraints' => [
-                    new Constraints\NotBlank(),
-                    new Constraints\Callback(function($object, ExecutionContextInterface $context) {
-                        $password = strval($object);
-
-
-                        if (strlen($password)<8) {
-                            $context
-                                ->buildViolation('Password must be at least 8 characters')
-                                ->addViolation();
-                        }
-
-                    }),
-                ],
-                'required' => true,
-
+                ]
             ])
             ->add('address', TextType::class, [
                 'attr' => [
@@ -76,7 +57,6 @@ class UserType extends AbstractType
 
                 ],
                 'required' => false,
-
             ])
             ->add('age', IntegerType::class, [
                 'attr' => [
@@ -85,40 +65,19 @@ class UserType extends AbstractType
 
                 ],
                 'required' => false,
-
             ])
             ->add('email', EmailType::class, [
                 'attr' => [
                     'class' => 'form-control',
                     'placeholder'=>'email@exemple.com'
-
                 ],
-
-                'required' => false,
-
             ])
 
             ->add('num_tel', IntegerType::class, [
                 'attr' => [
                     'class' => 'form-control',
                     'placeholder'=>'Numéro de téléphone',
-                ],
-                'constraints' => [
-                    new Constraints\NotBlank(),
-                    new Constraints\Callback(function($object, ExecutionContextInterface $context) {
-                        $phone = strval($object);
-
-
-                        if (strlen($phone)!=8) {
-                            $context
-                                ->buildViolation('Phone number must be 8 numbers')
-                                ->addViolation();
-                        }
-
-                    }),
-                ],
-                'required' => true,
-
+                ]
             ])
 
             ->add('role', ChoiceType::class, [

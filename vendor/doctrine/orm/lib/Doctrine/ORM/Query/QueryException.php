@@ -1,34 +1,14 @@
 <?php
 
-/*
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the MIT license. For more information, see
- * <http://www.doctrine-project.org>.
- */
+declare(strict_types=1);
 
 namespace Doctrine\ORM\Query;
 
-use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\Query\AST\PathExpression;
 use Exception;
+use Stringable;
 
-/**
- * Description of QueryException.
- *
- * @link    www.doctrine-project.org
- */
 class QueryException extends ORMException
 {
     /**
@@ -63,9 +43,7 @@ class QueryException extends ORMException
         return new self('[Semantical Error] ' . $message, 0, $previous);
     }
 
-    /**
-     * @return QueryException
-     */
+    /** @return QueryException */
     public static function invalidLockMode()
     {
         return new self('Invalid lock mode hint provided.');
@@ -134,16 +112,14 @@ class QueryException extends ORMException
         return new self('Invalid parameter: token ' . $key . ' is not defined in the query.');
     }
 
-    /**
-     * @return QueryException
-     */
+    /** @return QueryException */
     public static function parameterTypeMismatch()
     {
         return new self('DQL Query parameter and type numbers mismatch, but have to be exactly equal.');
     }
 
     /**
-     * @param object $pathExpr
+     * @param PathExpression $pathExpr
      *
      * @return QueryException
      */
@@ -155,7 +131,7 @@ class QueryException extends ORMException
     }
 
     /**
-     * @param string $literal
+     * @param string|Stringable $literal
      *
      * @return QueryException
      */
@@ -165,9 +141,10 @@ class QueryException extends ORMException
     }
 
     /**
-     * @return QueryException
-     *
+     * @param string[] $assoc
      * @psalm-param array<string, string> $assoc
+     *
+     * @return QueryException
      */
     public static function iterateWithFetchJoinCollectionNotAllowed($assoc)
     {
@@ -177,9 +154,7 @@ class QueryException extends ORMException
         );
     }
 
-    /**
-     * @return QueryException
-     */
+    /** @return QueryException */
     public static function partialObjectsAreDangerous()
     {
         return new self(
@@ -190,9 +165,10 @@ class QueryException extends ORMException
     }
 
     /**
-     * @return QueryException
-     *
+     * @param string[] $assoc
      * @psalm-param array<string, string> $assoc
+     *
+     * @return QueryException
      */
     public static function overwritingJoinConditionsNotYetSupported($assoc)
     {
@@ -203,9 +179,7 @@ class QueryException extends ORMException
         );
     }
 
-    /**
-     * @return QueryException
-     */
+    /** @return QueryException */
     public static function associationPathInverseSideNotSupported(PathExpression $pathExpr)
     {
         return new self(
@@ -215,9 +189,10 @@ class QueryException extends ORMException
     }
 
     /**
-     * @return QueryException
-     *
+     * @param string[] $assoc
      * @psalm-param array<string, string> $assoc
+     *
+     * @return QueryException
      */
     public static function iterateWithFetchJoinNotAllowed($assoc)
     {
@@ -232,9 +207,7 @@ class QueryException extends ORMException
         return new self('Iterating a query with mixed results (using scalars) is not supported.');
     }
 
-    /**
-     * @return QueryException
-     */
+    /** @return QueryException */
     public static function associationPathCompositeKeyNotSupported()
     {
         return new self(

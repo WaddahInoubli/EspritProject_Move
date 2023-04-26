@@ -28,8 +28,8 @@ abstract class SmsCommandOptions {
     }
 
     /**
-     * @param string $sim The SID or unique name of the Sim that SMS Command was
-     *                    sent to or from.
+     * @param string $sim The SID or unique name of the Sim resource that SMS
+     *                    Command was sent to or from.
      * @param string $status The status of the SMS Command
      * @param string $direction The direction of the SMS Command
      * @return ReadSmsCommandOptions Options builder
@@ -88,8 +88,8 @@ class CreateSmsCommandOptions extends Options {
 
 class ReadSmsCommandOptions extends Options {
     /**
-     * @param string $sim The SID or unique name of the Sim that SMS Command was
-     *                    sent to or from.
+     * @param string $sim The SID or unique name of the Sim resource that SMS
+     *                    Command was sent to or from.
      * @param string $status The status of the SMS Command
      * @param string $direction The direction of the SMS Command
      */
@@ -100,10 +100,10 @@ class ReadSmsCommandOptions extends Options {
     }
 
     /**
-     * The SID or unique name of the Sim that SMS Command was sent to or from.
+     * The SID or unique name of the Sim resource that SMS Command was sent to or from.
      *
-     * @param string $sim The SID or unique name of the Sim that SMS Command was
-     *                    sent to or from.
+     * @param string $sim The SID or unique name of the Sim resource that SMS
+     *                    Command was sent to or from.
      * @return $this Fluent Builder
      */
     public function setSim(string $sim): self {
@@ -112,7 +112,7 @@ class ReadSmsCommandOptions extends Options {
     }
 
     /**
-     * The status of the SMS Command. Can be: `queued`, `sent`, `delivered`, `received` or `failed`. See the [SMS Command Status Values](https://www.twilio.com/docs/wireless/api/smscommand-resource#status-values) for a description of each.
+     * The status of the SMS Command. Can be: `queued`, `sent`, `delivered`, `received` or `failed`. See the [SMS Command Status Values](https://www.twilio.com/docs/iot/supersim/api/smscommand-resource#status-values) for a description of each.
      *
      * @param string $status The status of the SMS Command
      * @return $this Fluent Builder

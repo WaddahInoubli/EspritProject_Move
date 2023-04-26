@@ -19,7 +19,7 @@ use function is_callable;
 final class ConfigurationArray implements ConfigurationLoader
 {
     /** @var array<string,mixed> */
-    private $configurations;
+    private array $configurations;
 
     /**
      * @param array<string,mixed> $configurations
@@ -60,6 +60,9 @@ final class ConfigurationArray implements ConfigurationLoader
             'custom_template' => 'setCustomTemplate',
             'all_or_nothing' => static function ($value, Configuration $configuration): void {
                 $configuration->setAllOrNothing(is_bool($value) ? $value : BooleanStringFormatter::toBoolean($value, false));
+            },
+            'transactional' => static function ($value, Configuration $configuration): void {
+                $configuration->setTransactional(is_bool($value) ? $value : BooleanStringFormatter::toBoolean($value, true));
             },
             'check_database_platform' =>  static function ($value, Configuration $configuration): void {
                 $configuration->setCheckDatabasePlatform(is_bool($value) ? $value : BooleanStringFormatter::toBoolean($value, false));

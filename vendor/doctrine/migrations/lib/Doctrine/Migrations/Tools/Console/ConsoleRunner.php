@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Doctrine\Migrations\Tools\Console;
 
-use Doctrine\DBAL\Tools\Console\Helper\ConnectionHelper;
-use Doctrine\Migrations\Configuration\Connection\ExistingConnection;
+use Composer\InstalledVersions;
 use Doctrine\Migrations\Configuration\EntityManager\ExistingEntityManager;
 use Doctrine\Migrations\Configuration\Migration\ConfigurationFileWithFallback;
 use Doctrine\Migrations\DependencyFactory;
@@ -24,11 +23,11 @@ use Doctrine\Migrations\Tools\Console\Command\SyncMetadataCommand;
 use Doctrine\Migrations\Tools\Console\Command\UpToDateCommand;
 use Doctrine\Migrations\Tools\Console\Command\VersionCommand;
 use Doctrine\ORM\Tools\Console\Helper\EntityManagerHelper;
-use PackageVersions\Versions;
 use RuntimeException;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Helper\HelperSet;
 
+use function assert;
 use function file_exists;
 use function getcwd;
 use function is_readable;
@@ -99,7 +98,9 @@ class ConsoleRunner
     /** @param DoctrineCommand[] $commands */
     public static function createApplication(array $commands = [], ?DependencyFactory $dependencyFactory = null): Application
     {
-        $cli = new Application('Doctrine Migrations', Versions::getVersion('doctrine/migrations'));
+        $version = InstalledVersions::getVersion('doctrine/migrations');
+        assert($version !== null);
+        $cli = new Application('Doctrine Migrations', $version);
         $cli->setCatchExceptions(true);
         self::addCommands($cli, $dependencyFactory);
         $cli->addCommands($commands);
@@ -147,13 +148,6 @@ class ConsoleRunner
             return DependencyFactory::fromEntityManager(
                 $configurations,
                 new ExistingEntityManager($dependencyFactory->get('em')->getEntityManager())
-            );
-        }
-
-        if ($dependencyFactory->has('db') && $dependencyFactory->get('db') instanceof ConnectionHelper) {
-            return DependencyFactory::fromConnection(
-                $configurations,
-                new ExistingConnection($dependencyFactory->get('db')->getConnection())
             );
         }
 

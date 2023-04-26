@@ -29,6 +29,8 @@ use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface
  *
  * @author Ryan Weaver <ryan@knpuniversity.com>
  * @author Amaury Leroux de Lens <amaury@lerouxdelens.com>
+ *
+ * @deprecated since Symfony 5.3, use the new authenticator system instead
  */
 interface AuthenticatorInterface extends AuthenticationEntryPointInterface
 {
@@ -70,13 +72,13 @@ interface AuthenticatorInterface extends AuthenticationEntryPointInterface
      * The *credentials* are the return value from getCredentials()
      *
      * You may throw an AuthenticationException if you wish. If you return
-     * null, then a UsernameNotFoundException is thrown for you.
+     * null, then a UserNotFoundException is thrown for you.
      *
      * @param mixed $credentials
      *
-     * @throws AuthenticationException
-     *
      * @return UserInterface|null
+     *
+     * @throws AuthenticationException
      */
     public function getUser($credentials, UserProviderInterface $userProvider);
 
@@ -105,11 +107,9 @@ interface AuthenticatorInterface extends AuthenticationEntryPointInterface
      *
      * @see AbstractGuardAuthenticator
      *
-     * @param string $providerKey The provider (i.e. firewall) key
-     *
      * @return GuardTokenInterface
      */
-    public function createAuthenticatedToken(UserInterface $user, $providerKey);
+    public function createAuthenticatedToken(UserInterface $user, string $providerKey);
 
     /**
      * Called when authentication executed, but failed (e.g. wrong username password).
@@ -133,11 +133,9 @@ interface AuthenticatorInterface extends AuthenticationEntryPointInterface
      * If you return null, the current request will continue, and the user
      * will be authenticated. This makes sense, for example, with an API.
      *
-     * @param string $providerKey The provider (i.e. firewall) key
-     *
      * @return Response|null
      */
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey);
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $providerKey);
 
     /**
      * Does this method support remember me cookies?

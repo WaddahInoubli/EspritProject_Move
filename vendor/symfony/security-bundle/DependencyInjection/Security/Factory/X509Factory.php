@@ -20,10 +20,14 @@ use Symfony\Component\DependencyInjection\Reference;
  * X509Factory creates services for X509 certificate authentication.
  *
  * @author Fabien Potencier <fabien@symfony.com>
+ *
+ * @internal
  */
-class X509Factory implements SecurityFactoryInterface
+class X509Factory implements SecurityFactoryInterface, AuthenticatorFactoryInterface
 {
-    public function create(ContainerBuilder $container, $id, $config, $userProvider, $defaultEntryPoint)
+    public const PRIORITY = -10;
+
+    public function create(ContainerBuilder $container, string $id, array $config, string $userProvider, ?string $defaultEntryPoint): array
     {
         $providerId = 'security.authentication.provider.pre_authenticated.'.$id;
         $container
@@ -44,12 +48,31 @@ class X509Factory implements SecurityFactoryInterface
         return [$providerId, $listenerId, $defaultEntryPoint];
     }
 
-    public function getPosition()
+    public function createAuthenticator(ContainerBuilder $container, string $firewallName, array $config, string $userProviderId)
+    {
+        $authenticatorId = 'security.authenticator.x509.'.$firewallName;
+        $container
+            ->setDefinition($authenticatorId, new ChildDefinition('security.authenticator.x509'))
+            ->replaceArgument(0, new Reference($userProviderId))
+            ->replaceArgument(2, $firewallName)
+            ->replaceArgument(3, $config['user'])
+            ->replaceArgument(4, $config['credentials'])
+        ;
+
+        return $authenticatorId;
+    }
+
+    public function getPriority(): int
+    {
+        return self::PRIORITY;
+    }
+
+    public function getPosition(): string
     {
         return 'pre_auth';
     }
 
-    public function getKey()
+    public function getKey(): string
     {
         return 'x509';
     }

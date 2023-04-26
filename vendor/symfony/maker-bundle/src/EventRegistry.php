@@ -31,8 +31,8 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
 use Symfony\Component\HttpKernel\Event\ViewEvent;
-use Symfony\Component\Security\Core\Event\AuthenticationEvent;
 use Symfony\Component\Security\Core\Event\AuthenticationFailureEvent;
+use Symfony\Component\Security\Core\Event\AuthenticationSuccessEvent;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Http\Event\SwitchUserEvent;
 use Symfony\Contracts\EventDispatcher\Event;
@@ -43,7 +43,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 class EventRegistry
 {
     // list of *known* events to always include (if they exist)
-    private static $newEventsMap = [
+    private static array $newEventsMap = [
         'kernel.exception' => ExceptionEvent::class,
         'kernel.request' => RequestEvent::class,
         'kernel.response' => ResponseEvent::class,
@@ -53,7 +53,7 @@ class EventRegistry
         'kernel.terminate' => TerminateEvent::class,
     ];
 
-    private static $eventsMap = [
+    private static array $eventsMap = [
         'console.command' => ConsoleCommandEvent::class,
         'console.terminate' => ConsoleTerminateEvent::class,
         'console.error' => ConsoleErrorEvent::class,
@@ -65,21 +65,18 @@ class EventRegistry
         'kernel.response' => FilterResponseEvent::class,
         'kernel.terminate' => PostResponseEvent::class,
         'kernel.finish_request' => FinishRequestEvent::class,
-        'security.authentication.success' => AuthenticationEvent::class,
+        'security.authentication.success' => AuthenticationSuccessEvent::class,
         'security.authentication.failure' => AuthenticationFailureEvent::class,
         'security.interactive_login' => InteractiveLoginEvent::class,
         'security.switch_user' => SwitchUserEvent::class,
     ];
 
-    private $eventDispatcher;
-
-    public function __construct(EventDispatcherInterface $eventDispatcher)
-    {
-        $this->eventDispatcher = $eventDispatcher;
-
+    public function __construct(
+        private EventDispatcherInterface $eventDispatcher,
+    ) {
         // Loop through the new event classes
         foreach (self::$newEventsMap as $eventName => $newEventClass) {
-            //Check if the new event classes exist, if so replace the old one with the new.
+            // Check if the new event classes exist, if so replace the old one with the new.
             if (isset(self::$eventsMap[$eventName]) && class_exists($newEventClass)) {
                 self::$eventsMap[$eventName] = $newEventClass;
             }
@@ -123,7 +120,7 @@ class EventRegistry
     /**
      * Attempts to get the event class for a given event.
      */
-    public function getEventClassName(string $event)
+    public function getEventClassName(string $event): ?string
     {
         // if the event is already a class name, use it
         if (class_exists($event)) {
@@ -169,7 +166,7 @@ class EventRegistry
         return null;
     }
 
-    public function listActiveEvents(array $events)
+    public function listActiveEvents(array $events): array
     {
         foreach ($events as $key => $event) {
             $events[$key] = sprintf('%s (<fg=yellow>%s</>)', $event, self::$eventsMap[$event]);

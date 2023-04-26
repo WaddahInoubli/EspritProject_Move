@@ -21,14 +21,14 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class RememberMeToken extends AbstractToken
 {
     private $secret;
-    private $providerKey;
+    private $firewallName;
 
     /**
      * @param string $secret A secret used to make sure the token is created by the app and not by a malicious client
      *
      * @throws \InvalidArgumentException
      */
-    public function __construct(UserInterface $user, string $providerKey, string $secret)
+    public function __construct(UserInterface $user, string $firewallName, string $secret)
     {
         parent::__construct($user->getRoles());
 
@@ -36,42 +36,51 @@ class RememberMeToken extends AbstractToken
             throw new \InvalidArgumentException('$secret must not be empty.');
         }
 
-        if (empty($providerKey)) {
-            throw new \InvalidArgumentException('$providerKey must not be empty.');
+        if ('' === $firewallName) {
+            throw new \InvalidArgumentException('$firewallName must not be empty.');
         }
 
-        $this->providerKey = $providerKey;
+        $this->firewallName = $firewallName;
         $this->secret = $secret;
 
         $this->setUser($user);
-        parent::setAuthenticated(true);
+        parent::setAuthenticated(true, false);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function setAuthenticated($authenticated)
+    public function setAuthenticated(bool $authenticated)
     {
         if ($authenticated) {
             throw new \LogicException('You cannot set this token to authenticated after creation.');
         }
 
-        parent::setAuthenticated(false);
+        parent::setAuthenticated(false, false);
     }
 
     /**
      * Returns the provider secret.
      *
      * @return string The provider secret
+     *
+     * @deprecated since Symfony 5.2, use getFirewallName() instead
      */
     public function getProviderKey()
     {
-        return $this->providerKey;
+        if (1 !== \func_num_args() || true !== func_get_arg(0)) {
+            trigger_deprecation('symfony/security-core', '5.2', 'Method "%s()" is deprecated, use "getFirewallName()" instead.', __METHOD__);
+        }
+
+        return $this->firewallName;
+    }
+
+    public function getFirewallName(): string
+    {
+        return $this->getProviderKey(true);
     }
 
     /**
-     * Returns the secret.
-     *
      * @return string
      */
     public function getSecret()
@@ -84,6 +93,8 @@ class RememberMeToken extends AbstractToken
      */
     public function getCredentials()
     {
+        trigger_deprecation('symfony/security-core', '5.4', 'Method "%s()" is deprecated.', __METHOD__);
+
         return '';
     }
 
@@ -92,7 +103,7 @@ class RememberMeToken extends AbstractToken
      */
     public function __serialize(): array
     {
-        return [$this->secret, $this->providerKey, parent::__serialize()];
+        return [$this->secret, $this->firewallName, parent::__serialize()];
     }
 
     /**
@@ -100,7 +111,7 @@ class RememberMeToken extends AbstractToken
      */
     public function __unserialize(array $data): void
     {
-        [$this->secret, $this->providerKey, $parentData] = $data;
+        [$this->secret, $this->firewallName, $parentData] = $data;
         $parentData = \is_array($parentData) ? $parentData : unserialize($parentData);
         parent::__unserialize($parentData);
     }

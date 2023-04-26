@@ -4,9 +4,11 @@ namespace Doctrine\Bundle\DoctrineBundle;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\ORMException;
+use Doctrine\Persistence\Proxy;
 use ProxyManager\Proxy\LazyLoadingInterface;
 use Psr\Container\ContainerInterface;
 use Symfony\Bridge\Doctrine\ManagerRegistry;
+use Symfony\Component\VarExporter\LazyObjectInterface;
 use Symfony\Contracts\Service\ResetInterface;
 
 use function array_keys;
@@ -25,7 +27,7 @@ class Registry extends ManagerRegistry implements ResetInterface
     {
         $this->container = $container;
 
-        parent::__construct('ORM', $connections, $entityManagers, $defaultConnection, $defaultEntityManager, 'Doctrine\ORM\Proxy\Proxy');
+        parent::__construct('ORM', $connections, $entityManagers, $defaultConnection, $defaultEntityManager, Proxy::class);
     }
 
     /**
@@ -74,7 +76,7 @@ class Registry extends ManagerRegistry implements ResetInterface
 
         assert($manager instanceof EntityManagerInterface);
 
-        if (! $manager instanceof LazyLoadingInterface || $manager->isOpen()) {
+        if ((! $manager instanceof LazyLoadingInterface && ! $manager instanceof LazyObjectInterface) || $manager->isOpen()) {
             $manager->clear();
 
             return;

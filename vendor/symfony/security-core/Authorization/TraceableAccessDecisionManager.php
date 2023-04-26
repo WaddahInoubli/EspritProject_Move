@@ -26,6 +26,7 @@ class TraceableAccessDecisionManager implements AccessDecisionManagerInterface
 {
     private $manager;
     private $strategy;
+    /** @var iterable<mixed, VoterInterface> */
     private $voters = [];
     private $decisionLog = []; // All decision logs
     private $currentLog = [];  // Logs being filled in
@@ -50,7 +51,7 @@ class TraceableAccessDecisionManager implements AccessDecisionManagerInterface
      *
      * @param bool $allowMultipleAttributes Whether to allow passing multiple values to the $attributes array
      */
-    public function decide(TokenInterface $token, array $attributes, $object = null/*, bool $allowMultipleAttributes = false*/): bool
+    public function decide(TokenInterface $token, array $attributes, $object = null/* , bool $allowMultipleAttributes = false */): bool
     {
         $currentDecisionLog = [
             'attributes' => $attributes,
@@ -87,14 +88,18 @@ class TraceableAccessDecisionManager implements AccessDecisionManagerInterface
 
     public function getStrategy(): string
     {
-        // The $strategy property is misleading because it stores the name of its
-        // method (e.g. 'decideAffirmative') instead of the original strategy name
-        // (e.g. 'affirmative')
-        return null === $this->strategy ? '-' : strtolower(substr($this->strategy, 6));
+        if (null === $this->strategy) {
+            return '-';
+        }
+        if (method_exists($this->strategy, '__toString')) {
+            return (string) $this->strategy;
+        }
+
+        return get_debug_type($this->strategy);
     }
 
     /**
-     * @return iterable|VoterInterface[]
+     * @return iterable<mixed, VoterInterface>
      */
     public function getVoters(): iterable
     {
@@ -107,4 +112,6 @@ class TraceableAccessDecisionManager implements AccessDecisionManagerInterface
     }
 }
 
-class_alias(TraceableAccessDecisionManager::class, DebugAccessDecisionManager::class);
+if (!class_exists(DebugAccessDecisionManager::class, false)) {
+    class_alias(TraceableAccessDecisionManager::class, DebugAccessDecisionManager::class);
+}

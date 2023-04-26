@@ -24,10 +24,13 @@ use Symfony\Component\Mime\RawMessage;
  */
 class RoundRobinTransport implements TransportInterface
 {
+    /**
+     * @var \SplObjectStorage<TransportInterface, float>
+     */
     private $deadTransports;
     private $transports = [];
     private $retryPeriod;
-    private $cursor = 0;
+    private $cursor = -1;
 
     /**
      * @param TransportInterface[] $transports
@@ -45,15 +48,19 @@ class RoundRobinTransport implements TransportInterface
 
     public function send(RawMessage $message, Envelope $envelope = null): ?SentMessage
     {
+        $exception = null;
+
         while ($transport = $this->getNextTransport()) {
             try {
                 return $transport->send($message, $envelope);
             } catch (TransportExceptionInterface $e) {
+                $exception = $exception ?? new TransportException('All transports failed.');
+                $exception->appendDebug(sprintf("Transport \"%s\": %s\n", $transport, $e->getDebug()));
                 $this->deadTransports[$transport] = microtime(true);
             }
         }
 
-        throw new TransportException('All transports failed.');
+        throw $exception ?? new TransportException('No transports found.');
     }
 
     public function __toString(): string
@@ -66,6 +73,10 @@ class RoundRobinTransport implements TransportInterface
      */
     protected function getNextTransport(): ?TransportInterface
     {
+        if (-1 === $this->cursor) {
+            $this->cursor = $this->getInitialCursor();
+        }
+
         $cursor = $this->cursor;
         while (true) {
             $transport = $this->transports[$cursor];
@@ -93,6 +104,13 @@ class RoundRobinTransport implements TransportInterface
     protected function isTransportDead(TransportInterface $transport): bool
     {
         return $this->deadTransports->contains($transport);
+    }
+
+    protected function getInitialCursor(): int
+    {
+        // the cursor initial value is randomized so that
+        // when are not in a daemon, we are still rotating the transports
+        return mt_rand(0, \count($this->transports) - 1);
     }
 
     protected function getNameSymbol(): string

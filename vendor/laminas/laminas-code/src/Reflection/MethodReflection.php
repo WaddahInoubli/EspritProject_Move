@@ -1,15 +1,13 @@
 <?php
 
-/**
- * @see       https://github.com/laminas/laminas-code for the canonical source repository
- * @copyright https://github.com/laminas/laminas-code/blob/master/COPYRIGHT.md
- * @license   https://github.com/laminas/laminas-code/blob/master/LICENSE.md New BSD License
- */
-
 namespace Laminas\Code\Reflection;
 
 use ReflectionMethod as PhpReflectionMethod;
+use ReflectionParameter as PhpReflectionParameter;
+use ReturnTypeWillChange;
 
+use function array_key_exists;
+use function array_map;
 use function array_shift;
 use function array_slice;
 use function class_exists;
@@ -59,6 +57,7 @@ class MethodReflection extends PhpReflectionMethod implements ReflectionInterfac
      * @param  bool $includeDocComment
      * @return int
      */
+    #[ReturnTypeWillChange]
     public function getStartLine($includeDocComment = false)
     {
         if ($includeDocComment) {
@@ -75,6 +74,7 @@ class MethodReflection extends PhpReflectionMethod implements ReflectionInterfac
      *
      * @return ClassReflection
      */
+    #[ReturnTypeWillChange]
     public function getDeclaringClass()
     {
         $phpReflection     = parent::getDeclaringClass();
@@ -87,9 +87,14 @@ class MethodReflection extends PhpReflectionMethod implements ReflectionInterfac
     /**
      * Get method prototype
      *
+     * @deprecated this method is unreliable, and should not be used: it will be removed in the next major release.
+     *             It may crash on parameters with union types, and will return relative types, instead of
+     *             FQN references
+     *
      * @param string $format
      * @return array|string
      */
+    #[ReturnTypeWillChange]
     public function getPrototype($format = self::PROTOTYPE_AS_ARRAY)
     {
         $returnType = 'mixed';
@@ -118,15 +123,37 @@ class MethodReflection extends PhpReflectionMethod implements ReflectionInterfac
                 'by_ref'   => $parameter->isPassedByReference(),
                 'default'  => $parameter->isDefaultValueAvailable() ? $parameter->getDefaultValue() : null,
             ];
+
+            if ($parameter->isPromoted()) {
+                $prototype['arguments'][$parameter->getName()]['promoted'] = true;
+                if ($parameter->isPublicPromoted()) {
+                    $prototype['arguments'][$parameter->getName()]['visibility'] = 'public';
+                } elseif ($parameter->isProtectedPromoted()) {
+                    $prototype['arguments'][$parameter->getName()]['visibility'] = 'protected';
+                } elseif ($parameter->isPrivatePromoted()) {
+                    $prototype['arguments'][$parameter->getName()]['visibility'] = 'private';
+                }
+            }
         }
 
         if ($format == self::PROTOTYPE_AS_STRING) {
             $line = $prototype['visibility'] . ' ' . $prototype['return'] . ' ' . $prototype['name'] . '(';
             $args = [];
             foreach ($prototype['arguments'] as $name => $argument) {
-                $argsLine = ($argument['type'] ?
-                    $argument['type'] . ' '
-                    : '') . ($argument['by_ref'] ? '&' : '') . '$' . $name;
+                $argsLine =
+                    (
+                        array_key_exists('visibility', $argument)
+                            ? $argument['visibility'] . ' '
+                            : ''
+                    ) . (
+                        $argument['type']
+                            ? $argument['type'] . ' '
+                            : ''
+                    ) . (
+                        $argument['by_ref']
+                            ? '&'
+                            : ''
+                    ) . '$' . $name;
                 if (! $argument['required']) {
                     $argsLine .= ' = ' . var_export($argument['default'], true);
                 }
@@ -144,23 +171,18 @@ class MethodReflection extends PhpReflectionMethod implements ReflectionInterfac
     /**
      * Get all method parameter reflection objects
      *
-     * @return ParameterReflection[]
+     * @return list<ParameterReflection>
      */
+    #[ReturnTypeWillChange]
     public function getParameters()
     {
-        $phpReflections     = parent::getParameters();
-        $laminasReflections = [];
-        while ($phpReflections && ($phpReflection = array_shift($phpReflections))) {
-            $instance             = new ParameterReflection(
-                [$this->getDeclaringClass()->getName(), $this->getName()],
-                $phpReflection->getName()
-            );
-            $laminasReflections[] = $instance;
-            unset($phpReflection);
-        }
-        unset($phpReflections);
+        $method = [$this->getDeclaringClass()->getName(), $this->getName()];
 
-        return $laminasReflections;
+        return array_map(
+            static fn (PhpReflectionParameter $parameter): ParameterReflection
+                => new ParameterReflection($method, $parameter->getName()),
+            parent::getParameters()
+        );
     }
 
     /**
@@ -346,7 +368,7 @@ class MethodReflection extends PhpReflectionMethod implements ReflectionInterfac
      *
      * @param array $haystack
      * @param int $position
-     * @return bool
+     * @return bool|null
      */
     protected function isEndingBrace($haystack, $position)
     {
@@ -406,6 +428,8 @@ class MethodReflection extends PhpReflectionMethod implements ReflectionInterfac
                     return false;
             }
         }
+
+        return null;
     }
 
     /**

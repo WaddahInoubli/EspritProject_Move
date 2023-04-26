@@ -36,7 +36,7 @@ final class MakeVoter extends AbstractMaker
         return 'Creates a new security voter class';
     }
 
-    public function configureCommand(Command $command, InputConfiguration $inputConf)
+    public function configureCommand(Command $command, InputConfiguration $inputConfig): void
     {
         $command
             ->addArgument('name', InputArgument::OPTIONAL, 'The name of the security voter class (e.g. <fg=yellow>BlogPostVoter</>)')
@@ -44,7 +44,7 @@ final class MakeVoter extends AbstractMaker
         ;
     }
 
-    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
+    public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator): void
     {
         $voterClassNameDetails = $generator->createClassNameDetails(
             $input->getArgument('name'),
@@ -68,7 +68,7 @@ final class MakeVoter extends AbstractMaker
         ]);
     }
 
-    public function configureDependencies(DependencyBuilder $dependencies)
+    public function configureDependencies(DependencyBuilder $dependencies): void
     {
         $dependencies->addClassDependency(
             Voter::class,

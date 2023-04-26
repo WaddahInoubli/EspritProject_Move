@@ -29,7 +29,10 @@ class LogoutUrlGenerator
     private $router;
     private $tokenStorage;
     private $listeners = [];
-    private $currentFirewall;
+    /** @var string|null */
+    private $currentFirewallName;
+    /** @var string|null */
+    private $currentFirewallContext;
 
     public function __construct(RequestStack $requestStack = null, UrlGeneratorInterface $router = null, TokenStorageInterface $tokenStorage = null)
     {
@@ -47,7 +50,7 @@ class LogoutUrlGenerator
      * @param string|null $csrfParameter The CSRF token parameter name
      * @param string|null $context       The listener context
      */
-    public function registerListener($key, $logoutPath, $csrfTokenId, $csrfParameter, CsrfTokenManagerInterface $csrfTokenManager = null, string $context = null)
+    public function registerListener(string $key, string $logoutPath, ?string $csrfTokenId, ?string $csrfParameter, CsrfTokenManagerInterface $csrfTokenManager = null, string $context = null)
     {
         $this->listeners[$key] = [$logoutPath, $csrfTokenId, $csrfParameter, $csrfTokenManager, $context];
     }
@@ -55,11 +58,9 @@ class LogoutUrlGenerator
     /**
      * Generates the absolute logout path for the firewall.
      *
-     * @param string|null $key The firewall key or null to use the current firewall key
-     *
-     * @return string The logout path
+     * @return string
      */
-    public function getLogoutPath($key = null)
+    public function getLogoutPath(string $key = null)
     {
         return $this->generateLogoutUrl($key, UrlGeneratorInterface::ABSOLUTE_PATH);
     }
@@ -67,28 +68,21 @@ class LogoutUrlGenerator
     /**
      * Generates the absolute logout URL for the firewall.
      *
-     * @param string|null $key The firewall key or null to use the current firewall key
-     *
-     * @return string The logout URL
+     * @return string
      */
-    public function getLogoutUrl($key = null)
+    public function getLogoutUrl(string $key = null)
     {
         return $this->generateLogoutUrl($key, UrlGeneratorInterface::ABSOLUTE_URL);
     }
 
-    /**
-     * @param string|null $key     The current firewall key
-     * @param string|null $context The current firewall context
-     */
-    public function setCurrentFirewall($key, $context = null)
+    public function setCurrentFirewall(?string $key, string $context = null)
     {
-        $this->currentFirewall = [$key, $context];
+        $this->currentFirewallName = $key;
+        $this->currentFirewallContext = $context;
     }
 
     /**
      * Generates the logout URL for the firewall.
-     *
-     * @return string The logout URL
      */
     private function generateLogoutUrl(?string $key, int $referenceType): string
     {
@@ -106,6 +100,10 @@ class LogoutUrlGenerator
             }
 
             $request = $this->requestStack->getCurrentRequest();
+
+            if (!$request) {
+                throw new \LogicException('Unable to generate the logout URL without a Request.');
+            }
 
             $url = UrlGeneratorInterface::ABSOLUTE_URL === $referenceType ? $request->getUriForPath($logoutPath) : $request->getBaseUrl().$logoutPath;
 
@@ -140,12 +138,19 @@ class LogoutUrlGenerator
         if (null !== $this->tokenStorage) {
             $token = $this->tokenStorage->getToken();
 
+            // @deprecated since Symfony 5.4
             if ($token instanceof AnonymousToken) {
                 throw new \InvalidArgumentException('Unable to generate a logout url for an anonymous token.');
             }
 
-            if (null !== $token && method_exists($token, 'getProviderKey')) {
-                $key = $token->getProviderKey();
+            if (null !== $token) {
+                if (method_exists($token, 'getFirewallName')) {
+                    $key = $token->getFirewallName();
+                } elseif (method_exists($token, 'getProviderKey')) {
+                    trigger_deprecation('symfony/security-http', '5.2', 'Method "%s::getProviderKey()" has been deprecated, rename it to "getFirewallName()" instead.', \get_class($token));
+
+                    $key = $token->getProviderKey();
+                }
 
                 if (isset($this->listeners[$key])) {
                     return $this->listeners[$key];
@@ -154,14 +159,12 @@ class LogoutUrlGenerator
         }
 
         // Fetch from injected current firewall information, if possible
-        [$key, $context] = $this->currentFirewall;
-
-        if (isset($this->listeners[$key])) {
-            return $this->listeners[$key];
+        if (isset($this->listeners[$this->currentFirewallName])) {
+            return $this->listeners[$this->currentFirewallName];
         }
 
         foreach ($this->listeners as $listener) {
-            if (isset($listener[4]) && $context === $listener[4]) {
+            if (isset($listener[4]) && $this->currentFirewallContext === $listener[4]) {
                 return $listener;
             }
         }

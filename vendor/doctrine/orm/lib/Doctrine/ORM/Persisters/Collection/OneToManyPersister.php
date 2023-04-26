@@ -1,28 +1,12 @@
 <?php
 
-/*
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the MIT license. For more information, see
- * <http://www.doctrine-project.org>.
- */
+declare(strict_types=1);
 
 namespace Doctrine\ORM\Persisters\Collection;
 
 use BadMethodCallException;
 use Doctrine\Common\Collections\Criteria;
-use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Utility\PersisterHelper;
@@ -30,7 +14,9 @@ use Doctrine\ORM\Utility\PersisterHelper;
 use function array_merge;
 use function array_reverse;
 use function array_values;
+use function assert;
 use function implode;
+use function is_string;
 
 /**
  * Persister for one-to-many collections.
@@ -179,12 +165,8 @@ class OneToManyPersister extends AbstractCollectionPersister
         throw new BadMethodCallException('Filtering a collection by Criteria is not supported by this CollectionPersister.');
     }
 
-    /**
-     * @return int
-     *
-     * @throws DBALException
-     */
-    private function deleteEntityCollection(PersistentCollection $collection)
+    /** @throws DBALException */
+    private function deleteEntityCollection(PersistentCollection $collection): int
     {
         $mapping     = $collection->getMapping();
         $identifier  = $this->uow->getEntityIdentifier($collection->getOwner());
@@ -201,7 +183,7 @@ class OneToManyPersister extends AbstractCollectionPersister
         $statement = 'DELETE FROM ' . $this->quoteStrategy->getTableName($targetClass, $this->platform)
             . ' WHERE ' . implode(' = ? AND ', $columns) . ' = ?';
 
-        return $this->conn->executeUpdate($statement, $parameters);
+        return $this->conn->executeStatement($statement, $parameters);
     }
 
     /**
@@ -210,11 +192,9 @@ class OneToManyPersister extends AbstractCollectionPersister
      *
      * Thanks Steve Ebersole (Hibernate) for idea on how to tackle reliably this scenario, we owe him a beer! =)
      *
-     * @return int
-     *
      * @throws DBALException
      */
-    private function deleteJoinedEntityCollection(PersistentCollection $collection)
+    private function deleteJoinedEntityCollection(PersistentCollection $collection): int
     {
         $mapping     = $collection->getMapping();
         $sourceClass = $this->em->getClassMetadata($mapping['sourceEntity']);
@@ -237,7 +217,7 @@ class OneToManyPersister extends AbstractCollectionPersister
         $statement = $this->platform->getCreateTemporaryTableSnippetSQL() . ' ' . $tempTable
             . ' (' . $this->platform->getColumnDeclarationListSQL($columnDefinitions) . ')';
 
-        $this->conn->executeUpdate($statement);
+        $this->conn->executeStatement($statement);
 
         // 2) Build insert table records into temporary table
         $query = $this->em->createQuery(
@@ -245,9 +225,11 @@ class OneToManyPersister extends AbstractCollectionPersister
             . ' FROM ' . $targetClass->name . ' t0 WHERE t0.' . $mapping['mappedBy'] . ' = :owner'
         )->setParameter('owner', $collection->getOwner());
 
-        $statement  = 'INSERT INTO ' . $tempTable . ' (' . $idColumnList . ') ' . $query->getSQL();
+        $sql = $query->getSQL();
+        assert(is_string($sql));
+        $statement  = 'INSERT INTO ' . $tempTable . ' (' . $idColumnList . ') ' . $sql;
         $parameters = array_values($sourceClass->getIdentifierValues($collection->getOwner()));
-        $numDeleted = $this->conn->executeUpdate($statement, $parameters);
+        $numDeleted = $this->conn->executeStatement($statement, $parameters);
 
         // 3) Delete records on each table in the hierarchy
         $classNames = array_merge($targetClass->parentClasses, [$targetClass->name], $targetClass->subClasses);
@@ -257,13 +239,13 @@ class OneToManyPersister extends AbstractCollectionPersister
             $statement = 'DELETE FROM ' . $tableName . ' WHERE (' . $idColumnList . ')'
                 . ' IN (SELECT ' . $idColumnList . ' FROM ' . $tempTable . ')';
 
-            $this->conn->executeUpdate($statement);
+            $this->conn->executeStatement($statement);
         }
 
         // 4) Drop temporary table
         $statement = $this->platform->getDropTemporaryTableSQL($tempTable);
 
-        $this->conn->executeUpdate($statement);
+        $this->conn->executeStatement($statement);
 
         return $numDeleted;
     }

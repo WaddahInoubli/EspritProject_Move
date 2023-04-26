@@ -32,30 +32,23 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class MakerCommand extends Command
 {
-    private $maker;
-    private $fileManager;
-    private $inputConfig;
-    /** @var ConsoleStyle */
-    private $io;
-    private $checkDependencies = true;
-    private $generator;
+    private InputConfiguration $inputConfig;
+    private ConsoleStyle $io;
+    private bool $checkDependencies = true;
 
-    public function __construct(MakerInterface $maker, FileManager $fileManager, Generator $generator)
+    public function __construct(private MakerInterface $maker, private FileManager $fileManager, private Generator $generator)
     {
-        $this->maker = $maker;
-        $this->fileManager = $fileManager;
         $this->inputConfig = new InputConfiguration();
-        $this->generator = $generator;
 
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->maker->configureCommand($this, $this->inputConfig);
     }
 
-    protected function initialize(InputInterface $input, OutputInterface $output)
+    protected function initialize(InputInterface $input, OutputInterface $output): void
     {
         $this->io = new ConsoleStyle($input, $output);
         $this->fileManager->setIO($this->io);
@@ -64,17 +57,13 @@ final class MakerCommand extends Command
             $dependencies = new DependencyBuilder();
             $this->maker->configureDependencies($dependencies, $input);
 
-            if (!$dependencies->isPhpVersionSatisfied()) {
-                throw new RuntimeCommandException('The make:entity command requires that you use PHP 7.1 or higher.');
-            }
-
             if ($missingPackagesMessage = $dependencies->getMissingPackagesMessage($this->getName())) {
                 throw new RuntimeCommandException($missingPackagesMessage);
             }
         }
     }
 
-    protected function interact(InputInterface $input, OutputInterface $output)
+    protected function interact(InputInterface $input, OutputInterface $output): void
     {
         if (!$this->fileManager->isNamespaceConfiguredToAutoload($this->generator->getRootNamespace())) {
             $this->io->note([
@@ -111,7 +100,7 @@ final class MakerCommand extends Command
         return 0;
     }
 
-    public function setApplication(Application $application = null)
+    public function setApplication(Application $application = null): void
     {
         parent::setApplication($application);
 
@@ -127,7 +116,7 @@ final class MakerCommand extends Command
     /**
      * @internal Used for testing commands
      */
-    public function setCheckDependencies(bool $checkDeps)
+    public function setCheckDependencies(bool $checkDeps): void
     {
         $this->checkDependencies = $checkDeps;
     }

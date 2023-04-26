@@ -1,22 +1,6 @@
 <?php
 
-/*
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the MIT license. For more information, see
- * <http://www.doctrine-project.org>.
- */
+declare(strict_types=1);
 
 namespace Doctrine\ORM\Tools\Console\Command\SchemaTool;
 
@@ -35,22 +19,21 @@ use function sprintf;
  */
 class CreateCommand extends AbstractCommand
 {
-    /**
-     * {@inheritdoc}
-     */
+    /** @return void */
     protected function configure()
     {
         $this->setName('orm:schema-tool:create')
              ->setDescription('Processes the schema and either create it directly on EntityManager Storage Connection or generate the SQL output')
+             ->addOption('em', null, InputOption::VALUE_REQUIRED, 'Name of the entity manager to operate on')
              ->addOption('dump-sql', null, InputOption::VALUE_NONE, 'Instead of trying to apply generated SQLs into EntityManager Storage Connection, output them.')
-             ->setHelp(<<<EOT
+             ->setHelp(<<<'EOT'
 Processes the schema and either create it directly on EntityManager Storage Connection or generate the SQL output.
 
 <comment>Hint:</comment> If you have a database with tables that should not be managed
 by the ORM, you can use a DBAL functionality to filter the tables and sequences down
 on a global level:
 
-    \$config->setFilterSchemaAssetsExpression(\$regexp);
+    $config->setFilterSchemaAssetsExpression($regexp);
 EOT
              );
     }
@@ -64,24 +47,24 @@ EOT
 
         if ($dumpSql) {
             $sqls = $schemaTool->getCreateSchemaSql($metadatas);
-            $ui->text('The following SQL statements will be executed:');
-            $ui->newLine();
 
             foreach ($sqls as $sql) {
-                $ui->text(sprintf('    %s;', $sql));
+                $ui->writeln(sprintf('%s;', $sql));
             }
 
             return 0;
         }
 
-        $ui->caution('This operation should not be executed in a production environment!');
+        $notificationUi = $ui->getErrorStyle();
 
-        $ui->text('Creating database schema...');
-        $ui->newLine();
+        $notificationUi->caution('This operation should not be executed in a production environment!');
+
+        $notificationUi->text('Creating database schema...');
+        $notificationUi->newLine();
 
         $schemaTool->createSchema($metadatas);
 
-        $ui->success('Database schema created successfully!');
+        $notificationUi->success('Database schema created successfully!');
 
         return 0;
     }

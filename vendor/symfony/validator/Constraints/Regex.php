@@ -20,6 +20,7 @@ use Symfony\Component\Validator\Exception\InvalidArgumentException;
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
+#[\Attribute(\Attribute::TARGET_PROPERTY | \Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
 class Regex extends Constraint
 {
     public const REGEX_FAILED_ERROR = 'de1e3db3-5ed4-4941-aae4-59f3667cc3a3';
@@ -34,12 +35,36 @@ class Regex extends Constraint
     public $match = true;
     public $normalizer;
 
-    public function __construct($options = null)
-    {
-        parent::__construct($options);
+    /**
+     * {@inheritdoc}
+     *
+     * @param string|array $pattern The pattern to evaluate or an array of options
+     */
+    public function __construct(
+        $pattern,
+        string $message = null,
+        string $htmlPattern = null,
+        bool $match = null,
+        callable $normalizer = null,
+        array $groups = null,
+        $payload = null,
+        array $options = []
+    ) {
+        if (\is_array($pattern)) {
+            $options = array_merge($pattern, $options);
+        } elseif (null !== $pattern) {
+            $options['value'] = $pattern;
+        }
+
+        parent::__construct($options, $groups, $payload);
+
+        $this->message = $message ?? $this->message;
+        $this->htmlPattern = $htmlPattern ?? $this->htmlPattern;
+        $this->match = $match ?? $this->match;
+        $this->normalizer = $normalizer ?? $this->normalizer;
 
         if (null !== $this->normalizer && !\is_callable($this->normalizer)) {
-            throw new InvalidArgumentException(sprintf('The "normalizer" option must be a valid callable ("%s" given).', \is_object($this->normalizer) ? \get_class($this->normalizer) : \gettype($this->normalizer)));
+            throw new InvalidArgumentException(sprintf('The "normalizer" option must be a valid callable ("%s" given).', get_debug_type($this->normalizer)));
         }
     }
 
@@ -63,9 +88,6 @@ class Regex extends Constraint
      * Converts the htmlPattern to a suitable format for HTML5 pattern.
      * Example: /^[a-z]+$/ would be converted to [a-z]+
      * However, if options are specified, it cannot be converted.
-     *
-     * Pattern is also ignored if match=false since the pattern should
-     * then be reversed before application.
      *
      * @see http://dev.w3.org/html5/spec/single-page.html#the-pattern-attribute
      *
@@ -98,7 +120,7 @@ class Regex extends Constraint
 
         // If the pattern contains an or statement, wrap the pattern in
         // .*(pattern).* and quit. Otherwise we'd need to parse the pattern
-        if (false !== strpos($pattern, '|')) {
+        if (str_contains($pattern, '|')) {
             return '.*('.$pattern.').*';
         }
 

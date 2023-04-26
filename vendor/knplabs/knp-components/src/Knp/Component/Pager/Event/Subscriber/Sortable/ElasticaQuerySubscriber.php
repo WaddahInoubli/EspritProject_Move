@@ -11,10 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class ElasticaQuerySubscriber implements EventSubscriberInterface
 {
-    /**
-     * @var Request
-     */
-    private $request;
+    private Request $request;
 
     public function __construct(Request $request)
     {
@@ -52,7 +49,7 @@ class ElasticaQuerySubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            'knp_pager.items' => ['items', 1]
+            'knp_pager.items' => ['items', 1],
         ];
     }
 }

@@ -19,6 +19,8 @@ use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
+trigger_deprecation('symfony/security-http', '5.3', 'The "%s" class is deprecated, use the new authenticator system instead.', AnonymousAuthenticationListener::class);
+
 // Help opcache.preload discover always-needed symbols
 class_exists(AnonymousToken::class);
 
@@ -28,12 +30,10 @@ class_exists(AnonymousToken::class);
  *
  * @author Fabien Potencier <fabien@symfony.com>
  *
- * @final since Symfony 4.3
+ * @deprecated since Symfony 5.3, use the new authenticator system instead
  */
-class AnonymousAuthenticationListener extends AbstractListener implements ListenerInterface
+class AnonymousAuthenticationListener extends AbstractListener
 {
-    use LegacyListenerTrait;
-
     private $tokenStorage;
     private $secret;
     private $authenticationManager;

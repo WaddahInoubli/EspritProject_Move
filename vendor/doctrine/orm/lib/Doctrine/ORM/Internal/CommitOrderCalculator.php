@@ -1,26 +1,13 @@
 <?php
 
-/*
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * This software consists of voluntary contributions made by many individuals
- * and is licensed under the MIT license. For more information, see
- * <http://www.doctrine-project.org>.
- */
+declare(strict_types=1);
 
 namespace Doctrine\ORM\Internal;
 
-use stdClass;
+use Doctrine\ORM\Internal\CommitOrder\Edge;
+use Doctrine\ORM\Internal\CommitOrder\Vertex;
+use Doctrine\ORM\Internal\CommitOrder\VertexState;
+use Doctrine\ORM\Mapping\ClassMetadata;
 
 use function array_reverse;
 
@@ -33,33 +20,28 @@ use function array_reverse;
  */
 class CommitOrderCalculator
 {
-    public const NOT_VISITED = 0;
-    public const IN_PROGRESS = 1;
-    public const VISITED     = 2;
+    /** @deprecated */
+    public const NOT_VISITED = VertexState::NOT_VISITED;
+
+    /** @deprecated */
+    public const IN_PROGRESS = VertexState::IN_PROGRESS;
+
+    /** @deprecated */
+    public const VISITED = VertexState::VISITED;
 
     /**
      * Matrix of nodes (aka. vertex).
+     *
      * Keys are provided hashes and values are the node definition objects.
      *
-     * The node state definition contains the following properties:
-     *
-     * - <b>state</b> (integer)
-     * Whether the node is NOT_VISITED or IN_PROGRESS
-     *
-     * - <b>value</b> (object)
-     * Actual node value
-     *
-     * - <b>dependencyList</b> (array<string>)
-     * Map of node dependencies defined as hashes.
-     *
-     * @var array<stdClass>
+     * @var array<string, Vertex>
      */
     private $nodeList = [];
 
     /**
      * Volatile variable holding calculated nodes during sorting process.
      *
-     * @psalm-var list<object>
+     * @psalm-var list<ClassMetadata>
      */
     private $sortedNodeList = [];
 
@@ -78,21 +60,14 @@ class CommitOrderCalculator
     /**
      * Adds a new node (vertex) to the graph, assigning its hash and value.
      *
-     * @param string $hash
-     * @param object $node
+     * @param string        $hash
+     * @param ClassMetadata $node
      *
      * @return void
      */
     public function addNode($hash, $node)
     {
-        $vertex = new stdClass();
-
-        $vertex->hash           = $hash;
-        $vertex->state          = self::NOT_VISITED;
-        $vertex->value          = $node;
-        $vertex->dependencyList = [];
-
-        $this->nodeList[$hash] = $vertex;
+        $this->nodeList[$hash] = new Vertex($hash, $node);
     }
 
     /**
@@ -106,14 +81,8 @@ class CommitOrderCalculator
      */
     public function addDependency($fromHash, $toHash, $weight)
     {
-        $vertex = $this->nodeList[$fromHash];
-        $edge   = new stdClass();
-
-        $edge->from   = $fromHash;
-        $edge->to     = $toHash;
-        $edge->weight = $weight;
-
-        $vertex->dependencyList[$toHash] = $edge;
+        $this->nodeList[$fromHash]->dependencyList[$toHash]
+            = new Edge($fromHash, $toHash, $weight);
     }
 
     /**
@@ -122,12 +91,12 @@ class CommitOrderCalculator
      *
      * {@internal Highly performance-sensitive method.}
      *
-     * @psalm-return list<object>
+     * @psalm-return list<ClassMetadata>
      */
     public function sort()
     {
         foreach ($this->nodeList as $vertex) {
-            if ($vertex->state !== self::NOT_VISITED) {
+            if ($vertex->state !== VertexState::NOT_VISITED) {
                 continue;
             }
 
@@ -146,22 +115,20 @@ class CommitOrderCalculator
      * Visit a given node definition for reordering.
      *
      * {@internal Highly performance-sensitive method.}
-     *
-     * @param stdClass $vertex
      */
-    private function visit($vertex)
+    private function visit(Vertex $vertex): void
     {
-        $vertex->state = self::IN_PROGRESS;
+        $vertex->state = VertexState::IN_PROGRESS;
 
         foreach ($vertex->dependencyList as $edge) {
             $adjacentVertex = $this->nodeList[$edge->to];
 
             switch ($adjacentVertex->state) {
-                case self::VISITED:
+                case VertexState::VISITED:
                     // Do nothing, since node was already visited
                     break;
 
-                case self::IN_PROGRESS:
+                case VertexState::IN_PROGRESS:
                     if (
                         isset($adjacentVertex->dependencyList[$vertex->hash]) &&
                         $adjacentVertex->dependencyList[$vertex->hash]->weight < $edge->weight
@@ -171,25 +138,25 @@ class CommitOrderCalculator
                         foreach ($adjacentVertex->dependencyList as $adjacentEdge) {
                             $adjacentEdgeVertex = $this->nodeList[$adjacentEdge->to];
 
-                            if ($adjacentEdgeVertex->state === self::NOT_VISITED) {
+                            if ($adjacentEdgeVertex->state === VertexState::NOT_VISITED) {
                                 $this->visit($adjacentEdgeVertex);
                             }
                         }
 
-                        $adjacentVertex->state = self::VISITED;
+                        $adjacentVertex->state = VertexState::VISITED;
 
                         $this->sortedNodeList[] = $adjacentVertex->value;
                     }
 
                     break;
 
-                case self::NOT_VISITED:
+                case VertexState::NOT_VISITED:
                     $this->visit($adjacentVertex);
             }
         }
 
-        if ($vertex->state !== self::VISITED) {
-            $vertex->state = self::VISITED;
+        if ($vertex->state !== VertexState::VISITED) {
+            $vertex->state = VertexState::VISITED;
 
             $this->sortedNodeList[] = $vertex->value;
         }

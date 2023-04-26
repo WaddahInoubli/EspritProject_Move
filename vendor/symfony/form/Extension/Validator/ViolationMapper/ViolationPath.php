@@ -17,11 +17,13 @@ use Symfony\Component\PropertyAccess\PropertyPathInterface;
 
 /**
  * @author Bernhard Schussek <bschussek@gmail.com>
+ *
+ * @implements \IteratorAggregate<int, string>
  */
 class ViolationPath implements \IteratorAggregate, PropertyPathInterface
 {
     /**
-     * @var array
+     * @var list<string>
      */
     private $elements = [];
 
@@ -160,7 +162,7 @@ class ViolationPath implements \IteratorAggregate, PropertyPathInterface
     /**
      * {@inheritdoc}
      */
-    public function getElement($index)
+    public function getElement(int $index)
     {
         if (!isset($this->elements[$index])) {
             throw new OutOfBoundsException(sprintf('The index "%s" is not within the violation path.', $index));
@@ -172,7 +174,7 @@ class ViolationPath implements \IteratorAggregate, PropertyPathInterface
     /**
      * {@inheritdoc}
      */
-    public function isProperty($index)
+    public function isProperty(int $index)
     {
         if (!isset($this->isIndex[$index])) {
             throw new OutOfBoundsException(sprintf('The index "%s" is not within the violation path.', $index));
@@ -184,7 +186,7 @@ class ViolationPath implements \IteratorAggregate, PropertyPathInterface
     /**
      * {@inheritdoc}
      */
-    public function isIndex($index)
+    public function isIndex(int $index)
     {
         if (!isset($this->isIndex[$index])) {
             throw new OutOfBoundsException(sprintf('The index "%s" is not within the violation path.', $index));
@@ -203,13 +205,11 @@ class ViolationPath implements \IteratorAggregate, PropertyPathInterface
      * In this example, "address" and "office" map to forms, while
      * "street does not.
      *
-     * @param int $index The element index
-     *
-     * @return bool Whether the element maps to a form
+     * @return bool
      *
      * @throws OutOfBoundsException if the offset is invalid
      */
-    public function mapsForm($index)
+    public function mapsForm(int $index)
     {
         if (!isset($this->mapsForm[$index])) {
             throw new OutOfBoundsException(sprintf('The index "%s" is not within the violation path.', $index));
@@ -223,6 +223,7 @@ class ViolationPath implements \IteratorAggregate, PropertyPathInterface
      *
      * @return ViolationPathIterator
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new ViolationPathIterator($this);

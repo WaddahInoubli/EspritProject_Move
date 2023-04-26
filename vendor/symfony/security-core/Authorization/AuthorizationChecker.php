@@ -12,6 +12,7 @@
 namespace Symfony\Component\Security\Core\Authorization;
 
 use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
+use Symfony\Component\Security\Core\Authentication\Token\NullToken;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException;
 
@@ -29,36 +30,62 @@ class AuthorizationChecker implements AuthorizationCheckerInterface
     private $accessDecisionManager;
     private $authenticationManager;
     private $alwaysAuthenticate;
+    private $exceptionOnNoToken;
 
-    public function __construct(TokenStorageInterface $tokenStorage, AuthenticationManagerInterface $authenticationManager, AccessDecisionManagerInterface $accessDecisionManager, bool $alwaysAuthenticate = false)
+    public function __construct(TokenStorageInterface $tokenStorage, /* AccessDecisionManagerInterface */ $accessDecisionManager, /* bool */ $alwaysAuthenticate = false, /* bool */ $exceptionOnNoToken = true)
     {
+        if ($accessDecisionManager instanceof AuthenticationManagerInterface) {
+            trigger_deprecation('symfony/security-core', '5.4', 'The $autenticationManager argument of "%s" is deprecated.', __METHOD__);
+
+            $this->authenticationManager = $accessDecisionManager;
+            $accessDecisionManager = $alwaysAuthenticate;
+            $alwaysAuthenticate = $exceptionOnNoToken;
+            $exceptionOnNoToken = \func_num_args() > 4 ? func_get_arg(4) : true;
+        }
+
+        if (false !== $alwaysAuthenticate) {
+            trigger_deprecation('symfony/security-core', '5.4', 'Not setting the 4th argument of "%s" to "false" is deprecated.', __METHOD__);
+        }
+        if (false !== $exceptionOnNoToken) {
+            trigger_deprecation('symfony/security-core', '5.4', 'Not setting the 5th argument of "%s" to "false" is deprecated.', __METHOD__);
+        }
+
+        if (!$accessDecisionManager instanceof AccessDecisionManagerInterface) {
+            throw new \TypeError(sprintf('Argument 2 of "%s" must be instance of "%s", "%s" given.', __METHOD__, AccessDecisionManagerInterface::class, get_debug_type($accessDecisionManager)));
+        }
+
         $this->tokenStorage = $tokenStorage;
-        $this->authenticationManager = $authenticationManager;
         $this->accessDecisionManager = $accessDecisionManager;
         $this->alwaysAuthenticate = $alwaysAuthenticate;
+        $this->exceptionOnNoToken = $exceptionOnNoToken;
     }
 
     /**
      * {@inheritdoc}
      *
-     * @throws AuthenticationCredentialsNotFoundException when the token storage has no authentication token
+     * @throws AuthenticationCredentialsNotFoundException when the token storage has no authentication token and $exceptionOnNoToken is set to true
      */
-    final public function isGranted($attributes, $subject = null): bool
+    final public function isGranted($attribute, $subject = null): bool
     {
-        if (null === ($token = $this->tokenStorage->getToken())) {
-            throw new AuthenticationCredentialsNotFoundException('The token storage contains no authentication token. One possible reason may be that there is no firewall configured for this URL.');
-        }
+        $token = $this->tokenStorage->getToken();
 
-        if ($this->alwaysAuthenticate || !$token->isAuthenticated()) {
-            $this->tokenStorage->setToken($token = $this->authenticationManager->authenticate($token));
-        }
+        if (!$token || !$token->getUser()) {
+            if ($this->exceptionOnNoToken) {
+                throw new AuthenticationCredentialsNotFoundException('The token storage contains no authentication token. One possible reason may be that there is no firewall configured for this URL.');
+            }
 
-        if (!\is_array($attributes)) {
-            $attributes = [$attributes];
+            $token = new NullToken();
         } else {
-            @trigger_error(sprintf('Passing an array of Security attributes to %s() is deprecated since Symfony 4.4. Use multiple isGranted() calls or the expression language (e.g. "is_granted(...) or is_granted(...)") instead.', __METHOD__), \E_USER_DEPRECATED);
+            $authenticated = true;
+            // @deprecated since Symfony 5.4
+            if ($this->alwaysAuthenticate || !$authenticated = $token->isAuthenticated(false)) {
+                if (!($authenticated ?? true)) {
+                    trigger_deprecation('symfony/core', '5.4', 'Returning false from "%s::isAuthenticated()" is deprecated, return null from "getUser()" instead.', get_debug_type($token));
+                }
+                $this->tokenStorage->setToken($token = $this->authenticationManager->authenticate($token));
+            }
         }
 
-        return $this->accessDecisionManager->decide($token, $attributes, $subject);
+        return $this->accessDecisionManager->decide($token, [$attribute], $subject);
     }
 }

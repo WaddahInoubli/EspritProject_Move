@@ -55,7 +55,7 @@ final class BodyRenderer implements BodyRendererInterface
         }
 
         if (isset($messageContext['email'])) {
-            throw new InvalidArgumentException(sprintf('A "%s" context cannot have an "email" entry as this is a reserved variable.', \get_class($message)));
+            throw new InvalidArgumentException(sprintf('A "%s" context cannot have an "email" entry as this is a reserved variable.', get_debug_type($message)));
         }
 
         $vars = array_merge($this->context, $messageContext, [

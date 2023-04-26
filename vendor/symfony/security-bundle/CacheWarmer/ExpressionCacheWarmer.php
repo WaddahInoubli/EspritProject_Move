@@ -21,7 +21,7 @@ class ExpressionCacheWarmer implements CacheWarmerInterface
     private $expressionLanguage;
 
     /**
-     * @param iterable|Expression[] $expressions
+     * @param iterable<mixed, Expression> $expressions
      */
     public function __construct(iterable $expressions, ExpressionLanguage $expressionLanguage)
     {
@@ -34,10 +34,15 @@ class ExpressionCacheWarmer implements CacheWarmerInterface
         return true;
     }
 
-    public function warmUp($cacheDir)
+    /**
+     * @return string[]
+     */
+    public function warmUp(string $cacheDir)
     {
         foreach ($this->expressions as $expression) {
-            $this->expressionLanguage->parse($expression, ['token', 'user', 'object', 'subject', 'roles', 'role_names', 'request', 'trust_resolver']);
+            $this->expressionLanguage->parse($expression, ['token', 'user', 'object', 'subject', 'role_names', 'request', 'trust_resolver']);
         }
+
+        return [];
     }
 }

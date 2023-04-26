@@ -15,18 +15,18 @@ use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\Security\Core\Exception\LogicException;
 
 /**
  * JsonLoginLdapFactory creates services for json login ldap authentication.
+ *
+ * @internal
  */
 class JsonLoginLdapFactory extends JsonLoginFactory
 {
-    public function getKey()
-    {
-        return 'json-login-ldap';
-    }
+    use LdapFactoryTrait;
 
-    protected function createAuthProvider(ContainerBuilder $container, $id, $config, $userProviderId)
+    protected function createAuthProvider(ContainerBuilder $container, string $id, array $config, string $userProviderId): string
     {
         $provider = 'security.authentication.provider.ldap_bind.'.$id;
         $definition = $container
@@ -42,7 +42,7 @@ class JsonLoginLdapFactory extends JsonLoginFactory
 
         if (!empty($config['query_string'])) {
             if ('' === $config['search_dn'] || '' === $config['search_password']) {
-                @trigger_error('Using the "query_string" config without using a "search_dn" and a "search_password" is deprecated since Symfony 4.4 and will throw an exception in Symfony 5.0.', \E_USER_DEPRECATED);
+                throw new LogicException('Using the "query_string" config without using a "search_dn" and a "search_password" is not supported.');
             }
             $definition->addMethodCall('setQueryString', [$config['query_string']]);
         }

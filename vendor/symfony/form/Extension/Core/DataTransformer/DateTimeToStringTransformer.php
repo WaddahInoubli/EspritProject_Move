@@ -44,15 +44,17 @@ class DateTimeToStringTransformer extends BaseDateTimeTransformer
      *
      * @see \DateTime::format() for supported formats
      *
-     * @param string $inputTimezone  The name of the input timezone
-     * @param string $outputTimezone The name of the output timezone
-     * @param string $format         The date format
+     * @param string|null $inputTimezone  The name of the input timezone
+     * @param string|null $outputTimezone The name of the output timezone
+     * @param string      $format         The date format
+     * @param string|null $parseFormat    The parse format when different from $format
      */
-    public function __construct(string $inputTimezone = null, string $outputTimezone = null, string $format = 'Y-m-d H:i:s')
+    public function __construct(string $inputTimezone = null, string $outputTimezone = null, string $format = 'Y-m-d H:i:s', string $parseFormat = null)
     {
         parent::__construct($inputTimezone, $outputTimezone);
 
-        $this->generateFormat = $this->parseFormat = $format;
+        $this->generateFormat = $format;
+        $this->parseFormat = $parseFormat ?? $format;
 
         // See https://php.net/datetime.createfromformat
         // The character "|" in the format makes sure that the parts of a date
@@ -62,7 +64,7 @@ class DateTimeToStringTransformer extends BaseDateTimeTransformer
         // where the time corresponds to the current server time.
         // With "|" and "Y-m-d", "2010-02-03" becomes "2010-02-03 00:00:00",
         // which is at least deterministic and thus used here.
-        if (false === strpos($this->parseFormat, '|')) {
+        if (!str_contains($this->parseFormat, '|')) {
             $this->parseFormat .= '|';
         }
     }
@@ -73,7 +75,7 @@ class DateTimeToStringTransformer extends BaseDateTimeTransformer
      *
      * @param \DateTimeInterface $dateTime A DateTimeInterface object
      *
-     * @return string A value as produced by PHP's date() function
+     * @return string
      *
      * @throws TransformationFailedException If the given value is not a \DateTimeInterface
      */
@@ -101,7 +103,7 @@ class DateTimeToStringTransformer extends BaseDateTimeTransformer
      *
      * @param string $value A value as produced by PHP's date() function
      *
-     * @return \DateTime|null An instance of \DateTime
+     * @return \DateTime|null
      *
      * @throws TransformationFailedException If the given value is not a string,
      *                                       or could not be transformed
@@ -119,7 +121,7 @@ class DateTimeToStringTransformer extends BaseDateTimeTransformer
         $outputTz = new \DateTimeZone($this->outputTimezone);
         $dateTime = \DateTime::createFromFormat($this->parseFormat, $value, $outputTz);
 
-        $lastErrors = \DateTime::getLastErrors();
+        $lastErrors = \DateTime::getLastErrors() ?: ['error_count' => 0, 'warning_count' => 0];
 
         if (0 < $lastErrors['warning_count'] || 0 < $lastErrors['error_count']) {
             throw new TransformationFailedException(implode(', ', array_merge(array_values($lastErrors['warnings']), array_values($lastErrors['errors']))));
