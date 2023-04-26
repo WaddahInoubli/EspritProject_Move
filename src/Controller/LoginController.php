@@ -73,7 +73,7 @@ class LoginController extends AbstractController
             $url = $this->generateUrl('app_reset_password', array('token' => $token), UrlGeneratorInterface::ABSOLUTE_URL);
             $transport = (new \Swift_SmtpTransport('smtp.googlemail.com', 465, 'ssl'))
                 ->setUsername('firas.jallali@esprit.tn')
-                ->setPassword('201JMT3719')
+                ->setPassword('HIDDEN')
             ;
             $mailer = new \Swift_Mailer($transport);
             $message = (new \Swift_Message('Réintialiser votre mot de passe'))
