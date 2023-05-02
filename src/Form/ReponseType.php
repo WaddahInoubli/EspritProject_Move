@@ -14,7 +14,7 @@ class ReponseType extends AbstractType
         $builder
             ->add('objectif')
             ->add('texte')
-            ->add('idrec')
+
         ;
     }
 

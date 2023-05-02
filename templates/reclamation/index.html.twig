@@ -13,42 +13,87 @@
 						<div class="card-body">
 							<h1>Reclamation index</h1>
 
-							<table class="table table-striped">
+							<div class="form-group">
+								<label for="search-input">Search:</label>
+								<input type="text" id="search-input" class="form-control" placeholder="Enter your search ">
+							</div>
+
+							<table id="userTable" class="table table-striped">
 								<thead>
-									<tr>
-										<th>Id</th>
-										<th>Objectif</th>
-										<th>Text</th>
-										<th>Etat</th>
-										<th>actions</th>
-									</tr>
+								<tr>
+									<th>Id</th>
+									<th>Objectif</th>
+									<th>Text</th>
+									<th>Etat</th>
+									<th>actions</th>
+								</tr>
 								</thead>
 								<tbody>
-									{% for reclamation in reclamations %}
-										<tr>
-											<td>{{ reclamation.id }}</td>
-											<td>{{ reclamation.objectif }}</td>
-											<td>{{ reclamation.text }}</td>
-											<td>{{ reclamation.etat }}</td>
-											<td>
-												<a href="{{ path('app_reclamation_show', {'id': reclamation.id}) }}">show</a>
-												<a href="{{ path('app_reclamation_delete', {'id': reclamation.id}) }}">delete</a>
-												<a href="{{ path('app_reclamation_edit', {'id': reclamation.id}) }}">edit</a>
-											</td>
-										</tr>
-									{% else %}
-										<tr>
-											<td colspan="5">no records found</td>
-										</tr>
-									{% endfor %}
+								{% for reclamation in reclamations %}
+									<tr>
+										<td>{{ reclamation.id }}</td>
+										<td>{{ reclamation.objectif }}</td>
+										<td>{{ reclamation.text }}</td>
+										<td>{{ reclamation.etat }}</td>
+										<td>
+											<a href="{{ path('app_reclamation_show', {'id': reclamation.id}) }}">show</a>
+											<a href="{{ path('app_reclamation_delete', {'id': reclamation.id}) }}">delete</a>
+											<a href="{{ path('app_reclamation_edit', {'id': reclamation.id}) }}">edit</a>
+										</td>
+									</tr>
+								{% else %}
+									<tr>
+										<td colspan="5">no records found</td>
+									</tr>
+								{% endfor %}
 								</tbody>
 							</table>
+							{{ knp_pagination_render(reclamations) }}
 						</div>
 					</div>
 				</div>
 			</div>
 		</section>
-<a href="{{ path('app_reclamation_new') }}">Create new</a>
+		<a href="{{ path('app_reclamation_new') }}">Create new</a>
 	</main>
-	
+
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+	<script>
+		function searchTable() {
+			// Get the search query from the input field
+			var query = document.getElementById("search-input").value;
+			// Send an AJAX request to the server
+			$.ajax({
+				url: '{{ path("app_reclamation_search") }}',
+				method: 'GET',
+				data: {query: query},
+				success: function(data) {
+					// Parse the JSON data
+					var recs = JSON.parse(data);
+					// Clear the existing table rows
+					$("#userTable tbody").empty();
+					// Loop through the search results and add new rows to the table
+					for (var i = 0; i < recs.length; i++) {
+						var rec = recs[i];
+						var row = "<tr>" +
+								"<td>" + rec.id + "</td>" +
+								"<td>" + rec.objectif+ " </td>" +
+								"<td>" + rec.text + "</td>" +
+								"<td>" + rec.etat + "</td>" +
+								"<td>" +
+
+								"</tr>";
+						$("#userTable tbody").append(row);
+					}
+				}
+			});
+		}
+
+
+		$(document).ready(function() {
+			// Update the search results whenever the search query changes
+			$("#search-input").on("input", searchTable);
+		});
+	</script>
 {% endblock %}

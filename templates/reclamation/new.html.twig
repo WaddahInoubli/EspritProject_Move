@@ -13,13 +13,57 @@
 					<div class="card">
 						<div class="card-body">
 							<h1>Create new Reclamation</h1>
+							{{ form_start(form,{'attr': {'novalidate': 'novalidate'}}) }}
 
-							{{ include('reclamation/_form.html.twig') }}
+							<table class="table">
+								<tr>
+									<td>
+										{{ form_label(form.objectif,"objectif : ") }}
+									</td>
+									<td>
+										{{ form_widget(form.objectif) }}
+									</td>
+									<td>{{ form_errors(form.objectif) }}</td>
+								</tr>
 
-							<a href="{{ path('app_reclamation_index') }}">back to list</a>
+
+								<tr>
+									<td>
+										{{ form_label(form.text,"text : ") }}
+									</td>
+									<td>
+										{{ form_widget(form.text) }}
+									</td>
+									<td>{{ form_errors(form.text) }}</td>
+								</tr>
+								<tr>
+									<td>
+										{{ form_label(form.etat,"etat : ") }}
+									</td>
+									<td>
+										{{ form_widget(form.etat) }}
+									</td>
+									<td>{{ form_errors(form.etat) }}</td>
+								</tr>
+								<tr>
+									<td>
+										{{ form_label(form.iduser,"iduser : ") }}
+									</td>
+									<td>
+										{{ form_widget(form.iduser) }}
+									</td>
+									<td>{{ form_errors(form.iduser) }}</td>
+								</tr>
+
+								{{ form_row(form.Submit) }}
+								{{ form_end(form) }}
+							</table>
 						</div>
 					</div>
 				</div>
+
 			</div>
+
 		</section>
+	</main>
 	{% endblock %}

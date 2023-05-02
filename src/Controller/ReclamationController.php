@@ -9,7 +9,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-
+use Knp\Component\Pager\PaginatorInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 /**
  * @Route("/reclamation")
  */
@@ -18,11 +22,40 @@ class ReclamationController extends AbstractController
     /**
      * @Route("/", name="app_reclamation_index", methods={"GET"})
      */
-    public function index(ReclamationRepository $reclamationRepository): Response
+    public function index(Request $request,ReclamationRepository $reclamationRepository,PaginatorInterface $paginator): Response
     {
+        $data =$reclamationRepository->findAll();
+        $reclamations = $paginator->paginate(
+            $data,
+            $request->query->getInt('page',1),
+            6
+        );
         return $this->render('reclamation/index.html.twig', [
-            'reclamations' => $reclamationRepository->findAll(),
+            'reclamations' => $reclamations
         ]);
+    }
+
+    /**
+     * @Route("/reclamation/search", name="app_reclamation_search", methods={"GET"})
+     */
+    public function search(Request $request, ReclamationRepository $reclamationRepository, SerializerInterface $serializer): Response
+    {
+        $query = $request->query->get('query');
+
+        $recs = $reclamationRepository->createQueryBuilder('u')
+            ->where('u.id LIKE :query')
+            ->orWhere('u.objectif LIKE :query')
+            ->orWhere('u.text LIKE :query')
+            ->orWhere('u.etat LIKE :query')
+            ->setParameter('query', '%' . $query . '%')
+            ->getQuery()
+            ->getResult();
+
+        // Serialize the users to HTML
+        $json = $serializer->serialize($recs, 'json');
+
+        // Return the search results as JSON
+        return new JsonResponse($json);
     }
 
     /**
@@ -35,6 +68,7 @@ class ReclamationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
             $reclamationRepository->add($reclamation, true);
 
             return $this->redirectToRoute('app_reclamation_index', [], Response::HTTP_SEE_OTHER);
@@ -50,12 +84,16 @@ class ReclamationController extends AbstractController
      * @Route("/{id}", name="app_reclamation_show", methods={"GET"})
      */
     public function show(Reclamation $reclamation,$id,ReponseRepository $reponseRepository): Response
-    {  
+    {
         $id=$reclamation->getId();
-        
+
+        $criteria = ['idrec' => $id];
+        $orderBy = ['id' => 'DESC'];
+        $limit = 1;
+        $offset = 0;
         return $this->render('reclamation/show.html.twig', [
             'reclamation' => $reclamation,
-            'reponse'=> $reponseRepository->find($id),
+            'reponses'=> $reponseRepository->findBy($criteria, $orderBy, $limit, $offset),
         ]);
     }
 
