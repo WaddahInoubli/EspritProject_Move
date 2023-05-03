@@ -1,0 +1,80 @@
+{% extends 'front.html.twig' %}
+
+
+{% block body %}
+
+ 
+
+
+
+
+<section class="s-content s-styles">
+
+
+
+
+                     <div class="row">
+
+            <div class="column large-12 tab-12">
+
+                <h3 class="h-add-bottom">Form Styles</h3>
+                
+
+                {{ form_start(form, {'attr':{'novalidate':'novalidate'}}) }}
+
+
+                            <form class="user">
+                                <div class="form-group">
+                                    {{ form_label(form.nom, 'Nom du event') }}
+                                    {{ form_widget(form.nom ,{'attr': {'class': 'form-control','placeholder': 'Nom'}}) }}
+                                    {{ form_errors(form.nom,{'attr': {'class':'text-danger'}}) }}
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+                                        {{ form_label(form.datedeb, "Date de Debut" ) }}
+                                        {{ form_widget(form.datedeb, {'attr': {'class': 'form-control form-control-user ','placeholder': 'DD/MM/YYYY'}}) }}
+                                        {{ form_errors(form.datedeb,{'attr': {'class':'text-danger'}}) }}
+                                    </div>
+                                    <div class="col-sm-6">
+                                        {{ form_label(form.datefin, "Date de Fin" ) }}
+                                        {{ form_widget(form.datefin, {'attr': {'class': 'form-control form-control-user ','placeholder': 'DD/MM/YYYY'}}) }}
+                                        {{ form_errors(form.datefin,{'attr': {'class':'text-danger'}}) }}
+                                    </div>
+                                </div>
+                                <div class="form-group ">
+                                    {# {{ form_label(form.image, 'Image', ) }} #}
+                                    <span class="text-danger" >{{ form_row(form.image,{'attr': {'class': 'form-control file-upload-browse btn btn-primary' }}) }}</span>
+
+                                </div>
+                                <div class="form-group">
+                                    {{ form_label(form.description, 'Description du event') }}
+                                    {{ form_widget(form.description ,{'attr': {'class': 'form-control','placeholder': 'description'}}) }}
+                                    {{ form_errors(form.description,{'attr': {'class':'text-danger'}}) }}
+                                </div>
+
+                                <div class="form-group">
+                                    {{ form_label(form.place, 'place du event') }}
+                                    {{ form_widget(form.place ,{'attr': {'class': 'form-control','placeholder': 'place'}}) }}
+                                    {{ form_errors(form.place,{'attr': {'class':'text-danger'}}) }}
+                                </div>
+
+                                {{ form_widget(form.submit, {'attr': {'class': 'form-control btn btn-primary mr-2' }}) }}
+                                {{ form_widget(form.cancel, {'attr': {'class': 'form-control btn btn-light mr-2' }}) }}
+
+
+
+
+
+                                {{ form_end(form) }}
+                            </form>
+
+            </div>
+
+            
+
+        </div>
+
+
+</section>
+
+{% endblock %}

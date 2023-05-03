@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Eventplace{% endblock %}
+
+{% block body %}
+    <h1>Create new Eventplace</h1>
+
+    <div class="container">
+
+
+
+        <div class="card o-hidden border-0 shadow-lg my-2">
+            <div class="card-body p-0">
+                <!-- Nested Row within Card Body -->
+                <div class="row">
+
+                    <div class="col-lg-7">
+                        <div class="p-5">
+                            <div class="text-center">
+                                <h1 class="h4 text-gray-900 mb-4">Create a event</h1>
+                            </div>
+
+                            {{ form_start(form, {'attr':{'novalidate':'novalidate'}}) }}
+
+
+                            <form class="user">
+                                <div class="form-group">
+                                    {{ form_label(form.nom, 'Nom du event') }}
+                                    {{ form_widget(form.nom ,{'attr': {'class': 'form-control','placeholder': 'Nom'}}) }}
+                                    {{ form_errors(form.nom,{'attr': {'class':'text-danger'}}) }}
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+                                        {{ form_label(form.codep, "Code Postal" ) }}
+                                        {{ form_widget(form.codep, {'attr': {'class': 'form-control form-control-user ','placeholder': 'Code Postal'}}) }}
+                                        {{ form_errors(form.codep,{'attr': {'class':'text-danger'}}) }}
+                                    </div>
+                                    <div class="col-sm-6">
+                                        {{ form_label(form.adresse, "Adresse" ) }}
+                                        {{ form_widget(form.adresse, {'attr': {'class': 'form-control form-control-user ','placeholder': 'Adresse'}}) }}
+                                        {{ form_errors(form.adresse,{'attr': {'class':'text-danger'}}) }}
+                                    </div>
+                                </div>
+                                
+
+                                {{ form_widget(form.submit, {'attr': {'class': 'form-control btn btn-primary mr-2' }}) }}
+                                {{ form_widget(form.cancel, {'attr': {'class': 'form-control btn btn-light mr-2' }}) }}
+
+
+
+
+
+                                {{ form_end(form) }}
+                            </form>
+
+
+
+                        </div>
+                    </div>
+
+                    <div class="col-lg-5">
+                        <div class="p-5">
+                        <a class="form-control btn btn-info btn-sm"  href="{{ path('app_eventplace_index') }}">back to list</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+{% endblock %}

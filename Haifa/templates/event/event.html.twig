@@ -1,0 +1,47 @@
+{% extends 'front.html.twig' %}
+
+
+
+{% block body %}
+
+<section class="s-content s-content--single">
+        <div class="row">
+            <div class="column large-12">
+
+                <article class="s-post entry format-standard">
+
+                    <div class="s-content__media">
+                        <div class="s-content__post-thumb">
+                           <img src="{{asset('uploads/'~ event.image)}}" height="180"  class="user_pic rounded img-raised" alt="User">
+                        </div>
+                    </div> <!-- end s-content__media -->
+
+                    <div class="s-content__primary">
+
+                        <h2 class="s-content__title s-content__title--post">{{ event.nom }}</h2>
+
+                        <ul class="s-content__post-meta">
+                            <li class="date">{{ event.datedeb ? event.datedeb|date('Y-m-d') : '' }}</li>
+                            <li class="date">{{ event.datefin ? event.datefin|date('Y-m-d') : '' }}</li>
+                            <li class="cat"><a href="{{ path("app_eventplace_show", {'id': event.place.id}) }}">{{ event.place.nom }}</a></li>
+                        </ul>
+
+                        <p class="lead">
+                        {{ event.description }}
+
+                         <!-- end s-content__pagenav -->
+
+                    </div> <!-- end s-content__primary -->
+                </article>
+
+            </div> <!-- end column -->
+        </div> <!-- end row -->
+
+
+        <!-- comments
+        ================================================== -->
+        
+
+    </section>
+
+{% endblock %}
