@@ -1,0 +1,7 @@
+swiftmailer:
+    transport:        smtp
+    username:         promoesprit
+    password:         '13001074Aa'
+    host:             smtp.gmail.com
+    port:             587
+    auth-mode:        login

@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Annonces{% endblock %}
+
+{% block body %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<a href="{{ path("admin_annonces_ajout") }}" class="btn blue">Ajouter une Annonce</a>
+<div class="card">
+       
+   
+	 </div>
+
+            
+
+            <div class="material-datatables" >
+                <table id="userTable" class="table datatable"  >
+		<thead>
+			<tr>
+			    <th>Nom</th>
+				<th>Titre</th>
+                <th>content</th>
+				<th>Date</th>
+				<th>Active</th>
+                <th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+        {% for annonce in annonces %}            
+			<tr>
+				<td>{{ annonce.getNameUser().nom }}</td>
+				<td>{{ annonce.title }}</td>
+                <td>{{annonce.content}}</td>
+				<td>{{annonce.createdAt|date}}</td>
+                <td> <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" {{(annonce.active) ? 'checked' : ''}} data-id="{{annonce.id}}">
+                <label class="form-check-label" for="flexSwitchCheckChecked"></label>
+                </div>
+				</td>
+
+				{#<td class="text-center">
+                    <a href="{{ path("categories_modifier", {id: categorie.id}) }}" class="btn blue">Modifier</a>
+                </td>#}
+                <td class="text-center">
+                <a href="{{ path("annonce_modifier", {id: annonce.id}) }}" class="btn blue">Modifier</a>   
+                <a href="{{ path('supprimera', {id: annonce.id}) }}" class="btn btn-danger">Delete</a>
+
+                 </td>
+			</tr>
+            </div>
+    </div>
+
+						
+					
+			
+        {% endfor %}
+		</tbody>
+ 
+	</table>
+      </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+ {% block js %}
+  {{ parent() }}
+
+	<script>
+		window.onload = () => {
+			
+			let activer = document.querySelectorAll("[type=checkbox]")
+			for (let bouton of activer) {
+				bouton.addEventListener("click", function () {
+					let xmlhttp = new XMLHttpRequest;
+
+					xmlhttp.open("get", `/admin/annonces/activer/${this.dataset.id}`)
+					xmlhttp.send()
+				})
+			}
+        
+    }
+            
+            </script>
+           
+{% endblock %}

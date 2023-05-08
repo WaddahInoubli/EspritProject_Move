@@ -1,0 +1,29 @@
+{% extends 'baseBack.html.twig' %}
+
+{% block title %}Commentaire{% endblock %}
+
+{% block body %}
+<h1>Gérer les commentaires</h1>
+    <a href="{{ path("comments_ajout") }}" class="btn blue">Ajouter une commentaire</a>
+	<table class="table striped">
+		<thead>
+			<tr>
+				<th>Nom</th>
+				<th>Parent</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+        {% for comment in comments %}            
+			<tr>
+				<td>{{comment.nickname}}</td>
+				<td>{{comment.content}}</td>
+				<td class="text-center">
+                    <a href="{{ path("comments_modifier", {id: comment.id}) }}" class="btn blue">Modifier</a>
+					<a href="{{ path('supprimercom', {id: comment.id}) }}" class="btn btn-danger">Delete</a>
+                </td>
+			</tr>
+        {% endfor %}
+		</tbody>
+	</table>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends 'front.html.twig' %}
+
+{% block body %}
+
+
+
+
+
+
+
+
+    <br><br>
+
+    <input  id="myInput"  type="text" placeholder="search">
+
+
+    <table class="table table-borderless datatable">
+        <thead>
+        <tr>
+            <th></th>
+            <th> </th>
+            <th > etat </th>
+            <th>annes </th>
+            <th>prix_h</th>
+            <th>modele</th>
+            <th>creator</th>
+
+
+
+        </thead>
+
+        <tbody id="myTable">
+
+
+        {% for i in tableVoiture %}
+            <tr>
+
+                <td>             <a href="{{ path('pdf',{'id': i.id}) }}">  <img   width="30" src="https://cdn-icons-png.flaticon.com/512/337/337946.png">  </a>
+                </td>
+
+                <td>
+                    <a href="{{ path('modifiervoiture',{'id': i.id}) }}" >
+
+                        Modifier
+                    </a>
+
+                    <a href="{{ path('supprimervoiture',{'id': i.id}) }}"><img src="https://img.icons8.com/color/48/000000/trash--v2.png"/></a></td>
+
+
+                <td>{{ i.etat }}</td>
+                <td>{{ i.annes }}</td>
+                <td>{{ i.PrixH  }}</td>
+                <td>{{ i.modele  }}</td>
+                <td>{{ i.user.nom  }}</td>
+
+
+
+
+
+
+
+
+            </tr>
+
+        {% endfor %}
+
+
+        </tbody>
+        <tbody id="search">
+        </tbody>
+
+    </table>
+    {{ knp_pagination_render(tableVoiture) }}
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $("#myInput").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#myTable tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+
+
+
+{% endblock %}

@@ -1,0 +1,38 @@
+security:
+    encoders:
+        App\Entity\User:
+            algorithm: sha512
+            encode_as_base64: false
+            iterations: 1
+
+    providers:
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        main:
+            anonymous: true
+            form_login:
+                check_path: app_login
+                login_path: app_login
+                csrf_token_generator: security.csrf.token_manager
+            logout:
+                path: app_logout
+                target: app_login
+            guard:
+                authenticators:
+                    - App\Security\LoginAuthenticator
+            access_denied_handler: App\Security\AccessDeniedHandler
+
+    access_control:
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+
+    role_hierarchy:
+        ROLE_CLIENT : CLIENT
+        ROLE_ADMIN : ADMIN
+        ROLE_CONDUCTEUR : CONDUCTEUR

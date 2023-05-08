@@ -1,0 +1,113 @@
+{% extends 'front.html.twig' %}
+
+
+
+{% block body %}
+
+
+ <section class="s-pageheader">
+        <div class="row current-cat">
+            <div class="column">
+                <h1 class="h2">Events</h1>
+            </div>
+        </div>
+
+    </section>
+
+
+
+    <!-- masonry
+    ================================================== -->
+    <section class="s-bricks with-top-sep">
+    
+        <div class="masonry">
+            <form action="#" class="nk-form nk-form-style-1" style="margin-top:10px;margin-bottom:20px; margin-left:630px;" novalidate="novalidate">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Search for post" id="search">
+
+                        </div>
+             </form>
+            <!-- brick-wrapper -->
+            <div class="bricks-wrapper h-group">
+            
+                
+                 <div  id="all">
+                     {% for var in events %}
+                         <div class="grid-sizer"></div>
+
+                         <article class="brick entry format-standard animate-this">
+
+                             <div class="entry__thumb">
+                                 <a href="{{ path("app_eventfront_details", {'id': var.id})  }}" class="thumb-link">
+                                     <img src="{{asset('uploads/'~ var.image)}}" height="180"  class="user_pic rounded img-raised" alt="User">
+                                 </a>
+                             </div> <!-- end entry__thumb -->
+
+                             <div class="entry__text">
+                                 <div class="entry__header">
+
+                                     <div class="entry__meta">
+                                <span class="entry__cat-links">
+                                    Emplacement: <a href="{{ path("app_eventplace_show", {'id': var.place.id}) }}">{{var.place.nom}}</a>
+
+                                </span>
+                                     </div>
+
+                                     <h1 class="entry__title"><a href="single-standard.html">{{ var.nom }}</a></h1>
+
+                                 </div>
+                                 <div class="entry__excerpt">
+                                     <p>
+                                         {{ var.description }}
+                                     </p>
+                                 </div>
+                             </div> <!-- end entry__text -->
+
+                         </article>
+
+                     {% endfor %}
+                 </div>
+
+
+                
+ 
+            </div> <!-- end brick-wrapper --> 
+ 
+        </div> <!-- end masonry -->
+
+
+   <!-- end row -->
+
+    </section>
+
+
+
+    <script>
+        $( document ).ready(function() {
+            var currentRequest = null;
+            $("#search").keyup(function(e){
+                /* La variable value va prendre la valeur insérer dans le champ de texte
+                afin d’effectuer la recherche */
+                var value = $(this).val();
+                if(currentRequest != null) {
+                    currentRequest.abort();
+                }
+                /* Ajax est lancé lors du remplissage du champ texte dont l’id est
+                « search » pour faire la recherche */
+                currentRequest = $.ajax({
+                    url : "{{ path('app_searchevent') }}",
+                    type : 'GET',
+                    data: {
+                        'searchValue' : value
+                    },
+                    success : function(retour)
+                    {
+                        $('#all').html(retour);
+                    },
+                });
+                return false;
+            });
+        });
+    </script>
+
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'baseBack.html.twig' %}
+
+{% block body %}
+    <h1>Recherche</h1>
+
+    {{ form_start(form) }}
+    {{ form_row(form.search) }}
+    {{ form_row(form.submit) }}
+    {{ form_end(form) }}
+
+    {% if annonces is not empty %}
+        <hr>
+        <h2>Résultats de la recherche pour "{{ keyword }}"</h2>
+        {% for annonce in annonces %}
+            <div>
+                <h3>{{ annonce.title }}</h3>
+                <p>{{ annonce.content }}</p>
+            </div>
+            <hr>
+        {% endfor %}
+    {% endif %}
+{% endblock %}

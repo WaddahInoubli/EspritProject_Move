@@ -1,0 +1,34 @@
+{% for var in events %}
+                <div class="grid-sizer"></div>
+
+                <article class="brick entry format-standard animate-this">
+    
+                    <div class="entry__thumb">
+                        <a href="{{ path("app_eventfront_details", {'id': var.id})  }}" class="thumb-link">
+                           <img src="{{asset('uploads/'~ var.image)}}" height="180"  class="user_pic rounded img-raised" alt="User">
+                        </a>
+                    </div> <!-- end entry__thumb -->
+    
+                    <div class="entry__text">
+                        <div class="entry__header">
+    
+                            <div class="entry__meta">
+                                <span class="entry__cat-links">
+                                    Emplacement: <a href="{{ path("app_eventplace_show", {'id': var.place.id}) }}">{{var.place.nom}}</a> 
+                                    
+                                </span>
+                            </div>
+    
+                            <h1 class="entry__title"><a href="single-standard.html">{{ var.nom }}</a></h1>
+                            
+                        </div>
+                        <div class="entry__excerpt">
+                            <p>
+                            {{ var.description }}
+                            </p>
+                        </div>
+                    </div> <!-- end entry__text -->
+    
+                </article>
+                
+                {% endfor %}

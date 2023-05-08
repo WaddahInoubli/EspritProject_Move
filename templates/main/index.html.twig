@@ -1,0 +1,33 @@
+{% extends 'front.html.twig' %}
+
+{% block title %}Acceuil{% endblock %}
+
+{% block body %}
+
+<div class="card2">
+		
+
+	{% for annonce in annonces %}
+     
+      <div class="image2">
+        {% for image in annonce.images %}
+     
+					<img src="{{ asset('uploads/images/annonces/' ~ image.name)}}"  style="width:100%" alt="{{ annonce.title }}"/>
+			
+			  {% endfor %}
+      </div>
+      
+  
+        <div class="content2">
+				<span class="title2">{{annonce.title}}</span>
+        <p class="card-text">{{annonce.categories.name}}</p>
+        <p class="desc2">{{annonce.content|striptags|u.truncate(50,'...')}}</p>
+        <a href="{{ path("details",  {slug: annonce.slug}) }}"{{ annonce.title }} class="btn btn-primary">details</a>
+        </div>
+
+
+
+ {% endfor %}
+ </div>
+
+{% endblock %}

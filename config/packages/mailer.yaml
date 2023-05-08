@@ -1,0 +1,3 @@
+framework:
+    mailer:
+        dsn: 'smtp://devcompi2023@gmail.com:slzwonaplhtpfcww@smtp.gmail.com:587?encryption=tls&auth_mode=login'

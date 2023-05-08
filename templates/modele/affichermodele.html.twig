@@ -1,0 +1,88 @@
+{% extends 'base.html.twig' %}
+
+
+
+{% block body %}
+
+
+
+
+
+
+    <button class="btn btn-success btn-icon-split" ><a href="{{ path('ajoutermodele')  }}"><span class="text" style="color: white">Ajouter </span></a></button>
+
+
+    <br><br>
+
+    <input  id="myInput"  type="text" placeholder="search">
+
+
+    <table class="table table-borderless datatable">
+        <thead>
+        <tr>
+            <th></th>
+            <th> </th>
+            <th > marque </th>
+            <th>modele </th>
+            <th>couleur</th>
+
+
+
+        </thead>
+
+        <tbody id="myTable">
+
+
+        {% for i in tablemodele %}
+            <tr>
+
+                <td>             <a href="{{ path('pdf2',{'id': i.id}) }}">  <img   width="30" src="https://cdn-icons-png.flaticon.com/512/337/337946.png">  </a>
+                </td>
+
+                <td>
+                    <a href="{{ path('modifiermodele',{'id': i.id}) }}" >
+
+                        Modifier
+                    </a>
+
+                    <a href="{{ path('supprimermodele',{'id': i.id}) }}"><img src="https://img.icons8.com/color/48/000000/trash--v2.png"/></a></td>
+
+
+                <td>{{ i.marque }}</td>
+                <td>{{ i.modele }}</td>
+                <td>{{ i.couleur  }}</td>
+
+
+
+
+
+
+
+
+            </tr>
+
+        {% endfor %}
+
+
+        </tbody>
+        <tbody id="search">
+        </tbody>
+
+    </table>
+    {{ knp_pagination_render(tablemodele) }}
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $("#myInput").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#myTable tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+
+
+
+{% endblock %}

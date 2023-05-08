@@ -1,0 +1,52 @@
+{% extends 'front.html.twig' %}
+
+{% block title %}Reclamation {% endblock %}
+
+{% block body %}
+	<main id="main" class="main">
+		<section class="section">
+			<div class="row">
+				<div class="col-lg-12">
+
+					<div class="card">
+						<div class="card-body">
+							<h1>Reclamation index</h1>
+
+
+								<table id="userTable" class="table table-striped">
+									<thead>
+									<tr>
+										<th>Objectif</th>
+										<th>Text</th>
+										<th>Etat</th>
+										<th>actions</th>
+									</tr>
+									</thead>
+									<tbody>
+									{% for reclamation in reclamations %}
+										<tr>
+											<td>{{ reclamation.objectif }}</td>
+											<td>{{ reclamation.text }}</td>
+											<td>{{ reclamation.etat }}</td>
+											<td>
+												<a href="{{ path('app_reclamation_showfront', {'id': reclamation.id}) }}">show</a>
+
+												<a href="{{ path('app_reclamation_edit', {'id': reclamation.id}) }}">edit</a>
+											</td>
+										</tr>
+									{% endfor %}
+
+									</tbody>
+								</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+
+			<a href="{{ path('app_reclamation_new') }}">Create Reclamation</a>
+
+	</main>
+
+{% endblock %}

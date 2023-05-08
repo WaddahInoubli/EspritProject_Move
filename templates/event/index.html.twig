@@ -1,0 +1,102 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Event index{% endblock %}
+
+{% block body %}
+{% for message in app.flashes('success') %}
+              <div class="alert alert-success"  id="flash-message">{{ message }}</div>
+          {% endfor %}
+          {% for message in app.flashes('danger') %}
+              <div class="alert alert-danger"  id="flash-message">{{ message }}</div>
+          {% endfor %}
+
+          <script>
+    // Set a timer to hide the flash message after 3 seconds
+    setTimeout(function() {
+        var flashMessage = document.getElementById('flash-message');
+        if (flashMessage) {
+            flashMessage.style.display = 'none';
+        }
+    }, 3000);
+</script>
+    <h1>Event index</h1>
+    {# <div class="btn btn-warning btn-circle"><a class="Comment"  href="{{ path('app_event_nom') }}">Trier par sujet</a></div> #}
+<div class="card-body">
+
+    <div class="btn btn-outline-info " style="margin-left:900px;"><a class="Comment"  href="{{ path('app_event_date') }}">Trier par Date Debut</a></div>
+    <div class="btn btn-outline-info "><a class="Comment"  href="{{ path('app_event_dateFin') }}">Trier par Date Fin</a></div>
+
+    <div class="btn btn-outline-info "><a class="Comment"  href="{{ path('app_event_nom') }}">Trier par Nom</a></div>
+
+    <div class="">
+    <table >
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nom</th>
+                <th>Datedeb</th>
+                <th>Datefin</th>
+                <th>Image</th>
+                <th>Description</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for event in events %}
+            <tr>
+                <td>{{ event.id }}</td>
+                <td>{{ event.nom }}</td>
+                <td>{{ event.datedeb ? event.datedeb|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ event.datefin ? event.datefin|date('Y-m-d H:i:s') : '' }}</td>
+                <td><img src="{{asset('uploads/'~ event.image)}}" height="180"  class="user_pic rounded img-raised" alt="User"></td>
+                <td>{{ event.description }}</td>
+                <td>
+                    <a href="{{ path('app_event_show', {'id': event.id}) }}" class="btn btn-outline-secondary">show</a>
+                    <a href="{{ path('app_event_edit', {'id': event.id}) }}" class="btn btn-outline-secondary">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="7">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    </div>
+    </div>
+
+    <a href="{{ path('app_event_new') }}" class="btn btn-outline-secondary" >Create new</a>
+
+
+    <style>
+                #calendrier{
+                    width: 80%;
+                    margin: auto;
+                }
+            </style>
+            <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js" integrity="sha256-YicH/8aE660iEnJtgll3vT54dJApy3XkYmqNfGVFEzA=" crossorigin="anonymous"></script>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css" integrity="sha256-5veQuRbWaECuYxwap/IOE/DAwNxgm4ikX7nrgsqYp88=" crossorigin="anonymous">
+            <h1>Calendar events</h1>
+            <div id="calendrier"></div>
+
+
+            <script>
+                window.onload = () =>{
+                    let calendarElt = document.querySelector("#calendrier")
+                    let calendar = new FullCalendar.Calendar(calendarElt,{
+                        initialView: 'dayGridMonth',
+                        locale: 'fr',
+                        timeZone: 'Europe/Paris',
+                        headerToolbar: {
+                            start: 'prev,next today',
+                            center: 'title',
+                            end: 'dayGridMonth,timeGridWeek'
+                        },
+                        events: {{ data|raw }}
+                    })
+                    calendar.render();
+                }
+            </script>
+
+{% endblock %}

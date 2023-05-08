@@ -1,0 +1,77 @@
+{% extends 'front.html.twig' %}
+
+{% block title %}
+	{{annonce.title}}
+{% endblock %}
+
+{% block body %}
+	
+	  
+		<div class="card1">
+		<div class="image1">
+			
+		</div>
+			 <div class="content1">
+			 <span class="title1">{{ annonce.title }}</span>
+				<span class="title1">{{ annonce.title }}</span>
+				<h5 class="card-text">
+					<p class="desc1">Catégorie :
+						{{ annonce.categories.name }}</p>
+					<p class="desc1">
+						{{ annonce.content|raw }}
+
+					</p>
+				</h5>
+    
+
+			</div>
+		</div>
+
+		<div class="card-body">
+			<div class="col-xs2 col-sm3">
+				<h2>Liste des commentaires</h2>
+				{% for comment in annonce.comments %}
+					{% if comment.parent == null %}
+						<h3>Commentaire de {{comment.user}}</h3>
+						<p>Publié le {{comment.createdAt|date("d/m/Y H:i") }}</p>
+						<div>{{comment.content|raw}}</div>
+						<a href="#ajout-commentaire" data-reply data-id="{{comment.id}}" class="btn primary press">Répondre</a>
+					    <a href="{{ path('supprimercomusr', {id: comment.id}) }}" class="btn btn-danger">Delete</a>
+
+						{# On affiche les réponses #}
+						{% for reply in comment.replies %}
+							<p>Réponse publiée par {{reply.nickname}} le {{reply.createdAt|date("d/m/Y H:i") }}</p>
+							<div>{{reply.content|raw}}</div>
+						{% endfor %}
+					{% endif %}
+				{% endfor %}
+			</div>
+			<div class="col-xs2 col-sm3" id="ajout-commentaire">
+				<h2>Ajouter un commentaire</h2>
+				{{ form(commentForm) }}
+				    
+				    
+                    <p>Message</p>
+                    <div id="editor"></div>
+				
+			</div>
+		</div>
+	</div>
+     
+{% endblock %}
+
+{% block javascripts %}
+	<script>
+		window.onload = () => {
+			
+
+			// On met un écouteur d'évènements sur tous les boutons répondre
+			    document.querySelectorAll("[data-reply]").forEach(element => {
+				element.addEventListener("click", function(){
+					document.querySelector("#comments_parentid").value = this.dataset.id;
+				});
+			});
+		}
+		
+	</script>
+{% endblock %}

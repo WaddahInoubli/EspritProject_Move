@@ -1,0 +1,105 @@
+{% extends 'baseBack.html.twig' %}
+
+{% block content %}
+
+
+
+
+    <div class="card">
+        <div class="card-body">
+            <div class="card-title">{{ title }}</div>
+            <hr>
+            {{ form_start(form) }}
+            <div class="my-custom-class-for-errors">
+                {{ form_errors(form) }}
+            </div>
+                <div class="row">
+                    <div class="form-group col-6">
+                        <label for="input-1">Nom</label>
+                        {{ form_widget(form.nom) }}
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="input-2">Prenom</label>
+                        {{ form_widget(form.prenom) }}
+                    </div>
+                </div>
+            <div class="row">
+                <div class="form-group col-6">
+                    <label for="input-2">Email</label>
+                    {{ form_widget(form.email) }}
+                    <div class="text-danger">
+                        {{ form_errors(form.email) }}
+                        {% for message in app.flashes('danger') %}
+                            {{ message }}
+
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="form-group col-6"{% if  title  == 'Edit User' %}style="display: none"{% endif %}>
+                    <label for="input-2">Password</label>
+                    {% if  title  == 'Edit User' %}
+                        {{ form_widget(form.password, {'required':false}) }}
+                    {% else %}
+                        {{ form_widget(form.password) }}
+                    {% endif %}
+                    <div class="text-danger">
+                        {{ form_errors(form.password) }}
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="form-group col-6">
+                    <label for="input-2">Numéro de téléphone</label>
+                    {{ form_widget(form.num_tel) }}
+                    <div class="text-danger">
+                        {{ form_errors(form.num_tel) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-6">
+                    <label for="input-2">Adresse</label>
+                    {{ form_widget(form.address) }}
+                    <div class="text-danger">
+                        {{ form_errors(form.address) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-6">
+                    <label for="input-2">Age</label>
+                    {{ form_widget(form.age) }}
+                    <div class="text-danger">
+                        {{ form_errors(form.age) }}
+                    </div>
+                </div>
+            </div>
+
+
+
+
+            <div class="form-group">
+                <label for="input-2">Role</label>
+                {{ form_widget(form.role) }}
+            </div>
+
+
+
+
+
+            <br>
+
+            <center>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-success px-10 w-25"><i class="icon-lock"></i> Save</button>
+                    </div>
+                </center>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+
+{% endblock %}

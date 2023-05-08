@@ -1,0 +1,77 @@
+{% extends 'front.html.twig' %}
+
+{% block title %}Reponse
+{% endblock %}
+
+{% block body %}
+
+<main id="main" class="main">
+    <section class="section">
+        <div class="row">
+            <div class="col-lg-12">
+
+                <div class="card">
+                    <div class="card-body">
+                        <h1>Reclamation</h1>
+                        <table class="table">
+                            <tbody>
+                            <tr>
+                                <th>Id</th>
+                                <td>{{ reclamation.id }}</td>
+                            </tr>
+                            <tr>
+                                <th>Objectif</th>
+                                <td>{{ reclamation.objectif }}</td>
+                            </tr>
+                            <tr>
+                                <th>Text</th>
+                                <td>{{ reclamation.text }}</td>
+                            </tr>
+                            <tr>
+                                <th>Etat</th>
+                                <td>{{ reclamation.etat }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        <a href="{{ path('app_reclamation_indexfront') }}">back to reclamation</a>
+
+                        <a href="{{ path('app_reclamation_edit', {'id': reclamation.id}) }}">edit</a>
+
+                        {{ include('reclamation/_delete_form.html.twig') }}
+
+
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <h1>Reponse</h1>
+
+                        <table class="table">
+                            <tbody>
+                            {% for reponse in reponses %}
+                            <tr>
+                                <th>Id</th>
+                                <td>{{ reponse.id }}</td>
+                            </tr>
+                            <tr>
+                                <th>Objectif</th>
+                                <td>{{ reponse.objectif }}</td>
+                            </tr>
+                            <tr>
+                                <th>Texte</th>
+                                <td>{{ reponse.texte }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+
+
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+    </section>
+    {% endblock %}

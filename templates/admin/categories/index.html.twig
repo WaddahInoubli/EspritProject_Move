@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Categories!{% endblock %}
+
+{% block body %}
+<h1>Gérer les catégories</h1>
+    <a href="{{ path("categories_ajout") }}" class="btn btn-success">Ajouter une catégorie</a>
+	<table class="table striped">
+		<thead>
+			<tr>
+				<th>Nom</th>
+				<th>Parent</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+        {% for categorie in categories %}            
+			<tr>
+				<td>{{categorie.name}}</td>
+				<td>{{categorie.parent}}</td>
+				<td class="text-center">
+                    <a href="{{ path("categories_modifier", {id: categorie.id}) }}" class="btn btn-warning">Modifier</a>
+					<a href="{{ path('supprimerc', {id: categorie.id}) }}" class="btn btn-danger">Delete</a>
+                </td>
+			</tr>
+        {% endfor %}
+
+		</tbody>
+	</table>
+	
+	 {{ knp_pagination_render(categories) }}
+{% endblock %}
