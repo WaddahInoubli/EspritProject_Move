@@ -24,7 +24,7 @@ public class BaseForm extends com.codename1.ui.Form {
         logoContainer.setUIID("SideCommandLogo");
         tb.addComponentToSideMenu(logoContainer);
 
-        Label taglineLabel = new Label("Gestion Evenement");
+        Label taglineLabel = new Label("MENU");
         taglineLabel.setUIID("SideCommandTagline");
         Container taglineContainer = BorderLayout.south(taglineLabel);
         taglineContainer.setUIID("SideCommand");
